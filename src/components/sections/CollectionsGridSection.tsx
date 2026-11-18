@@ -1,0 +1,237 @@
+"use client";
+
+import React, { useState } from "react";
+import Image from "next/image";
+import { ArrowRight, ShoppingBag, Eye, Star, Sparkles } from "lucide-react";
+import { CATEGORIES, PRODUCTS } from "@/data/teflookData";
+import { useCart } from "@/context/CartContext";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+
+export function CollectionsGridSection() {
+  const { addToCart, setActiveQuickProduct, currency } = useCart();
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+
+  const filteredProducts =
+    selectedCategory === "all"
+      ? PRODUCTS
+      : PRODUCTS.filter((p) => p.categorySlug === selectedCategory);
+
+  return (
+    <section id="collections" className="py-16 sm:py-24 bg-[#F9F8F6] border-b border-[#E8E5DF]">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Section Header */}
+        <div className="text-center max-w-3xl mx-auto mb-14 space-y-3">
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#EBF4F5] border border-[#4A9099]/30 text-xs font-semibold text-[#4A9099]">
+            <Sparkles className="w-3.5 h-3.5 text-[#FF6B00]" />
+            <span>Collections Officielles TefLook</span>
+          </div>
+          <h2 className="font-serif-brand text-3xl sm:text-4xl md:text-5xl font-bold text-[#1E293B] tracking-tight">
+            Nos Collections Emblématiques
+          </h2>
+          <p className="font-arabic text-lg text-[#FF6B00] font-semibold">
+            مجموعاتنا الراقية من البلغة، الصنادل والجلد المغربي الفاخر
+          </p>
+          <p className="text-sm sm:text-base text-[#334155] leading-relaxed">
+            Six univers d&apos;artisanat d&apos;exception. Du raffinement des babouches d&apos;apparat aux sabots en bois de cèdre sculpté, chaque création TefLook célèbre l&apos;élégance marocaine.
+          </p>
+        </div>
+
+        {/* 6 Category Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-16">
+          {CATEGORIES.map((cat) => (
+            <div
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.slug)}
+              className={`group relative rounded-3xl overflow-hidden bg-white border border-[#E8E5DF] shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer ${
+                selectedCategory === cat.slug ? "ring-2 ring-[#FF6B00] shadow-md" : ""
+              }`}
+            >
+              {/* Image & Overlay */}
+              <div className="relative aspect-4/3 w-full overflow-hidden bg-[#F9F8F6]">
+                <Image
+                  src={cat.imageUrl}
+                  alt={cat.name}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1E293B]/85 via-[#1E293B]/25 to-transparent opacity-80 group-hover:opacity-95 transition-opacity" />
+                
+                {/* Category Badge */}
+                <div className="absolute top-4 left-4">
+                  <Badge variant="orange">{cat.highlight}</Badge>
+                </div>
+
+                {/* Item Count */}
+                <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-xs text-[#1E293B] text-xs font-semibold px-2.5 py-1 rounded-full shadow-xs">
+                  {cat.itemCount} modèles
+                </div>
+
+                {/* Text inside banner bottom */}
+                <div className="absolute bottom-4 left-4 right-4 text-white">
+                  <p className="font-arabic text-sm text-[#FF6B00] font-bold leading-none mb-1">
+                    {cat.nameAr}
+                  </p>
+                  <h3 className="font-serif-brand text-2xl font-bold tracking-tight leading-tight group-hover:text-[#FF6B00] transition-colors">
+                    {cat.name}
+                  </h3>
+                  <p className="text-xs text-[#CBD5E1] mt-1 line-clamp-1">
+                    {cat.subtitle}
+                  </p>
+                </div>
+              </div>
+
+              {/* Card Bottom Meta */}
+              <div className="p-5 flex items-center justify-between bg-white">
+                <p className="text-xs text-[#64748B] line-clamp-2 pr-2">
+                  {cat.description}
+                </p>
+                <div className="w-9 h-9 rounded-full bg-[#EBF4F5] border border-[#4A9099]/30 flex items-center justify-center text-[#4A9099] group-hover:bg-[#FF6B00] group-hover:text-white transition-all shrink-0">
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Category Navigation Pills */}
+        <div id="sabots-babouches" className="pt-8">
+          <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
+            <div>
+              <h3 className="font-serif-brand text-2xl sm:text-3xl font-bold text-[#1E293B]">
+                Pièces Disponibles à la Commande
+              </h3>
+              <p className="text-xs sm:text-sm text-[#64748B]">
+                {selectedCategory === "all"
+                  ? "Toutes nos créations en cuir véritable confectionnées à la main"
+                  : `Filtré par : ${
+                      CATEGORIES.find((c) => c.slug === selectedCategory)?.name
+                    }`}
+              </p>
+            </div>
+
+            {/* Filter buttons */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+              <button
+                onClick={() => setSelectedCategory("all")}
+                className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                  selectedCategory === "all"
+                    ? "bg-[#4A9099] text-white shadow-xs"
+                    : "bg-white text-[#334155] border border-[#E8E5DF] hover:bg-[#EBF4F5] hover:text-[#4A9099]"
+                }`}
+              >
+                Tous ({PRODUCTS.length})
+              </button>
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.slug)}
+                  className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                    selectedCategory === cat.slug
+                      ? "bg-[#4A9099] text-white shadow-xs"
+                      : "bg-white text-[#334155] border border-[#E8E5DF] hover:bg-[#EBF4F5] hover:text-[#4A9099]"
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Product Items Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {filteredProducts.map((product) => {
+              const price = currency === "MAD" ? product.priceMad : product.priceEur;
+              return (
+                <div
+                  key={product.id}
+                  className="group rounded-3xl bg-white border border-[#E8E5DF] shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden"
+                >
+                  {/* Image Container */}
+                  <div className="relative aspect-square w-full overflow-hidden bg-[#F9F8F6]">
+                    <Image
+                      src={product.images[0]}
+                      alt={product.name}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      className="object-cover group-hover:scale-108 transition-transform duration-500"
+                    />
+
+                    {/* Badge */}
+                    {product.badge && (
+                      <div className="absolute top-3 left-3">
+                        <Badge variant="orange">{product.badge}</Badge>
+                      </div>
+                    )}
+
+                    {/* Quick View Button on Hover */}
+                    <div className="absolute inset-0 bg-[#1E293B]/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => setActiveQuickProduct(product)}
+                        className="bg-white/95 text-[#1E293B] text-xs gap-1.5 shadow-lg hover:text-[#4A9099]"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        Aperçu
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="orange"
+                        onClick={() => addToCart(product, product.sizes[0])}
+                        className="text-xs gap-1.5 shadow-lg"
+                      >
+                        <ShoppingBag className="w-3.5 h-3.5" />
+                        Ajouter
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Body Content */}
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-[11px] text-[#4A9099] font-bold uppercase tracking-wider">
+                        <span>{product.categoryName}</span>
+                        <div className="flex items-center gap-1 text-[#FF6B00]">
+                          <Star className="w-3 h-3 fill-[#FF6B00]" />
+                          <span className="text-[#1E293B] font-semibold">{product.rating}</span>
+                        </div>
+                      </div>
+                      <h4
+                        onClick={() => setActiveQuickProduct(product)}
+                        className="font-serif-brand font-bold text-base text-[#1E293B] group-hover:text-[#4A9099] transition-colors cursor-pointer line-clamp-1"
+                      >
+                        {product.name}
+                      </h4>
+                      <p className="text-xs text-[#64748B] line-clamp-2">
+                        {product.description}
+                      </p>
+                    </div>
+
+                    <div className="pt-2 border-t border-[#F1F5F9] flex items-center justify-between">
+                      <div>
+                        <span className="text-[10px] text-[#64748B] block">Prix atelier</span>
+                        <span className="font-bold text-lg text-[#4A9099]">
+                          {price} {currency}
+                        </span>
+                      </div>
+                      <Button
+                        variant="orange"
+                        size="sm"
+                        onClick={() => addToCart(product, product.sizes[0])}
+                        className="text-xs shadow-xs"
+                      >
+                        Commander
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

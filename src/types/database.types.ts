@@ -9,76 +9,181 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
-      profiles: {
+      categories: {
+        Row: {
+          id: string;
+          slug: string;
+          name: string;
+          name_ar?: string;
+          description: string;
+          image_url: string;
+          item_count: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          name: string;
+          name_ar?: string;
+          description: string;
+          image_url: string;
+          item_count?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          slug?: string;
+          name?: string;
+          name_ar?: string;
+          description?: string;
+          image_url?: string;
+          item_count?: number;
+          created_at?: string;
+        };
+      };
+      products: {
+        Row: {
+          id: string;
+          name: string;
+          name_ar?: string;
+          category_slug: string;
+          price_mad: number;
+          price_eur: number;
+          description: string;
+          material: string;
+          origin: string;
+          images: string[];
+          rating: number;
+          reviews_count: number;
+          sizes: number[];
+          in_stock: boolean;
+          is_featured: boolean;
+          badge?: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          name_ar?: string;
+          category_slug: string;
+          price_mad: number;
+          price_eur: number;
+          description: string;
+          material: string;
+          origin?: string;
+          images: string[];
+          rating?: number;
+          reviews_count?: number;
+          sizes?: number[];
+          in_stock?: boolean;
+          is_featured?: boolean;
+          badge?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          name_ar?: string;
+          category_slug?: string;
+          price_mad?: number;
+          price_eur?: number;
+          description?: string;
+          material?: string;
+          origin?: string;
+          images?: string[];
+          rating?: number;
+          reviews_count?: number;
+          sizes?: number[];
+          in_stock?: boolean;
+          is_featured?: boolean;
+          badge?: string;
+          created_at?: string;
+        };
+      };
+      reviews: {
+        Row: {
+          id: string;
+          author_name: string;
+          city: string;
+          rating: number;
+          comment: string;
+          product_name: string;
+          product_image: string;
+          verified: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          author_name: string;
+          city: string;
+          rating: number;
+          comment: string;
+          product_name: string;
+          product_image: string;
+          verified?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          author_name?: string;
+          city?: string;
+          rating?: number;
+          comment?: string;
+          product_name?: string;
+          product_image?: string;
+          verified?: boolean;
+          created_at?: string;
+        };
+      };
+      newsletter_subscribers: {
         Row: {
           id: string;
           email: string;
-          full_name: string | null;
-          avatar_url: string | null;
-          role: string;
+          locale: string;
           created_at: string;
-          updated_at: string;
         };
         Insert: {
-          id: string;
+          id?: string;
           email: string;
-          full_name?: string | null;
-          avatar_url?: string | null;
-          role?: string;
+          locale?: string;
           created_at?: string;
-          updated_at?: string;
         };
         Update: {
           id?: string;
           email?: string;
-          full_name?: string | null;
-          avatar_url?: string | null;
-          role?: string;
+          locale?: string;
           created_at?: string;
-          updated_at?: string;
         };
       };
-      projects: {
+      contact_inquiries: {
         Row: {
           id: string;
-          user_id: string;
           name: string;
-          description: string | null;
-          status: 'draft' | 'active' | 'archived';
-          metadata: Json | null;
+          phone: string;
+          email?: string;
+          message: string;
+          status: string;
           created_at: string;
-          updated_at: string;
         };
         Insert: {
           id?: string;
-          user_id: string;
           name: string;
-          description?: string | null;
-          status?: 'draft' | 'active' | 'archived';
-          metadata?: Json | null;
+          phone: string;
+          email?: string;
+          message: string;
+          status?: string;
           created_at?: string;
-          updated_at?: string;
         };
         Update: {
           id?: string;
-          user_id?: string;
           name?: string;
-          description?: string | null;
-          status?: 'draft' | 'active' | 'archived';
-          metadata?: Json | null;
+          phone?: string;
+          email?: string;
+          message?: string;
+          status?: string;
           created_at?: string;
-          updated_at?: string;
         };
       };
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      [_ in never]: never;
-    };
-    Enums: {
-      [_ in never]: never;
     };
   };
 }
