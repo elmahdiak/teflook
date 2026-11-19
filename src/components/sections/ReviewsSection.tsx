@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Star, Heart, Quote } from "lucide-react";
+import { Star, Heart, Quote, BadgeCheck } from "lucide-react";
 import { REVIEWS } from "@/data/teflookData";
 
 export function ReviewsSection() {
@@ -102,9 +102,12 @@ export function ReviewsSection() {
                       <Star key={i} className="w-4 h-4 fill-[#FF6B00]" />
                     ))}
                   </div>
-                  <span className="text-[11px] font-semibold text-[#4A9099] bg-[#EBF4F5] px-2 py-0.5 rounded-full border border-[#4A9099]/30">
-                    Achat Vérifié
-                  </span>
+                  {rev.verified && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-300/80 px-2.5 py-0.5 text-[11px] font-bold text-emerald-800 shadow-xs">
+                      <BadgeCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span>Acheteur vérifié</span>
+                    </span>
+                  )}
                 </div>
 
                 {/* Comment */}

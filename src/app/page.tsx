@@ -29,6 +29,7 @@ import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-quer
 
 import { Button } from "@/components/ui/button";
 import { TefLookLanguageSwitcher } from "@/components/teflook-language-switcher";
+import { CODCheckoutModal } from "@/components/cart/CODCheckoutModal";
 import {
   Sheet,
   SheetContent,
@@ -89,6 +90,7 @@ function TefLookStorefront() {
   const [activeCategory, setActiveCategory] = useState<ChildStoreCategory | "all">("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCODModalOpen, setIsCODModalOpen] = useState(false);
   const [notice, setNotice] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { items, hasHydrated, error: cartError } = useCartStore();
@@ -518,7 +520,14 @@ function TefLookStorefront() {
       </footer>
 
       {/* Cart Sheet Drawer */}
-      <CartSheet open={isCartOpen} onOpenChange={setIsCartOpen} />
+      <CartSheet
+        open={isCartOpen}
+        onOpenChange={setIsCartOpen}
+        onOpenCODCheckout={() => setIsCODModalOpen(true)}
+      />
+
+      {/* Cash on Delivery Modal */}
+      <CODCheckoutModal open={isCODModalOpen} onOpenChange={setIsCODModalOpen} />
 
       {/* Toast Notification */}
       {(notice || cartError) && (
@@ -679,27 +688,30 @@ function ValuePoint({
 function CartSheet({
   open,
   onOpenChange,
+  onOpenCODCheckout,
 }: {
   open: boolean;
   onOpenChange: (value: boolean) => void;
+  onOpenCODCheckout?: () => void;
 }) {
   const { locale, t } = useTefLookLanguage();
-  const { items, isLoading, isSyncing, checkoutUrl, error } = useCartStore();
+  const { items, isLoading, isSyncing, error } = useCartStore();
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
   const syncCart = useCartStore((state) => state.syncCart);
   const itemCount = items.reduce((total, item) => total + item.quantity, 0);
   const total = items.reduce((sum, item) => sum + Number(item.price.amount) * item.quantity, 0);
-  const currency = items[0]?.price.currencyCode;
+  const currency = items[0]?.price.currencyCode || "MAD";
 
   useEffect(() => {
     if (open && items.length > 0) void syncCart();
   }, [open, items.length, syncCart]);
 
-  function beginCheckout() {
-    if (!checkoutUrl || items.length === 0) return;
-    window.open(checkoutUrl, "_blank", "noopener,noreferrer");
+  function handleCheckout() {
     onOpenChange(false);
+    if (onOpenCODCheckout) {
+      onOpenCODCheckout();
+    }
   }
 
   return (
@@ -817,19 +829,15 @@ function CartSheet({
                   </p>
                 )}
                 <Button
-                  onClick={beginCheckout}
-                  disabled={!checkoutUrl || isLoading || isSyncing}
-                  className="h-12 w-full justify-between rounded-[3px] bg-brand-orange px-5 text-accent-foreground hover:bg-brand-orange/90"
+                  onClick={handleCheckout}
+                  disabled={items.length === 0}
+                  className="h-12 w-full justify-between rounded-[4px] bg-brand-orange px-5 text-white hover:bg-brand-orange/90 font-bold shadow-md cursor-pointer"
                 >
-                  <span>{isLoading || isSyncing ? t("cart.updating") : t("cart.checkout")}</span>
-                  {isLoading || isSyncing ? (
-                    <LoaderCircle className="animate-spin" />
-                  ) : (
-                    <ArrowUpRight size={17} />
-                  )}
+                  <span>Commander • Paiement à la livraison</span>
+                  <ShoppingBag size={18} />
                 </Button>
-                <p className="text-center text-[11px] text-muted-foreground">
-                  {t("cart.security")}
+                <p className="text-center text-[11px] text-muted-foreground font-medium">
+                  💵 Règlement en espèces à la livraison partout au Maroc
                 </p>
               </div>
             </>
