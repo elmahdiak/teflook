@@ -48,6 +48,12 @@ export default function RootLayout({
     <html lang="fr" className="h-full scroll-smooth">
       <head>
         <link rel="icon" href="/images/teflook-mark.png" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Amiri:wght@400;700&display=swap"
+          rel="stylesheet"
+        />
       </head>
       <body className="min-h-full flex flex-col bg-[#F9F8F6] text-[#1E293B] antialiased selection:bg-[#FF6B00] selection:text-white">
         {children}

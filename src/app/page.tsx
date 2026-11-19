@@ -590,18 +590,24 @@ function ProductCard({
     <article className="group flex h-full flex-col justify-between overflow-hidden rounded-xl sm:rounded-2xl border border-border/80 bg-card p-2.5 sm:p-3.5 shadow-xs transition-all duration-300 hover:border-brand-teal/40 hover:shadow-md">
       <div>
         <div className="relative aspect-square w-full overflow-hidden rounded-lg sm:rounded-xl bg-secondary">
-          {image ? (
-            <img
-              src={image.url}
-              alt={image.altText || product.title}
-              loading="lazy"
-              className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-          ) : (
-            <div className="grid size-full place-items-center bg-brand-mist text-primary">
-              <img src="/images/teflook-mark.png" alt="" className="size-14 sm:size-16 opacity-40" />
-            </div>
-          )}
+          <Link
+            href={`/product/${product.handle}`}
+            aria-label={`Voir ${product.title}`}
+            className="absolute inset-0 block"
+          >
+            {image ? (
+              <img
+                src={image.url}
+                alt={image.altText || product.title}
+                loading="lazy"
+                className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            ) : (
+              <div className="grid size-full place-items-center bg-brand-mist text-primary">
+                <img src="/images/teflook-mark.png" alt="" className="size-14 sm:size-16 opacity-40" />
+              </div>
+            )}
+          </Link>
           {!variant && (
             <span className="absolute bottom-1.5 left-1.5 sm:bottom-2 sm:left-2 rounded-md bg-card/95 px-1.5 sm:px-2 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.07em] shadow-xs">
               Épuisé
@@ -614,12 +620,13 @@ function ProductCard({
               {product.vendor}
             </p>
           )}
-          <h3
+          <Link
+            href={`/product/${product.handle}`}
             className="line-clamp-2 text-[12px] sm:text-[14px] font-semibold leading-[1.3] sm:leading-[1.4] text-foreground transition-colors hover:text-brand-teal"
             title={product.title}
           >
             {product.title}
-          </h3>
+          </Link>
         </div>
       </div>
 
