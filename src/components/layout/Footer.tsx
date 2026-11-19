@@ -162,45 +162,40 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Column 2: Rayons & Univers */}
+          {/* Column 2: Les 6 Piliers Éducatifs */}
           <div className="lg:col-span-3 lg:pl-4 space-y-3.5">
             <h4 className="text-xs font-black uppercase tracking-[0.15em] text-[#1E293B]">
-              Rayons &amp; Univers
+              Piliers Éducatifs
             </h4>
             <ul className="space-y-2.5 text-xs sm:text-sm font-medium text-[#64748B]">
               <li>
-                <a href="#selection-du-moment" className="hover:text-[#FF6B00] transition-colors inline-block">
-                  Sélection du Moment (Promos)
+                <a href="#discipline-maitrise-de-soi" className="hover:text-[#4A9099] transition-colors inline-block">
+                  Discipline et maîtrise de soi
                 </a>
               </li>
               <li>
-                <a href="#boutique-par-age" className="hover:text-[#FF6B00] transition-colors inline-block">
-                  Boutique par Âge &amp; Naissance
+                <a href="#intelligence-emotionnelle" className="hover:text-[#FF6B00] transition-colors inline-block">
+                  Intelligence émotionnelle
                 </a>
               </li>
               <li>
-                <a href="#vetements-mode" className="hover:text-[#FF6B00] transition-colors inline-block">
-                  Vêtements Coton Bio
+                <a href="#autonomie-competences-de-vie" className="hover:text-[#4A9099] transition-colors inline-block">
+                  Autonomie et compétences de vie
                 </a>
               </li>
               <li>
-                <a href="#jouets-eveil" className="hover:text-[#FF6B00] transition-colors inline-block">
-                  Jouets Montessori &amp; Éveil
+                <a href="#confiance-en-soi-competences-sociales" className="hover:text-[#FF6B00] transition-colors inline-block">
+                  Confiance en soi &amp; social
                 </a>
               </li>
               <li>
-                <a href="#hygiene-soin" className="hover:text-[#FF6B00] transition-colors inline-block">
-                  Hygiène, Bain &amp; Parapharmacie
+                <a href="#creativite-imagination" className="hover:text-[#4A9099] transition-colors inline-block">
+                  Créativité et imagination
                 </a>
               </li>
               <li>
-                <a href="#equipement-sorties" className="hover:text-[#FF6B00] transition-colors inline-block">
-                  Poussettes &amp; Sièges Auto
-                </a>
-              </li>
-              <li>
-                <a href="#coffrets-cadeaux" className="hover:text-[#FF6B00] transition-colors inline-block">
-                  Coffrets Cadeaux &amp; Boîtes
+                <a href="#esprit-critique-resolution-problemes" className="hover:text-[#FF6B00] transition-colors inline-block">
+                  Esprit critique &amp; résolution
                 </a>
               </li>
             </ul>

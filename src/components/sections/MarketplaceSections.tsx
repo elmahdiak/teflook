@@ -1,328 +1,398 @@
 "use client";
 
-import React from "react";
+import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import {
-  ArrowRight,
   Sparkles,
-  ShieldCheck,
-  CheckCircle2,
-  Tag,
-  Star,
-  Heart,
-  Baby,
-  Gift,
-  Smile,
+  ArrowRight,
+  Filter,
+  Check,
+  RotateCcw,
+  SlidersHorizontal,
   Compass,
+  Brain,
+  Search,
 } from "lucide-react";
 import { ProductCard } from "@/components/ui/ProductCard";
 import {
-  MOMENT_SELECTION_PRODUCTS,
-  AGE_PROFILES,
-  CLOTHING_PRODUCTS,
-  TOYS_PRODUCTS,
-  HYGIENE_CARE_PRODUCTS,
-  GEAR_PRODUCTS,
-  GIFT_SETS_PRODUCTS,
-  PARTY_PRODUCTS,
-  HOME_NURSERY_PRODUCTS,
-  PARTNER_BRANDS,
+  CATEGORIES,
+  AGE_BRACKETS,
+  AgeBracket,
+  PRODUCTS,
+  ProductItem,
 } from "@/data/teflookData";
 
-interface SectionHeaderProps {
-  tag: string;
-  title: string;
-  titleHighlight?: string;
-  subtitle: string;
-  viewAllHref?: string;
-  tagColor?: string;
+interface MarketplaceSectionsProps {
+  initialAge?: string | null;
 }
 
-function SectionHeader({
-  tag,
-  title,
-  titleHighlight,
-  subtitle,
-  viewAllHref = "#",
-  tagColor = "bg-[#4A9099]/10 text-[#4A9099] border-[#4A9099]/25",
-}: SectionHeaderProps) {
-  return (
-    <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-4">
-      <div className="max-w-2xl">
-        <div
-          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border mb-2 ${tagColor}`}
-        >
-          <Sparkles className="w-3 h-3 text-[#FF6B00]" />
-          <span>{tag}</span>
-        </div>
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#1E293B] tracking-tight">
-          {title}{" "}
-          {titleHighlight && (
-            <span className="text-[#FF6B00]">{titleHighlight}</span>
-          )}
-        </h2>
-        <p className="mt-1.5 text-xs sm:text-sm text-[#64748B] leading-relaxed">
-          {subtitle}
-        </p>
-      </div>
-
-      <a
-        href={viewAllHref}
-        className="group inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold text-[#FF6B00] hover:text-[#E66000] transition-colors shrink-0"
-      >
-        <span>Voir tout le rayon</span>
-        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-      </a>
-    </div>
+export function MarketplaceSections({
+  initialAge = null,
+}: MarketplaceSectionsProps) {
+  // Dynamic filter states
+  const [selectedAges, setSelectedAges] = useState<string[]>(
+    initialAge ? [initialAge] : []
   );
-}
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [searchFilter, setSearchFilter] = useState<string>("");
 
-export function MarketplaceSections() {
+  // Toggle age bracket selection (multi-select supported)
+  const toggleAgeBracket = (bracket: string) => {
+    setSelectedAges((prev) => {
+      if (prev.includes(bracket)) {
+        return prev.filter((a) => a !== bracket);
+      } else {
+        return [...prev, bracket];
+      }
+    });
+  };
+
+  const clearAllFilters = () => {
+    setSelectedAges([]);
+    setSelectedCategory("all");
+    setSearchFilter("");
+  };
+
+  // Filter products based on selected category, age brackets, and search text
+  const filteredProducts = useMemo(() => {
+    return PRODUCTS.filter((item) => {
+      // Category filter
+      const matchesCategory =
+        selectedCategory === "all" || item.categorySlug === selectedCategory;
+
+      // Age filter: if none selected, all ages match; otherwise must match one of selected ages
+      const matchesAge =
+        selectedAges.length === 0 || selectedAges.includes(item.ageBracket);
+
+      // Search keyword filter
+      const query = searchFilter.trim().toLowerCase();
+      const matchesQuery =
+        !query ||
+        item.name.toLowerCase().includes(query) ||
+        item.description.toLowerCase().includes(query) ||
+        item.categoryName.toLowerCase().includes(query) ||
+        (item.brand && item.brand.toLowerCase().includes(query));
+
+      return matchesCategory && matchesAge && matchesQuery;
+    });
+  }, [selectedCategory, selectedAges, searchFilter]);
+
   return (
-    <div className="w-full bg-[#F8F9FA] space-y-16 sm:space-y-24 py-12 sm:py-16">
-      
+    <div className="w-full bg-[#F8F9FA] space-y-16 sm:space-y-24 py-10 sm:py-14">
       {/* ============================================================== */}
-      {/* 1. SÉLECTION DU MOMENT / PRODUITS VEDETTES                     */}
+      {/* 1. DYNAMIC CATALOGUE WITH AGE & CATEGORY FILTERING             */}
       {/* ============================================================== */}
-      <section id="selection-du-moment" className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionHeader
-          tag="Sélection du Moment"
-          title="Produits"
-          titleHighlight="Vedettes"
-          subtitle="Les articles indispensables les plus plébiscités avec réductions immédiates et garanties."
-          tagColor="bg-[#E63946]/10 text-[#E63946] border-[#E63946]/25"
-          viewAllHref="#selection-du-moment"
-        />
+      <section
+        id="catalogue-interactif"
+        className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 scroll-mt-28"
+      >
+        <div className="bg-white rounded-3xl p-6 sm:p-8 lg:p-10 border border-[#E8E5DF] shadow-sm">
+          {/* Section Header */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 pb-6 border-b border-[#F1EFEA] gap-4">
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-[#4A9099]/10 text-[#4A9099] border border-[#4A9099]/25 mb-2.5">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-[#FF6B00]" />
+                <span>Système de Filtrage Dynamique</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#1E293B] tracking-tight">
+                Catalogue <span className="text-[#FF6B00]">Pédagogique</span>
+              </h2>
+              <p className="mt-1.5 text-xs sm:text-sm text-[#64748B] max-w-2xl leading-relaxed">
+                Filtrez instantanément par <strong>tranche d&apos;âge</strong>{" "}
+                et parmi les <strong>6 piliers de développement</strong> pour
+                trouver l&apos;outil idéal.
+              </p>
+            </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {MOMENT_SELECTION_PRODUCTS.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </section>
+            {/* Quick Text Filter input */}
+            <div className="relative w-full md:w-72">
+              <input
+                type="text"
+                placeholder="Filtrer par mot-clé..."
+                value={searchFilter}
+                onChange={(e) => setSearchFilter(e.target.value)}
+                className="w-full h-10 pl-9 pr-3 text-xs rounded-xl bg-[#FAF9F7] border border-[#E8E5DF] focus:border-[#4A9099] text-[#1E293B] placeholder:text-[#94A3B8] focus:outline-none transition-all"
+              />
+              <Search className="w-4 h-4 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2" />
+              {searchFilter && (
+                <button
+                  onClick={() => setSearchFilter("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-[#94A3B8] hover:text-[#1E293B]"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
 
-      {/* ============================================================== */}
-      {/* 2. BOUTIQUE PAR ÂGE / PROFILS                                  */}
-      {/* ============================================================== */}
-      <section id="boutique-par-age" className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionHeader
-          tag="Guide Développement"
-          title="Boutique par"
-          titleHighlight="Âge & Profils"
-          subtitle="Chaque étape a ses besoins spécifiques. Sélectionnez la tranche d'âge de votre enfant."
-          tagColor="bg-[#4A9099]/10 text-[#4A9099] border-[#4A9099]/25"
-          viewAllHref="#boutique-par-age"
-        />
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 text-center">
-          {AGE_PROFILES.map((profile) => (
-            <a
-              key={profile.id}
-              href={profile.href}
-              className="group flex flex-col items-center p-4 rounded-3xl bg-white hover:bg-[#EBF4F5]/60 border border-[#E8E5DF] hover:border-[#4A9099] shadow-2xs hover:shadow-lg transition-all duration-300 cursor-pointer"
-            >
-              <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden mb-3 border-4 border-[#FAF9F7] group-hover:border-[#4A9099] group-hover:scale-105 transition-all shadow-sm">
-                <Image
-                  src={profile.imageUrl}
-                  alt={profile.title}
-                  fill
-                  sizes="120px"
-                  className="object-cover"
-                />
+          {/* ============================================================ */}
+          {/* FILTER CONTROLS: AGE (PRIMARY) & CATEGORY PILLS              */}
+          {/* ============================================================ */}
+          <div className="space-y-5 mb-8">
+            {/* Age Filter Row: Exactly the 4 specified age brackets */}
+            <div>
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-[#1E293B] flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#FF6B00]" />
+                  <span>Filtrer par âge (Sélection multiple possible) :</span>
+                </span>
+                {selectedAges.length > 0 && (
+                  <span className="text-[11px] font-bold text-[#FF6B00]">
+                    {selectedAges.length} tranche
+                    {selectedAges.length > 1 ? "s" : ""} sélectionnée
+                    {selectedAges.length > 1 ? "s" : ""}
+                  </span>
+                )}
               </div>
 
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-[#FF6B00] text-white shadow-2xs mb-1.5">
-                {profile.age}
-              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => setSelectedAges([])}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                    selectedAges.length === 0
+                      ? "bg-[#1E293B] text-white shadow-xs"
+                      : "bg-[#FAF9F7] text-[#334155] hover:bg-[#EBF4F5] border border-[#E8E5DF]"
+                  }`}
+                >
+                  Tous les âges (5 - 15 ans)
+                </button>
 
-              <h3 className="text-xs sm:text-sm font-extrabold text-[#1E293B] group-hover:text-[#4A9099] transition-colors line-clamp-1">
-                {profile.title}
-              </h3>
-
-              <p className="text-[11px] text-[#94A3B8] mt-0.5 line-clamp-1">
-                {profile.subtitle}
-              </p>
-            </a>
-          ))}
-        </div>
-      </section>
-
-      {/* ============================================================== */}
-      {/* 3. VÊTEMENTS & MODE                                            */}
-      {/* ============================================================== */}
-      <section id="vetements-mode" className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionHeader
-          tag="Coton Biologique GOTS"
-          title="Vêtements &"
-          titleHighlight="Mode Enfants"
-          subtitle="Des matières saines et respirantes, conçues pour préserver la peau sensible de bébé."
-          tagColor="bg-[#FF6B00]/10 text-[#FF6B00] border-[#FF6B00]/25"
-          viewAllHref="#vetements-mode"
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {CLOTHING_PRODUCTS.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </section>
-
-      {/* ============================================================== */}
-      {/* 4. JOUETS & ÉVEIL                                              */}
-      {/* ============================================================== */}
-      <section id="jouets-eveil" className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionHeader
-          tag="Méthode Montessori"
-          title="Jouets &"
-          titleHighlight="Éveil Sensoriel"
-          subtitle="Formes en bois de hêtre poli, textures tactiles et jeux libres pour apprendre en s'amusant."
-          tagColor="bg-amber-100 text-amber-800 border-amber-300"
-          viewAllHref="#jouets-eveil"
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {TOYS_PRODUCTS.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </section>
-
-      {/* ============================================================== */}
-      {/* 5. HYGIÈNE, SOIN & BEAUTÉ                                      */}
-      {/* ============================================================== */}
-      <section id="hygiene-soin" className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionHeader
-          tag="Parapharmacie Bébé"
-          title="Hygiène, Soin &"
-          titleHighlight="Beauté"
-          subtitle="Formules hypoallergéniques testées sous contrôle pédiatrique et dermatologique."
-          tagColor="bg-emerald-50 text-emerald-700 border-emerald-200"
-          viewAllHref="#hygiene-soin"
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {HYGIENE_CARE_PRODUCTS.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </section>
-
-      {/* ============================================================== */}
-      {/* 6. ÉQUIPEMENT & SORTIES (POUSSETTES & SIÈGES AUTO)             */}
-      {/* ============================================================== */}
-      <section id="equipement-sorties" className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionHeader
-          tag="Sécurité R129 i-Size"
-          title="Équipement &"
-          titleHighlight="Sorties"
-          subtitle="Poussettes homologuées cabine avion, sièges auto pivotants 360° et porte-bébés ergonomiques."
-          tagColor="bg-blue-50 text-blue-700 border-blue-200"
-          viewAllHref="#equipement-sorties"
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {GEAR_PRODUCTS.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </section>
-
-      {/* ============================================================== */}
-      {/* 7. COFFRETS CADEAUX & BOÎTES SURPRISES                         */}
-      {/* ============================================================== */}
-      <section id="coffrets-cadeaux" className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionHeader
-          tag="Prêt à Offrir"
-          title="Coffrets Cadeaux &"
-          titleHighlight="Boîtes Surprises"
-          subtitle="Le cadeau de naissance parfait : trousseaux raffinés présentés dans de superbes boîtes ruban."
-          tagColor="bg-rose-50 text-rose-700 border-rose-200"
-          viewAllHref="#coffrets-cadeaux"
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {GIFT_SETS_PRODUCTS.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </section>
-
-      {/* ============================================================== */}
-      {/* 8. FÊTES & CÉLÉBRATIONS                                        */}
-      {/* ============================================================== */}
-      <section id="fetes-celebrations" className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionHeader
-          tag="Aqiqah, Baptême & Anniversaire"
-          title="Fêtes &"
-          titleHighlight="Célébrations"
-          subtitle="Décorations thématiques, costumes confortables et boîtes souvenirs pour marquer les moments précieux."
-          tagColor="bg-purple-50 text-purple-700 border-purple-200"
-          viewAllHref="#fetes-celebrations"
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {PARTY_PRODUCTS.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </section>
-
-      {/* ============================================================== */}
-      {/* 9. ESSENTIELS DE LA MAISON & LITERIE                           */}
-      {/* ============================================================== */}
-      <section id="maison-literie" className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionHeader
-          tag="Sommeil & Sérénité"
-          title="Essentiels Maison &"
-          titleHighlight="Literie"
-          subtitle="Gigoteuses respirantes, coussins d'allaitement et tapis d'éveil grand format pour un cocon douillet."
-          tagColor="bg-teal-50 text-teal-700 border-teal-200"
-          viewAllHref="#maison-literie"
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {HOME_NURSERY_PRODUCTS.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </section>
-
-      {/* ============================================================== */}
-      {/* 10. NOS MARQUES PARTENAIRES / EXPLORER PAR MARQUE              */}
-      {/* ============================================================== */}
-      <section id="marques-partenaires" className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionHeader
-          tag="Marques Officielles"
-          title="Nos Marques"
-          titleHighlight="Partenaires"
-          subtitle="Nous distribuons exclusivement les marques de référence conformes aux normes sanitaires et pédiatriques."
-          tagColor="bg-[#4A9099]/10 text-[#4A9099] border-[#4A9099]/25"
-          viewAllHref="#marques-partenaires"
-        />
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4 sm:gap-5 text-center">
-          {PARTNER_BRANDS.map((brand) => (
-            <div
-              key={brand.name}
-              className="group p-5 rounded-2xl bg-white hover:bg-[#EBF4F5]/60 border border-[#E8E5DF] hover:border-[#4A9099] shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col items-center justify-center min-h-[120px]"
-            >
-              <span
-                className="text-lg font-black tracking-tight group-hover:scale-105 transition-transform"
-                style={{ color: brand.color }}
-              >
-                {brand.logoText}
-              </span>
-              <span className="text-[11px] font-bold text-[#1E293B] mt-2 line-clamp-1">
-                {brand.name}
-              </span>
-              <span className="text-[9px] text-[#94A3B8] line-clamp-1 mt-0.5">
-                {brand.tagline}
-              </span>
+                {AGE_BRACKETS.map((bracket) => {
+                  const isSelected = selectedAges.includes(bracket);
+                  return (
+                    <button
+                      key={bracket}
+                      onClick={() => toggleAgeBracket(bracket)}
+                      className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black transition-all ${
+                        isSelected
+                          ? "bg-[#FF6B00] text-white shadow-md scale-102"
+                          : "bg-[#FAF9F7] text-[#334155] hover:bg-[#FFF2EB] hover:text-[#FF6B00] border border-[#E8E5DF]"
+                      }`}
+                    >
+                      {isSelected && (
+                        <Check className="w-3.5 h-3.5 stroke-[3]" />
+                      )}
+                      <span>{bracket}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          ))}
+
+            {/* Category Filter Row: Exactly the 6 official categories */}
+            <div>
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-[#1E293B] flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#4A9099]" />
+                  <span>Filtrer par pilier de développement :</span>
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => setSelectedCategory("all")}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                    selectedCategory === "all"
+                      ? "bg-[#4A9099] text-white shadow-xs"
+                      : "bg-[#FAF9F7] text-[#334155] hover:bg-[#EBF4F5] border border-[#E8E5DF]"
+                  }`}
+                >
+                  Tous les 6 piliers ({PRODUCTS.length})
+                </button>
+
+                {CATEGORIES.map((cat, idx) => {
+                  const isSelected = selectedCategory === cat.slug;
+                  const isOrangeAccent = idx % 2 === 1;
+
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => setSelectedCategory(cat.slug)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                        isSelected
+                          ? isOrangeAccent
+                            ? "bg-[#FF6B00] text-white shadow-sm"
+                            : "bg-[#4A9099] text-white shadow-sm"
+                          : isOrangeAccent
+                          ? "bg-[#FAF9F7] text-[#334155] hover:bg-[#FF6B00]/10 hover:text-[#FF6B00] border border-[#E8E5DF]"
+                          : "bg-[#FAF9F7] text-[#334155] hover:bg-[#4A9099]/10 hover:text-[#4A9099] border border-[#E8E5DF]"
+                      }`}
+                    >
+                      {cat.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Active Filters Summary Bar */}
+          <div className="p-3.5 rounded-2xl bg-[#FAF9F7] border border-[#E8E5DF] flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="flex flex-wrap items-center gap-2 text-[#64748B]">
+              <span className="font-bold text-[#1E293B]">
+                {filteredProducts.length} outil
+                {filteredProducts.length > 1 ? "s" : ""} trouvé
+                {filteredProducts.length > 1 ? "s" : ""}
+              </span>
+
+              {selectedCategory !== "all" && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-[#4A9099]/15 text-[#4A9099] font-bold text-[11px]">
+                  Catégorie :{" "}
+                  {
+                    CATEGORIES.find((c) => c.slug === selectedCategory)?.name
+                  }
+                  <button
+                    onClick={() => setSelectedCategory("all")}
+                    className="hover:text-black font-black ml-1"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
+
+              {selectedAges.map((age) => (
+                <span
+                  key={age}
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-[#FF6B00]/15 text-[#FF6B00] font-bold text-[11px]"
+                >
+                  Âge : {age}
+                  <button
+                    onClick={() => toggleAgeBracket(age)}
+                    className="hover:text-black font-black ml-1"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+
+              {searchFilter && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-slate-200 text-[#1E293B] font-bold text-[11px]">
+                  Mot-clé : &quot;{searchFilter}&quot;
+                  <button
+                    onClick={() => setSearchFilter("")}
+                    className="hover:text-black font-black ml-1"
+                  >
+                    ×
+                  </button>
+                </span>
+              )}
+            </div>
+
+            {(selectedAges.length > 0 ||
+              selectedCategory !== "all" ||
+              searchFilter) && (
+              <button
+                onClick={clearAllFilters}
+                className="inline-flex items-center gap-1 text-[11px] font-bold text-[#E63946] hover:underline"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Réinitialiser tous les filtres</span>
+              </button>
+            )}
+          </div>
+
+          {/* Filtered Products Grid */}
+          <div className="mt-8">
+            {filteredProducts.length === 0 ? (
+              <div className="text-center py-16 space-y-3 bg-[#FAF9F7] rounded-3xl border border-[#E8E5DF]">
+                <Brain className="w-10 h-10 mx-auto text-[#94A3B8]" />
+                <h3 className="font-bold text-base text-[#1E293B]">
+                  Aucun outil ne correspond à cette combinaison
+                </h3>
+                <p className="text-xs text-[#64748B] max-w-md mx-auto">
+                  Essayez d&apos;élargir les tranches d&apos;âge ou de choisir
+                  un autre pilier éducatif.
+                </p>
+                <button
+                  onClick={clearAllFilters}
+                  className="mt-2 px-5 py-2.5 rounded-full bg-[#4A9099] text-white text-xs font-bold shadow-xs hover:bg-[#3D7A82] transition-colors"
+                >
+                  Voir tous les outils
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+                {filteredProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
+      {/* ============================================================== */}
+      {/* 2. THE 6 DEDICATED SPOTLIGHT CATEGORY SECTIONS                 */}
+      {/* ============================================================== */}
+      {CATEGORIES.map((cat, idx) => {
+        const isOrangeTheme = idx % 2 === 1;
+        const categoryProducts = PRODUCTS.filter(
+          (p) => p.categorySlug === cat.slug
+        );
+
+        return (
+          <section
+            key={cat.id}
+            id={cat.slug}
+            className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 scroll-mt-28"
+          >
+            {/* Category Header */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 gap-4">
+              <div className="max-w-3xl">
+                {/* Category Pill Tag */}
+                <div
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border mb-2.5 ${
+                    isOrangeTheme
+                      ? "bg-[#FF6B00]/10 text-[#FF6B00] border-[#FF6B00]/25"
+                      : "bg-[#4A9099]/10 text-[#4A9099] border-[#4A9099]/25"
+                  }`}
+                >
+                  <Sparkles
+                    className={`w-3.5 h-3.5 ${
+                      isOrangeTheme ? "text-[#FF6B00]" : "text-[#4A9099]"
+                    }`}
+                  />
+                  <span>Pilier 0{idx + 1} • {cat.highlight}</span>
+                </div>
+
+                {/* Title */}
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#1E293B] tracking-tight">
+                  {cat.name}
+                </h2>
+
+                {/* Subtitle & Description */}
+                <p className="mt-2 text-xs sm:text-sm text-[#64748B] leading-relaxed">
+                  {cat.description}
+                </p>
+              </div>
+
+              {/* Quick Filter Jump for this category */}
+              <button
+                onClick={() => {
+                  setSelectedCategory(cat.slug);
+                  const el = document.getElementById("catalogue-interactif");
+                  if (el) el.scrollIntoView({ behavior: "smooth" });
+                }}
+                className={`group inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold transition-colors shrink-0 ${
+                  isOrangeTheme
+                    ? "text-[#FF6B00] hover:text-[#E66000]"
+                    : "text-[#4A9099] hover:text-[#3D7A82]"
+                }`}
+              >
+                <span>Filtrer ce pilier par tranche d&apos;âge</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+
+            {/* Product Cards for this Category */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+              {categoryProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
 }

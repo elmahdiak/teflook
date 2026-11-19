@@ -78,7 +78,7 @@ export function SearchModal() {
                 : "bg-[#F9F8F6] text-[#334155] hover:bg-[#EBF4F5]"
             }`}
           >
-            Tous les modèles
+            Tous les outils
           </button>
           {CATEGORIES.map((cat) => (
             <button
@@ -100,10 +100,10 @@ export function SearchModal() {
           {results.length === 0 ? (
             <div className="text-center py-10 space-y-2">
               <p className="font-serif-brand text-lg text-[#1E293B]">
-                Aucun modèle ne correspond à votre recherche
+                Aucun outil ne correspond à votre recherche
               </p>
               <p className="text-xs text-[#64748B]">
-                Essayez d&apos;autres termes comme &quot;babouche&quot;, &quot;sandale&quot;, ou &quot;sac&quot;.
+                Essayez d&apos;autres termes comme &quot;autonomie&quot;, &quot;émotions&quot;, ou &quot;logique&quot;.
               </p>
             </div>
           ) : (

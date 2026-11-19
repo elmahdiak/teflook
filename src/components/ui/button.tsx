@@ -7,16 +7,17 @@ export interface ButtonProps
     | "default"
     | "teal"
     | "orange"
-    | "gold" // Alias to orange for backward compatibility
+    | "gold"
     | "secondary"
     | "outline"
     | "orangeOutline"
     | "ghost";
   size?: "sm" | "md" | "lg" | "icon";
+  asChild?: boolean;
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "default", size = "md", ...props }, ref) => {
+  ({ className, variant = "default", size = "md", asChild = false, children, ...props }, ref) => {
     const variants = {
       default:
         "bg-[#4A9099] text-white hover:bg-[#3D7A82] shadow-md shadow-[#4A9099]/20 active:scale-[0.98] border border-transparent",
@@ -43,17 +44,28 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       icon: "h-10 w-10 p-2 rounded-xl flex items-center justify-center",
     };
 
+    const combinedClassName = cn(
+      "inline-flex items-center justify-center font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B00] disabled:pointer-events-none disabled:opacity-50 cursor-pointer",
+      variants[variant] || variants.default,
+      sizes[size] || sizes.md,
+      className
+    );
+
+    if (asChild && React.isValidElement(children)) {
+      return React.cloneElement(children as React.ReactElement<any>, {
+        className: cn(combinedClassName, (children as any).props?.className),
+        ...props,
+      });
+    }
+
     return (
       <button
         ref={ref}
-        className={cn(
-          "inline-flex items-center justify-center font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B00] disabled:pointer-events-none disabled:opacity-50 cursor-pointer",
-          variants[variant],
-          sizes[size],
-          className
-        )}
+        className={combinedClassName}
         {...props}
-      />
+      >
+        {children}
+      </button>
     );
   }
 );

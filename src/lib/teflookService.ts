@@ -56,6 +56,7 @@ export async function getProducts(categorySlug?: string): Promise<ProductItem[]>
       nameAr: p.name_ar,
       categorySlug: p.category_slug,
       categoryName: p.category_slug.replace("-", " "),
+      ageBracket: (p.age_bracket || "7 - 10 ans") as any,
       priceMad: Number(p.price_mad),
       priceEur: Number(p.price_eur),
       description: p.description,

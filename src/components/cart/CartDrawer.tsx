@@ -130,14 +130,14 @@ export function CartDrawer() {
               </div>
               <p className="font-serif-brand text-xl text-[#1E293B]">Votre panier est vide</p>
               <p className="text-sm text-[#64748B] max-w-xs mx-auto">
-                Explorez nos babouches royales, sandales Argana et maroquinerie en cuir véritable.
+                Explorez nos outils éducatifs, jeux d&apos;éveil et kits de développement pour vos enfants.
               </p>
               <Button
                 variant="orange"
                 onClick={() => setIsCartOpen(false)}
                 className="mt-2 text-sm shadow-xs"
               >
-                Découvrir nos créations
+                Découvrir nos outils éducatifs
               </Button>
             </div>
           ) : (

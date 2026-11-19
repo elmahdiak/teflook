@@ -46,7 +46,7 @@ export function ReviewsSection() {
         {/* Filter by City / Origin */}
         <div className="flex items-center justify-center gap-2 mb-10 flex-wrap text-xs">
           <span className="text-[#64748B] font-medium mr-2">Filtrer par ville :</span>
-          {["all", "Casablanca", "Paris", "Marrakech", "Rabat", "Bruxelles", "Tanger"].map(
+          {["all", "Casablanca", "Rabat", "Fès", "Marrakech"].map(
             (c) => (
               <button
                 key={c}

@@ -84,9 +84,14 @@ export function QuickViewModal() {
           <div className="p-6 sm:p-8 flex flex-col justify-between space-y-6">
             <div className="space-y-4">
               <div className="space-y-1">
-                <span className="text-xs uppercase tracking-widest font-bold text-[#4A9099]">
-                  {product.categoryName} • {product.origin}
-                </span>
+                <div className="flex flex-wrap items-center gap-2 mb-1">
+                  <span className="text-xs uppercase tracking-widest font-bold text-[#4A9099]">
+                    {product.categoryName}
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#FF6B00]/15 text-[#FF6B00] text-xs font-black">
+                    Âge recommandé : {product.ageBracket}
+                  </span>
+                </div>
                 <h3 className="font-serif-brand text-2xl sm:text-3xl font-bold text-[#1E293B] leading-tight">
                   {product.name}
                 </h3>

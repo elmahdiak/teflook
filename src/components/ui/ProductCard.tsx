@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Star, ShoppingBag, Eye, Check, Tag } from "lucide-react";
+import { Star, ShoppingBag, Eye, Check, Sparkles } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { ProductItem } from "@/data/teflookData";
 
@@ -43,7 +43,7 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
   return (
     <div
       onClick={handleCardClick}
-      className={`group flex flex-col bg-white rounded-2xl overflow-hidden border border-[#E8E5DF] hover:border-[#4A9099]/40 hover:shadow-xl hover:shadow-[#4A9099]/10 transition-all duration-300 cursor-pointer select-none ${className}`}
+      className={`group flex flex-col bg-white rounded-2xl overflow-hidden border border-[#E8E5DF] hover:border-[#4A9099]/50 hover:shadow-xl hover:shadow-[#4A9099]/10 transition-all duration-300 cursor-pointer select-none ${className}`}
     >
       {/* 1. Media & Image Container */}
       <div className="relative aspect-square w-full overflow-hidden bg-[#F9F8F6]">
@@ -58,7 +58,7 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
         {/* Hover vignette */}
         <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-        {/* Top Left Badges (Discount or Promo Badge) */}
+        {/* Top Left Badges: Discount & Promo */}
         <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1">
           {product.discountPercentage && (
             <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-[#E63946] text-white shadow-xs">
@@ -72,7 +72,7 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
           )}
         </div>
 
-        {/* Top Right Quick View Button */}
+        {/* Top Right: Quick View Button */}
         <div className="absolute top-2.5 right-2.5 z-10 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
           <button
             onClick={(e) => {
@@ -87,20 +87,21 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
           </button>
         </div>
 
-        {/* Brand Pill (if present) */}
-        {product.brand && (
-          <div className="absolute bottom-2.5 left-2.5 z-10">
-            <span className="px-2 py-0.5 rounded-md bg-white/90 backdrop-blur-md text-[10px] font-extrabold text-[#4A9099] border border-white/50 shadow-2xs">
-              {product.brand}
-            </span>
-          </div>
-        )}
+        {/* Bottom Floating: Category Pill */}
+        <div className="absolute bottom-2.5 left-2.5 right-2.5 z-10 flex items-center justify-between gap-1 pointer-events-none">
+          <span className="px-2.5 py-1 rounded-lg bg-white/90 backdrop-blur-md text-[10px] font-extrabold text-[#4A9099] border border-white/60 shadow-xs truncate max-w-[70%]">
+            {product.categoryName}
+          </span>
+          <span className="px-2 py-1 rounded-lg bg-[#FF6B00] text-white text-[10px] font-black shadow-xs shrink-0">
+            {product.ageBracket}
+          </span>
+        </div>
       </div>
 
       {/* 2. Content Details */}
       <div className="flex-1 p-3.5 sm:p-4 flex flex-col justify-between">
         <div>
-          {/* Star Rating */}
+          {/* Star Rating & Reviews */}
           <div className="flex items-center gap-1.5 mb-1.5">
             <div className="flex items-center text-amber-400">
               {[...Array(5)].map((_, i) => (
@@ -118,7 +119,7 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
               {product.rating.toFixed(1)}
             </span>
             <span className="text-[10px] text-[#94A3B8]">
-              ({product.reviewsCount})
+              ({product.reviewsCount} avis)
             </span>
           </div>
 
@@ -127,10 +128,10 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
             {product.name}
           </h3>
 
-          {/* Material or Origin feature badge */}
-          {product.material && (
-            <p className="mt-1 text-[11px] text-[#94A3B8] line-clamp-1">
-              {product.material}
+          {/* Key pedagogical benefit / feature */}
+          {product.features && product.features[0] && (
+            <p className="mt-1 text-[11px] text-[#4A9099] line-clamp-1 font-medium">
+              ✓ {product.features[0]}
             </p>
           )}
         </div>
@@ -149,7 +150,7 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
             </span>
           </div>
 
-          {/* Add to Cart Button */}
+          {/* Interactive "Ajouter au panier" Button */}
           <button
             onClick={handleAddToCart}
             disabled={isAdded}

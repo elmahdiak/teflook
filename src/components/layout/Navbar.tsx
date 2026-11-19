@@ -9,16 +9,13 @@ import {
   Menu,
   X,
   ChevronDown,
-  Flame,
-  Tag,
   Sparkles,
-  Globe,
-  SlidersHorizontal,
+  Award,
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { AccountModal } from "./AccountModal";
-import { MARKETPLACE_DEPARTMENTS } from "@/data/teflookData";
+import { CATEGORIES } from "@/data/teflookData";
 
 export function Navbar() {
   const {
@@ -57,7 +54,7 @@ export function Navbar() {
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="lg:hidden p-2 rounded-xl text-[#1E293B] hover:bg-[#F9F8F6] border border-[#E8E5DF] transition-colors"
-                aria-label="Menu de navigation"
+                aria-label="Menu des catégories"
               >
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
@@ -74,7 +71,7 @@ export function Navbar() {
               >
                 <input
                   type="text"
-                  placeholder="Rechercher un produit, une marque, un univers (poussette, jouet, biberon)..."
+                  placeholder="Rechercher par compétence (émotions, autonomie, logique, créativité)..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   readOnly
@@ -228,7 +225,7 @@ export function Navbar() {
             >
               <input
                 type="text"
-                placeholder="Rechercher poussette, jouet, biberon..."
+                placeholder="Rechercher par compétence (autonomie, émotions)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 readOnly
@@ -245,55 +242,41 @@ export function Navbar() {
         </div>
 
         {/* ============================================================== */}
-        {/* 2. SUB-HEADER CATEGORY BAR (Horizontal Scrollable Pill Bar)    */}
+        {/* 2. SUB-HEADER: THE 6 OFFICIAL EDUCATIONAL CATEGORIES           */}
         {/* ============================================================== */}
         <div className="bg-[#FAF9F7] border-b border-[#E8E5DF] overflow-x-auto no-scrollbar">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <nav className="flex items-center gap-1.5 sm:gap-2 py-2 whitespace-nowrap text-xs font-bold uppercase tracking-wider">
-              {MARKETPLACE_DEPARTMENTS.map((dept) => {
-                if (dept.isSpecial) {
-                  return (
-                    <a
-                      key={dept.label}
-                      href={dept.href}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 transition-all font-black shrink-0"
-                    >
-                      <Flame className="w-3.5 h-3.5 fill-rose-600 animate-pulse" />
-                      <span>{dept.label}</span>
-                      {dept.badge && (
-                        <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-rose-600 text-white font-extrabold tracking-normal">
-                          {dept.badge}
-                        </span>
-                      )}
-                    </a>
-                  );
-                }
-
-                if (dept.isSale) {
-                  return (
-                    <a
-                      key={dept.label}
-                      href={dept.href}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FF6B00]/10 text-[#FF6B00] hover:bg-[#FF6B00]/20 border border-[#FF6B00]/30 transition-all font-black shrink-0"
-                    >
-                      <Tag className="w-3.5 h-3.5 text-[#FF6B00]" />
-                      <span>{dept.label}</span>
-                      {dept.badge && (
-                        <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-[#FF6B00] text-white font-extrabold tracking-normal">
-                          {dept.badge}
-                        </span>
-                      )}
-                    </a>
-                  );
-                }
+            <nav className="flex items-center gap-2 sm:gap-2.5 py-2.5 whitespace-nowrap text-xs font-bold tracking-tight">
+              {CATEGORIES.map((cat, idx) => {
+                const isOrangeAccent = idx % 2 === 1;
 
                 return (
                   <a
-                    key={dept.label}
-                    href={dept.href}
-                    className="inline-flex items-center px-3 py-1.5 rounded-full bg-white hover:bg-[#EBF4F5] text-[#334155] hover:text-[#4A9099] border border-[#E8E5DF] hover:border-[#4A9099]/30 transition-colors shrink-0 font-bold"
+                    key={cat.id}
+                    href={`#${cat.slug}`}
+                    className={`group inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border transition-all shrink-0 font-bold ${
+                      isOrangeAccent
+                        ? "bg-white hover:bg-[#FF6B00]/10 text-[#334155] hover:text-[#FF6B00] border-[#E8E5DF] hover:border-[#FF6B00]/40"
+                        : "bg-white hover:bg-[#4A9099]/10 text-[#334155] hover:text-[#4A9099] border-[#E8E5DF] hover:border-[#4A9099]/40"
+                    }`}
                   >
-                    {dept.label}
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full transition-transform group-hover:scale-125 ${
+                        isOrangeAccent ? "bg-[#FF6B00]" : "bg-[#4A9099]"
+                      }`}
+                    />
+                    <span>{cat.name}</span>
+                    {cat.highlight && (
+                      <span
+                        className={`text-[9px] px-1.5 py-0.2 rounded-full font-black ${
+                          isOrangeAccent
+                            ? "bg-[#FF6B00]/15 text-[#FF6B00]"
+                            : "bg-[#4A9099]/15 text-[#4A9099]"
+                        }`}
+                      >
+                        {cat.highlight}
+                      </span>
+                    )}
                   </a>
                 );
               })}
@@ -302,27 +285,32 @@ export function Navbar() {
         </div>
 
         {/* ============================================================== */}
-        {/* MOBILE NAVIGATION DRAWER                                       */}
+        {/* MOBILE NAVIGATION DRAWER (6 OFFICIAL CATEGORIES)               */}
         {/* ============================================================== */}
         {mobileMenuOpen && (
           <div className="lg:hidden border-t border-[#E8E5DF] bg-white px-4 py-4 space-y-3 animate-in slide-in-from-top-2 duration-200">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8]">
-              Rayons &amp; Univers
+            <p className="text-[11px] font-bold uppercase tracking-wider text-[#4A9099]">
+              Les 6 Piliers Éducatifs &amp; Développementaux
             </p>
-            <div className="grid grid-cols-2 gap-2">
-              {MARKETPLACE_DEPARTMENTS.map((dept) => (
+            <div className="space-y-1.5">
+              {CATEGORIES.map((cat, idx) => (
                 <a
-                  key={dept.label}
-                  href={dept.href}
+                  key={cat.id}
+                  href={`#${cat.slug}`}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-[#FAF9F7] hover:bg-[#EBF4F5] text-xs font-bold text-[#1E293B] border border-[#E8E5DF]"
+                  className="flex items-center justify-between p-3 rounded-xl bg-[#FAF9F7] hover:bg-[#EBF4F5] text-xs font-bold text-[#1E293B] border border-[#E8E5DF] transition-colors"
                 >
-                  <span>{dept.label}</span>
-                  {dept.badge && (
-                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#FF6B00] text-white font-black">
-                      {dept.badge}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        idx % 2 === 1 ? "bg-[#FF6B00]" : "bg-[#4A9099]"
+                      }`}
+                    />
+                    <span>{cat.name}</span>
+                  </div>
+                  <span className="text-[10px] text-[#94A3B8]">
+                    {cat.itemCount} outils
+                  </span>
                 </a>
               ))}
             </div>

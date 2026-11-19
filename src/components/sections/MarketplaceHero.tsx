@@ -8,73 +8,82 @@ import {
   ShieldCheck,
   Truck,
   Heart,
-  Baby,
-  Gift,
+  Brain,
+  Compass,
   Smile,
-  Layers,
+  Target,
+  Palette,
+  Lightbulb,
 } from "lucide-react";
+import { CATEGORIES, AGE_BRACKETS } from "@/data/teflookData";
 
-export function MarketplaceHero() {
-  const quickCircles = [
+interface MarketplaceHeroProps {
+  selectedAge?: string | null;
+  onSelectAge?: (age: string) => void;
+}
+
+export function MarketplaceHero({
+  selectedAge,
+  onSelectAge,
+}: MarketplaceHeroProps) {
+  const categoryCircles = [
     {
-      name: "Bébé (0-2 ans)",
-      image: "https://images.unsplash.com/photo-1555252333-9f8e92e65df9?q=80&w=400&auto=format&fit=crop",
-      href: "#boutique-par-age",
-      highlight: "Nouveau-né",
+      name: "Discipline & Maîtrise",
+      slug: "discipline-maitrise-de-soi",
+      image:
+        "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=400&auto=format&fit=crop",
+      highlight: "Focus",
+      color: "#4A9099",
     },
     {
-      name: "Mode Enfant",
-      image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=400&auto=format&fit=crop",
-      href: "#vetements-mode",
-      highlight: "Bio GOTS",
+      name: "Émotions & Empathie",
+      slug: "intelligence-emotionnelle",
+      image:
+        "https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=400&auto=format&fit=crop",
+      highlight: "Sérénité",
+      color: "#FF6B00",
     },
     {
-      name: "Jouets & Éveil",
-      image: "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?q=80&w=400&auto=format&fit=crop",
-      href: "#jouets-eveil",
-      highlight: "Montessori",
+      name: "Autonomie & Vie",
+      slug: "autonomie-competences-de-vie",
+      image:
+        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=400&auto=format&fit=crop",
+      highlight: "Pratique",
+      color: "#4A9099",
     },
     {
-      name: "Hygiène & Soin",
-      image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?q=80&w=400&auto=format&fit=crop",
-      href: "#hygiene-soin",
-      highlight: "Mustela",
+      name: "Confiance & Social",
+      slug: "confiance-en-soi-competences-sociales",
+      image:
+        "https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=400&auto=format&fit=crop",
+      highlight: "Éloquence",
+      color: "#FF6B00",
     },
     {
-      name: "Poussettes & Sièges",
-      image: "https://images.unsplash.com/photo-1591088398332-8a7791972843?q=80&w=400&auto=format&fit=crop",
-      href: "#equipement-sorties",
-      highlight: "i-Size R129",
+      name: "Créativité & Art",
+      slug: "creativite-imagination",
+      image:
+        "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?q=80&w=400&auto=format&fit=crop",
+      highlight: "Inventivité",
+      color: "#4A9099",
     },
     {
-      name: "Chambre & Literie",
-      image: "https://images.unsplash.com/photo-1516627145497-ae6968895b74?q=80&w=400&auto=format&fit=crop",
-      href: "#maison-literie",
-      highlight: "Sommeil",
-    },
-    {
-      name: "Coffrets Naissance",
-      image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=400&auto=format&fit=crop",
-      href: "#coffrets-cadeaux",
-      highlight: "Cadeau",
-    },
-    {
-      name: "Fêtes & Déco",
-      image: "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?q=80&w=400&auto=format&fit=crop",
-      href: "#fetes-celebrations",
-      highlight: "Célébrations",
+      name: "Esprit Critique & Logique",
+      slug: "esprit-critique-resolution-problemes",
+      image:
+        "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?q=80&w=400&auto=format&fit=crop",
+      highlight: "Stratégie",
+      color: "#FF6B00",
     },
   ];
 
   return (
     <div className="w-full bg-[#F8F9FA] border-b border-[#E8E5DF]">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-5 sm:pt-6 pb-10 sm:pb-12 space-y-8 sm:space-y-10">
-        
         {/* ============================================================== */}
-        {/* 1. MAIN HERO PROMOTIONAL BANNER                                */}
+        {/* 1. MAIN HERO BANNER (EDUCATIONAL DEVELOPMENT)                  */}
         {/* ============================================================== */}
         <div className="relative w-full rounded-3xl overflow-hidden shadow-xl border border-[#E8E5DF] bg-gradient-to-r from-[#1E293B] via-[#0F172A] to-[#1E293B]">
-          
           {/* Background Photography with Gradient Blend */}
           <div className="absolute inset-0 z-0">
             <Image
@@ -90,39 +99,41 @@ export function MarketplaceHero() {
 
           {/* Banner Text & CTAs */}
           <div className="relative z-10 px-6 sm:px-10 lg:px-14 py-12 sm:py-16 lg:py-20 max-w-2xl text-white space-y-5 sm:space-y-6">
-            
             {/* Promo Tag */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FF6B00] text-white text-xs font-black uppercase tracking-wider shadow-md">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Grandes Offres Famille &amp; Éveil</span>
+              <span>Les 6 Piliers du Développement</span>
             </div>
 
             {/* Headline */}
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.15]">
-              L&apos;Univers d&apos;Éveil, de Soin &amp; de Sécurité pour{" "}
+              L&apos;Épanouissement Éducatif &amp; le Développement de{" "}
               <span className="text-[#FF6B00]">vos Enfants</span>
             </h1>
 
             {/* Subtitle */}
             <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
-              Poussettes compactes, jouets éducatifs Montessori, soins pédiatriques doux et coffrets de naissance livrés à domicile partout au Maroc.
+              Outils pédagogiques scientifiquement éprouvés pour cultiver la
+              discipline, l&apos;intelligence émotionnelle, l&apos;autonomie, les
+              compétences sociales, la créativité et l&apos;esprit critique de 5
+              à 15 ans.
             </p>
 
             {/* Action Buttons */}
             <div className="pt-2 flex flex-wrap items-center gap-3 sm:gap-4">
               <a
-                href="#selection-du-moment"
+                href="#catalogue-interactif"
                 className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-full bg-[#FF6B00] hover:bg-[#E66000] text-white font-extrabold text-sm shadow-lg shadow-[#FF6B00]/30 hover:-translate-y-0.5 transition-all group"
               >
-                <span>Découvrir les Offres</span>
+                <span>Filtrer par Âge &amp; Catégorie</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </a>
 
               <a
-                href="#jouets-eveil"
+                href="#discipline-maitrise-de-soi"
                 className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-bold text-sm backdrop-blur-sm border border-white/20 transition-all"
               >
-                <span>Jouets Montessori</span>
+                <span>Découvrir les 6 Piliers</span>
               </a>
             </div>
 
@@ -138,49 +149,60 @@ export function MarketplaceHero() {
               </div>
               <div className="flex items-center gap-2">
                 <Heart className="w-4 h-4 text-rose-400" />
-                <span>100% Produits Certifiés</span>
+                <span>Outils Validés par Pédopsychologues</span>
               </div>
             </div>
-
           </div>
         </div>
 
         {/* ============================================================== */}
-        {/* 2. CLICKABLE CATEGORY CIRCLES UNDERNEATH                       */}
+        {/* 2. CIRCULAR CATEGORY SHOWCASE (THE 6 OFFICIAL CATEGORIES)      */}
         {/* ============================================================== */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-[#4A9099]">
-              Explorer par Univers
+            <h2 className="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-[#4A9099] flex items-center gap-2">
+              <Brain className="w-4 h-4 text-[#FF6B00]" />
+              <span>Les 6 Piliers Fondamentaux</span>
             </h2>
-            <span className="text-xs text-[#94A3B8]">Accès rapide aux rayons</span>
+            <span className="text-xs text-[#94A3B8]">
+              Cliquez pour naviguer directement
+            </span>
           </div>
 
-          <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-8 gap-3 sm:gap-4 text-center">
-            {quickCircles.map((cat) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 text-center">
+            {categoryCircles.map((cat, idx) => (
               <a
-                key={cat.name}
-                href={cat.href}
-                className="group flex flex-col items-center p-2.5 sm:p-3 rounded-2xl bg-white hover:bg-[#EBF4F5]/60 border border-[#E8E5DF] hover:border-[#4A9099] shadow-2xs hover:shadow-md transition-all duration-200 cursor-pointer"
+                key={cat.slug}
+                href={`#${cat.slug}`}
+                className="group flex flex-col items-center p-3 rounded-2xl bg-white hover:bg-[#EBF4F5]/60 border border-[#E8E5DF] hover:border-[#4A9099] shadow-2xs hover:shadow-md transition-all duration-200 cursor-pointer"
               >
                 {/* Circular Image Container */}
-                <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden mb-2 border-2 border-[#E8E5DF] group-hover:border-[#4A9099] group-hover:scale-105 transition-all">
+                <div
+                  className={`relative w-16 h-16 sm:w-18 sm:h-18 rounded-full overflow-hidden mb-2.5 border-2 transition-all group-hover:scale-105 ${
+                    idx % 2 === 1
+                      ? "border-[#FF6B00]/40 group-hover:border-[#FF6B00]"
+                      : "border-[#4A9099]/40 group-hover:border-[#4A9099]"
+                  }`}
+                >
                   <Image
                     src={cat.image}
                     alt={cat.name}
                     fill
-                    sizes="80px"
+                    sizes="100px"
                     className="object-cover"
                   />
                 </div>
 
                 {/* Label */}
-                <span className="text-[11px] sm:text-xs font-bold text-[#1E293B] group-hover:text-[#4A9099] transition-colors line-clamp-1">
+                <span className="text-xs font-black text-[#1E293B] group-hover:text-[#4A9099] transition-colors line-clamp-1">
                   {cat.name}
                 </span>
 
                 {/* Sub-tag */}
-                <span className="text-[10px] text-[#FF6B00] font-semibold mt-0.5">
+                <span
+                  className="text-[10px] font-extrabold mt-0.5"
+                  style={{ color: cat.color }}
+                >
                   {cat.highlight}
                 </span>
               </a>
@@ -189,84 +211,138 @@ export function MarketplaceHero() {
         </div>
 
         {/* ============================================================== */}
-        {/* 3. SECONDARY PROMOTIONAL BANNERS STRIP (3 High-Impact Cards)   */}
+        {/* 3. INTERACTIVE AGE FILTER BAR (QUICK BRACKET SELECTOR)         */}
+        {/* ============================================================== */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#E8E5DF] shadow-xs">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-[#EBF4F5] text-[#4A9099] flex items-center justify-center shrink-0">
+                <Target className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-sm text-[#1E293B]">
+                  Filtrer par Âge
+                </h3>
+                <p className="text-xs text-[#64748B]">
+                  Sélectionnez la tranche d&apos;âge de votre enfant pour voir
+                  les outils adaptés :
+                </p>
+              </div>
+            </div>
+
+            {/* The 4 Exact Age Brackets Buttons */}
+            <div className="flex flex-wrap items-center gap-2">
+              {AGE_BRACKETS.map((bracket) => {
+                const isSelected = selectedAge === bracket;
+                return (
+                  <a
+                    key={bracket}
+                    href="#catalogue-interactif"
+                    onClick={() => onSelectAge && onSelectAge(bracket)}
+                    className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer shadow-2xs ${
+                      isSelected
+                        ? "bg-[#FF6B00] text-white shadow-md scale-105"
+                        : "bg-[#FAF9F7] text-[#334155] hover:bg-[#EBF4F5] hover:text-[#4A9099] border border-[#E8E5DF]"
+                    }`}
+                  >
+                    <span>{bracket}</span>
+                  </a>
+                );
+              })}
+              {selectedAge && (
+                <button
+                  onClick={() => onSelectAge && onSelectAge("")}
+                  className="text-xs font-bold text-[#94A3B8] hover:text-[#E63946] px-2 py-1 underline transition-colors"
+                >
+                  Réinitialiser
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* ============================================================== */}
+        {/* 4. SECONDARY STRIPS (FOCUSING ON THE CORE BENEFIT AREAS)       */}
         {/* ============================================================== */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-          
-          {/* Banner 1: Maternité & Naissance */}
+          {/* Banner 1: Intelligence Émotionnelle */}
           <a
-            href="#coffrets-cadeaux"
+            href="#intelligence-emotionnelle"
             className="group relative rounded-2xl overflow-hidden p-6 bg-gradient-to-br from-[#FFF2EB] to-[#FFE3D4] border border-[#FFD2BC] shadow-xs hover:shadow-md transition-all flex items-center justify-between"
           >
             <div className="space-y-1.5 z-10 max-w-[65%]">
               <span className="text-[10px] font-black uppercase tracking-wider text-[#FF6B00] bg-white px-2 py-0.5 rounded-full shadow-2xs">
-                Pack Maternité
+                Intelligence Émotionnelle
               </span>
               <h3 className="text-base sm:text-lg font-black text-[#1E293B] leading-tight">
-                Trousseaux &amp; Boîtes Naissance
+                Gérer les Émotions &amp; Apaiser le Stress
               </h3>
-              <p className="text-xs text-[#64748B]">Jusqu&apos;à -30% sur les coffrets</p>
+              <p className="text-xs text-[#64748B]">
+                Jeux d&apos;empathie et rituels calmes
+              </p>
             </div>
             <div className="relative w-20 h-20 rounded-2xl overflow-hidden shrink-0 shadow-md group-hover:scale-105 transition-transform">
               <Image
-                src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=300&auto=format&fit=crop"
-                alt="Pack Maternité"
+                src="https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=300&auto=format&fit=crop"
+                alt="Intelligence Émotionnelle"
                 fill
                 className="object-cover"
               />
             </div>
           </a>
 
-          {/* Banner 2: Sécurité & Protection */}
+          {/* Banner 2: Autonomie & Vie */}
           <a
-            href="#selection-du-moment"
+            href="#autonomie-competences-de-vie"
             className="group relative rounded-2xl overflow-hidden p-6 bg-gradient-to-br from-[#EBF4F5] to-[#D5EAEB] border border-[#BCE1E3] shadow-xs hover:shadow-md transition-all flex items-center justify-between"
           >
             <div className="space-y-1.5 z-10 max-w-[65%]">
               <span className="text-[10px] font-black uppercase tracking-wider text-[#4A9099] bg-white px-2 py-0.5 rounded-full shadow-2xs">
-                Sécurité Maison
+                Compétences de Vie
               </span>
               <h3 className="text-base sm:text-lg font-black text-[#1E293B] leading-tight">
-                Kits Protection Domestique
+                Apprendre à Faire Seul avec Fierté
               </h3>
-              <p className="text-xs text-[#64748B]">Normes CE &amp; Adhésifs 3M</p>
+              <p className="text-xs text-[#64748B]">
+                Cuisine sûre, routines &amp; responsabilité
+              </p>
             </div>
             <div className="relative w-20 h-20 rounded-2xl overflow-hidden shrink-0 shadow-md group-hover:scale-105 transition-transform">
               <Image
                 src="https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=300&auto=format&fit=crop"
-                alt="Sécurité Enfant"
+                alt="Autonomie et Compétences"
                 fill
                 className="object-cover"
               />
             </div>
           </a>
 
-          {/* Banner 3: Jeux d'Éveil Montessori */}
+          {/* Banner 3: Esprit Critique */}
           <a
-            href="#jouets-eveil"
+            href="#esprit-critique-resolution-problemes"
             className="group relative rounded-2xl overflow-hidden p-6 bg-gradient-to-br from-[#FEF3C7] to-[#FDE68A] border border-[#FCD34D] shadow-xs hover:shadow-md transition-all flex items-center justify-between"
           >
             <div className="space-y-1.5 z-10 max-w-[65%]">
               <span className="text-[10px] font-black uppercase tracking-wider text-amber-800 bg-white px-2 py-0.5 rounded-full shadow-2xs">
-                Montessori Lab
+                Esprit Critique
               </span>
               <h3 className="text-base sm:text-lg font-black text-[#1E293B] leading-tight">
-                Jeux d&apos;Éveil en Bois Sain
+                Logique, Énigmes &amp; Déduction
               </h3>
-              <p className="text-xs text-amber-900/80">Livraison offerte dès 300 DH</p>
+              <p className="text-xs text-amber-900/80">
+                Escape games et casse-têtes en bois
+              </p>
             </div>
             <div className="relative w-20 h-20 rounded-2xl overflow-hidden shrink-0 shadow-md group-hover:scale-105 transition-transform">
               <Image
                 src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?q=80&w=300&auto=format&fit=crop"
-                alt="Jeux Montessori"
+                alt="Logique et Esprit Critique"
                 fill
                 className="object-cover"
               />
             </div>
           </a>
-
         </div>
-
       </div>
     </div>
   );
