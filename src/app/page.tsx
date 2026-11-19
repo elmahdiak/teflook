@@ -438,7 +438,7 @@ function TefLookStorefront() {
           ) : (
             <div
               id="product-grid"
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+              className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4"
             >
               {filteredProducts.map((product) => (
                 <ProductCard
@@ -587,9 +587,9 @@ function ProductCard({
   }
 
   return (
-    <article className="group flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-border/80 bg-card p-3.5 shadow-xs transition-all duration-300 hover:border-brand-teal/40 hover:shadow-md">
+    <article className="group flex h-full flex-col justify-between overflow-hidden rounded-xl sm:rounded-2xl border border-border/80 bg-card p-2.5 sm:p-3.5 shadow-xs transition-all duration-300 hover:border-brand-teal/40 hover:shadow-md">
       <div>
-        <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-secondary">
+        <div className="relative aspect-square w-full overflow-hidden rounded-lg sm:rounded-xl bg-secondary">
           {image ? (
             <img
               src={image.url}
@@ -599,23 +599,23 @@ function ProductCard({
             />
           ) : (
             <div className="grid size-full place-items-center bg-brand-mist text-primary">
-              <img src="/images/teflook-mark.png" alt="" className="size-16 opacity-40" />
+              <img src="/images/teflook-mark.png" alt="" className="size-14 sm:size-16 opacity-40" />
             </div>
           )}
           {!variant && (
-            <span className="absolute bottom-2 left-2 rounded-md bg-card/95 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.07em] shadow-xs">
+            <span className="absolute bottom-1.5 left-1.5 sm:bottom-2 sm:left-2 rounded-md bg-card/95 px-1.5 sm:px-2 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.07em] shadow-xs">
               Épuisé
             </span>
           )}
         </div>
-        <div className="pt-3.5">
+        <div className="pt-2 sm:pt-3">
           {product.vendor && (
-            <p className="mb-1 truncate text-[11px] font-semibold uppercase tracking-[0.11em] text-brand-teal">
+            <p className="mb-0.5 sm:mb-1 truncate text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.11em] text-brand-teal">
               {product.vendor}
             </p>
           )}
           <h3
-            className="line-clamp-2 text-[14px] font-semibold leading-[1.4] text-foreground transition-colors hover:text-brand-teal"
+            className="line-clamp-2 text-[12px] sm:text-[14px] font-semibold leading-[1.3] sm:leading-[1.4] text-foreground transition-colors hover:text-brand-teal"
             title={product.title}
           >
             {product.title}
@@ -623,8 +623,8 @@ function ProductCard({
         </div>
       </div>
 
-      <div className="mt-3.5 flex items-center justify-between gap-2 border-t border-border/50 pt-3">
-        <p className="text-[15px] font-bold text-brand-orange-deep">
+      <div className="mt-2.5 sm:mt-3.5 flex items-center justify-between gap-1.5 sm:gap-2 border-t border-border/50 pt-2 sm:pt-3">
+        <p className="truncate text-[13px] sm:text-[15px] font-bold text-brand-orange-deep">
           {new Intl.NumberFormat(locale === "ar" ? "ar-MA" : "fr-MA", {
             style: "currency",
             currency: product.priceRange.minVariantPrice.currencyCode,
@@ -638,9 +638,9 @@ function ProductCard({
           aria-label={`Ajouter ${product.title} au panier`}
           title={t("product.add")}
           onClick={() => void handleAdd()}
-          className="size-9 shrink-0 rounded-lg border border-border bg-background transition-all hover:border-brand-teal hover:bg-brand-teal/10 hover:text-brand-teal"
+          className="size-8 sm:size-9 shrink-0 rounded-lg border border-border bg-background transition-all hover:border-brand-teal hover:bg-brand-teal/10 hover:text-brand-teal"
         >
-          {adding ? <LoaderCircle className="animate-spin" /> : <Plus size={17} />}
+          {adding ? <LoaderCircle className="size-3.5 sm:size-4 animate-spin" /> : <Plus className="size-3.5 sm:size-4" />}
         </Button>
       </div>
     </article>
