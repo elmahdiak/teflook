@@ -59,7 +59,7 @@ export function Footer() {
             
             {/* Reassurance 1 */}
             <div className="flex items-start gap-3.5">
-              <div className="w-10 h-10 rounded-2xl bg-[#EBF4F5] text-[#4A9099] flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-2xl bg-[#EDF3F1] text-[#1A3C34] flex items-center justify-center shrink-0">
                 <Truck className="w-5 h-5" />
               </div>
               <div>
@@ -74,7 +74,7 @@ export function Footer() {
 
             {/* Reassurance 2 */}
             <div className="flex items-start gap-3.5">
-              <div className="w-10 h-10 rounded-2xl bg-[#FFF2EB] text-[#FF6B00] flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-2xl bg-[#FBF1EC] text-[#C85A32] flex items-center justify-center shrink-0">
                 <CreditCard className="w-5 h-5" />
               </div>
               <div>
@@ -89,7 +89,7 @@ export function Footer() {
 
             {/* Reassurance 3 */}
             <div className="flex items-start gap-3.5">
-              <div className="w-10 h-10 rounded-2xl bg-[#EBF4F5] text-[#4A9099] flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-2xl bg-[#EDF3F1] text-[#1A3C34] flex items-center justify-center shrink-0">
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
@@ -104,7 +104,7 @@ export function Footer() {
 
             {/* Reassurance 4 */}
             <div className="flex items-start gap-3.5">
-              <div className="w-10 h-10 rounded-2xl bg-[#FFF2EB] text-[#FF6B00] flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-2xl bg-[#FBF1EC] text-[#C85A32] flex items-center justify-center shrink-0">
                 <RotateCcw className="w-5 h-5" />
               </div>
               <div>
@@ -136,15 +136,15 @@ export function Footer() {
 
             <div className="space-y-2 pt-1 text-xs text-[#64748B]">
               <div className="flex items-center gap-2">
-                <MapPin className="w-3.5 h-3.5 text-[#4A9099] shrink-0" />
+                <MapPin className="w-3.5 h-3.5 text-[#1A3C34] shrink-0" />
                 <span>Casablanca &amp; Fès, Royaume du Maroc</span>
               </div>
               <div className="flex items-center gap-2">
-                <Mail className="w-3.5 h-3.5 text-[#4A9099] shrink-0" />
+                <Mail className="w-3.5 h-3.5 text-[#1A3C34] shrink-0" />
                 <span>contact@teflook.com</span>
               </div>
               <div className="flex items-center gap-2">
-                <PhoneCall className="w-3.5 h-3.5 text-[#4A9099] shrink-0" />
+                <PhoneCall className="w-3.5 h-3.5 text-[#1A3C34] shrink-0" />
                 <span>Support téléphonique : +212 5 22 00 00 00</span>
               </div>
             </div>
@@ -169,32 +169,32 @@ export function Footer() {
             </h4>
             <ul className="space-y-2.5 text-xs sm:text-sm font-medium text-[#64748B]">
               <li>
-                <a href="#discipline-maitrise-de-soi" className="hover:text-[#4A9099] transition-colors inline-block">
+                <a href="#discipline-maitrise-de-soi" className="hover:text-[#1A3C34] transition-colors inline-block">
                   Discipline et maîtrise de soi
                 </a>
               </li>
               <li>
-                <a href="#intelligence-emotionnelle" className="hover:text-[#FF6B00] transition-colors inline-block">
+                <a href="#intelligence-emotionnelle" className="hover:text-[#C85A32] transition-colors inline-block">
                   Intelligence émotionnelle
                 </a>
               </li>
               <li>
-                <a href="#autonomie-competences-de-vie" className="hover:text-[#4A9099] transition-colors inline-block">
+                <a href="#autonomie-competences-de-vie" className="hover:text-[#1A3C34] transition-colors inline-block">
                   Autonomie et compétences de vie
                 </a>
               </li>
               <li>
-                <a href="#confiance-en-soi-competences-sociales" className="hover:text-[#FF6B00] transition-colors inline-block">
+                <a href="#confiance-en-soi-competences-sociales" className="hover:text-[#C85A32] transition-colors inline-block">
                   Confiance en soi &amp; social
                 </a>
               </li>
               <li>
-                <a href="#creativite-imagination" className="hover:text-[#4A9099] transition-colors inline-block">
+                <a href="#creativite-imagination" className="hover:text-[#1A3C34] transition-colors inline-block">
                   Créativité et imagination
                 </a>
               </li>
               <li>
-                <a href="#esprit-critique-resolution-problemes" className="hover:text-[#FF6B00] transition-colors inline-block">
+                <a href="#esprit-critique-resolution-problemes" className="hover:text-[#C85A32] transition-colors inline-block">
                   Esprit critique &amp; résolution
                 </a>
               </li>
@@ -208,32 +208,32 @@ export function Footer() {
             </h4>
             <ul className="space-y-2.5 text-xs sm:text-sm font-medium text-[#64748B]">
               <li>
-                <a href="#suivi-commande" className="hover:text-[#4A9099] transition-colors inline-block">
+                <a href="#suivi-commande" className="hover:text-[#1A3C34] transition-colors inline-block">
                   Suivi de Commande
                 </a>
               </li>
               <li>
-                <a href="#livraison" className="hover:text-[#4A9099] transition-colors inline-block">
+                <a href="#livraison" className="hover:text-[#1A3C34] transition-colors inline-block">
                   Délais &amp; Tarifs de Livraison
                 </a>
               </li>
               <li>
-                <a href="#paiement" className="hover:text-[#4A9099] transition-colors inline-block">
+                <a href="#paiement" className="hover:text-[#1A3C34] transition-colors inline-block">
                   Paiement à la Livraison
                 </a>
               </li>
               <li>
-                <a href="#retours" className="hover:text-[#4A9099] transition-colors inline-block">
+                <a href="#retours" className="hover:text-[#1A3C34] transition-colors inline-block">
                   Retours &amp; Remboursements
                 </a>
               </li>
               <li>
-                <a href="#guide-tailles" className="hover:text-[#4A9099] transition-colors inline-block">
+                <a href="#guide-tailles" className="hover:text-[#1A3C34] transition-colors inline-block">
                   Guide des Tailles
                 </a>
               </li>
               <li>
-                <a href="#faq" className="hover:text-[#4A9099] transition-colors inline-block">
+                <a href="#faq" className="hover:text-[#1A3C34] transition-colors inline-block">
                   Foire Aux Questions (FAQ)
                 </a>
               </li>
@@ -332,7 +332,7 @@ export function Footer() {
           <div className="flex items-center gap-2">
             <p>© 2026 TEFLOOK. Tous droits réservés.</p>
             <span>•</span>
-            <span className="font-arabic text-[#FF6B00] font-bold">
+            <span className="font-arabic text-[#C85A32] font-bold">
               المملكة المغربية
             </span>
           </div>
@@ -342,7 +342,7 @@ export function Footer() {
             {showScrollTop && (
               <button
                 onClick={scrollToTop}
-                className="w-8 h-8 rounded-full bg-[#4A9099] text-white flex items-center justify-center hover:bg-[#3D7A82] transition-colors shadow-sm"
+                className="w-8 h-8 rounded-full bg-[#1A3C34] text-white flex items-center justify-center hover:bg-[#132E27] transition-colors shadow-sm"
                 aria-label="Retour en haut"
                 title="Retour en haut de page"
               >

@@ -82,18 +82,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   const SidebarContent = () => (
-    <div className="flex h-full flex-col justify-between p-5 bg-[#23494F] text-[#F9F8F6]">
+    <div className="flex h-full flex-col justify-between p-5 bg-[#1A3C34] text-[#F9F8F6]">
       <div>
         {/* Brand */}
         <div className="flex items-center justify-between pb-6 border-b border-white/10">
           <Link href="/admin" className="flex items-center gap-2.5">
-            <img src="/images/teflook-mark.png" alt="TefLook" className="size-9 object-contain" />
+            <img src="/images/logoodark.png" alt="TefLook" className="size-9 rounded-xl object-contain shadow-xs" />
             <div>
               <span className="font-display text-xl font-extrabold tracking-tight text-white">
-                <span className="text-[#4A9099]">Tef</span>
-                <span className="text-[#FF6B00]">Look</span>
+                <span className="text-[#F9F8F6]">Tef</span>
+                <span className="text-[#E6A15C]">Look</span>
               </span>
-              <span className="block text-[10px] font-bold uppercase tracking-widest text-[#4A9099]">
+              <span className="block text-[10px] font-bold uppercase tracking-widest text-[#E6A15C]">
                 Admin Console
               </span>
             </div>
@@ -121,7 +121,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 onClick={() => setMobileSidebarOpen(false)}
                 className={`flex items-center justify-between rounded-xl px-3.5 py-3 text-xs font-bold transition-all duration-200 ${
                   isActive
-                    ? "bg-[#4A9099] text-white shadow-sm shadow-black/10"
+                    ? "bg-[#C85A32] text-white shadow-sm shadow-black/10"
                     : "text-white/75 hover:bg-white/10 hover:text-white"
                 }`}
               >
@@ -132,7 +132,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 {item.badge && (
                   <span
                     className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                      isActive ? "bg-[#FF6B00] text-white" : "bg-white/15 text-white/90"
+                      isActive ? "bg-[#E6A15C] text-[#1A3C34]" : "bg-white/15 text-white/90"
                     }`}
                   >
                     {item.badge}

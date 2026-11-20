@@ -19,13 +19,13 @@ export function Badge({
   ...props
 }: BadgeProps) {
   const variants = {
-    default: "bg-[#4A9099] text-white border-transparent",
-    teal: "bg-[#EBF4F5] text-[#4A9099] border-[#4A9099]/30 font-semibold",
-    orange: "bg-[#FFF2EB] text-[#FF6B00] border-[#FF6B00]/40 font-semibold",
-    gold: "bg-[#FFF2EB] text-[#FF6B00] border-[#FF6B00]/40 font-semibold", // Backward compatibility alias
-    secondary: "bg-[#F9F8F6] text-[#1E293B] border-[#E8E5DF]",
-    outline: "border-[#E8E5DF] text-[#64748B] bg-transparent",
-    leather: "bg-[#EBF4F5] text-[#3D7A82] border-[#4A9099]/30 font-medium",
+    default: "bg-[#1A3C34] text-white border-transparent",
+    teal: "bg-[#EDF3F1] text-[#1A3C34] border-[#1A3C34]/30 font-semibold",
+    orange: "bg-[#FBF1EC] text-[#C85A32] border-[#C85A32]/40 font-semibold",
+    gold: "bg-[#FDF6ED] text-[#E6A15C] border-[#E6A15C]/40 font-semibold",
+    secondary: "bg-[#F9F8F6] text-[#1A2825] border-[#E5E1D8]",
+    outline: "border-[#E5E1D8] text-[#5E6D68] bg-transparent",
+    leather: "bg-[#EDF3F1] text-[#132E27] border-[#1A3C34]/30 font-medium",
     success: "bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold",
   };
 

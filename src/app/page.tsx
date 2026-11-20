@@ -146,11 +146,11 @@ function TefLookStorefront() {
       {/* 2. Header & Navigation */}
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-md">
         <div className="store-shell flex h-[82px] items-center justify-between gap-3 sm:gap-5">
-          <Link href="/" aria-label="TefLook, accueil" className="flex shrink-0 items-center gap-2.5">
-            <img src="/images/teflook-mark.png" alt="TefLook" className="size-[41px] object-contain" />
-            <span className="font-display text-[21px] font-extrabold tracking-normal">
-              <span className="text-brand-teal">Tef</span>
-              <span className="text-brand-orange">Look</span>
+          <Link href="/" aria-label="TefLook, accueil" className="flex shrink-0 items-center gap-3">
+            <img src="/images/logoo.png" alt="TefLook" className="size-11 rounded-xl object-contain shadow-xs" />
+            <span className="font-display text-[22px] font-extrabold tracking-normal">
+              <span className="text-brand-forest">Tef</span>
+              <span className="text-brand-terracotta">Look</span>
             </span>
           </Link>
 
@@ -480,10 +480,11 @@ function TefLookStorefront() {
       <footer className="border-t border-border bg-primary text-primary-foreground">
         <div className="store-shell grid gap-9 py-10 sm:grid-cols-[1.5fr_1fr_1fr] sm:py-12">
           <div>
-            <div className="mb-3 flex items-center gap-2">
+            <div className="mb-3 flex items-center gap-2.5">
+              <img src="/images/logoodark.png" alt="TefLook" className="size-9 rounded-xl object-contain shadow-xs" />
               <span className="font-display text-2xl font-black tracking-normal text-white">
-                <span className="text-[#4A9099]">Tef</span>
-                <span className="text-[#FF6B00]">Look</span>
+                <span className="text-[#F9F8F6]">Tef</span>
+                <span className="text-[#E6A15C]">Look</span>
               </span>
             </div>
             <p className="font-display text-xl font-semibold">{t("footer.tagline")}</p>
@@ -613,7 +614,7 @@ function ProductCard({
               />
             ) : (
               <div className="grid size-full place-items-center bg-brand-mist text-primary">
-                <img src="/images/teflook-mark.png" alt="" className="size-14 sm:size-16 opacity-40" />
+                <img src="/images/logoo.png" alt="" className="size-14 sm:size-16 rounded-xl opacity-40 object-contain" />
               </div>
             )}
           </Link>

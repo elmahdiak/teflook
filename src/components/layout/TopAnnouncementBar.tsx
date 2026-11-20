@@ -10,7 +10,7 @@ export function TopAnnouncementBar() {
         
         {/* Left: Promotional Offer Badge */}
         <div className="flex items-center gap-2 shrink-0">
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FF6B00] text-white text-[10px] font-black uppercase tracking-wider animate-pulse">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#C85A32] text-white text-[10px] font-black uppercase tracking-wider animate-pulse">
             <Sparkles className="w-3 h-3" />
             <span>Offres Spéciales</span>
           </span>
@@ -21,9 +21,9 @@ export function TopAnnouncementBar() {
 
         {/* Center: Delivery Notice */}
         <div className="flex items-center gap-1.5 text-center truncate justify-center">
-          <Truck className="w-3.5 h-3.5 text-[#4A9099] shrink-0" />
+          <Truck className="w-3.5 h-3.5 text-[#1A3C34] shrink-0" />
           <span className="truncate text-slate-200">
-            <span className="font-bold text-[#4A9099]">Livraison Gratuite</span> dès 300 MAD partout au Maroc • Code : <strong className="text-[#FF6B00]">TEFPROMO</strong>
+            <span className="font-bold text-[#1A3C34]">Livraison Gratuite</span> dès 300 MAD partout au Maroc • Code : <strong className="text-[#C85A32]">TEFPROMO</strong>
           </span>
         </div>
 
@@ -35,7 +35,7 @@ export function TopAnnouncementBar() {
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 hover:text-white transition-colors"
           >
-            <PhoneCall className="w-3 h-3 text-[#4A9099]" />
+            <PhoneCall className="w-3 h-3 text-[#1A3C34]" />
             <span className="font-semibold">Aide &amp; Commande WhatsApp</span>
           </a>
         </div>

@@ -27,7 +27,7 @@ export function TefLookLanguageSwitcher({
           compact ? "px-2 py-0.5 text-[11px]" : "px-3 py-1 text-xs"
         } ${
           locale === "fr"
-            ? "bg-[#4A9099] text-white shadow-xs"
+            ? "bg-[#1A3C34] text-white shadow-xs"
             : "text-muted-foreground hover:text-foreground"
         }`}
         aria-pressed={locale === "fr"}
@@ -41,7 +41,7 @@ export function TefLookLanguageSwitcher({
           compact ? "px-2 py-0.5 text-[11px]" : "px-3 py-1 text-xs"
         } ${
           locale === "ar"
-            ? "bg-[#4A9099] text-white shadow-xs"
+            ? "bg-[#1A3C34] text-white shadow-xs"
             : "text-muted-foreground hover:text-foreground"
         }`}
         aria-pressed={locale === "ar"}

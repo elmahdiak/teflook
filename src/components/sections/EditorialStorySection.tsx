@@ -35,7 +35,7 @@ export function EditorialStorySection() {
   return (
     <section id="sandales" className="py-20 lg:py-28 bg-[#F2EFE9] border-b border-[#E8E5DF] relative overflow-hidden">
       {/* Decorative background circle */}
-      <div className="absolute top-1/2 -right-32 w-96 h-96 rounded-full bg-[#4A9099]/10 blur-[130px] pointer-events-none" />
+      <div className="absolute top-1/2 -right-32 w-96 h-96 rounded-full bg-[#1A3C34]/10 blur-[130px] pointer-events-none" />
 
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
@@ -51,7 +51,7 @@ export function EditorialStorySection() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#1E293B]/85 via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6 text-white">
-                <span className="text-[11px] uppercase tracking-widest text-[#FF6B00] font-bold">
+                <span className="text-[11px] uppercase tracking-widest text-[#C85A32] font-bold">
                   Patrimoine Mondial UNESCO
                 </span>
                 <h4 className="font-serif-brand text-2xl font-bold">
@@ -66,8 +66,8 @@ export function EditorialStorySection() {
             {/* Overlapping Detail Card */}
             <div className="hidden sm:block absolute -bottom-8 -right-6 p-4 rounded-2xl bg-white shadow-xl border border-[#E8E5DF] max-w-xs">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-[#EBF4F5] border border-[#4A9099]/20 flex items-center justify-center text-[#4A9099]">
-                  <Sparkles className="w-6 h-6 text-[#FF6B00]" />
+                <div className="w-12 h-12 rounded-xl bg-[#EDF3F1] border border-[#1A3C34]/20 flex items-center justify-center text-[#1A3C34]">
+                  <Sparkles className="w-6 h-6 text-[#C85A32]" />
                 </div>
                 <div>
                   <h5 className="font-serif-brand font-bold text-sm text-[#1E293B]">
@@ -84,14 +84,14 @@ export function EditorialStorySection() {
           {/* Editorial Text Content */}
           <div className="lg:col-span-7 space-y-6 order-1 lg:order-2">
             <div className="space-y-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#4A9099]/30 text-xs font-semibold text-[#4A9099]">
-                <Sparkles className="w-3.5 h-3.5 text-[#FF6B00]" />
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-[#1A3C34]/30 text-xs font-semibold text-[#1A3C34]">
+                <Sparkles className="w-3.5 h-3.5 text-[#C85A32]" />
                 <span>Savoir-Faire &amp; Tradition Ancestrale</span>
               </div>
               <h2 className="font-serif-brand text-3xl sm:text-4xl md:text-5xl font-bold text-[#1E293B] tracking-tight leading-tight">
                 L&apos;art du bronzage et la noblesse du cuir marocain
               </h2>
-              <p className="font-arabic text-xl text-[#FF6B00] font-bold">
+              <p className="font-arabic text-xl text-[#C85A32] font-bold">
                 فن الدباغة الأصيلة وسر النعومة الخالدة لجلد فاس ومراكش
               </p>
             </div>
@@ -101,7 +101,7 @@ export function EditorialStorySection() {
                 Au cœur des ruelles millénaires de la médina de Fès, les maîtres tanneurs de TefLook perpétuent un rituel que le temps n&apos;a jamais altéré. Les peaux de chèvre et d&apos;agneau sont travaillées à la main dans les cuves polygonales en pierre calcaire, sous la lumière dorée du ciel marocain.
               </p>
               <p>
-                Pour donner au cuir <strong className="text-[#4A9099]">Tef</strong><strong className="text-[#FF6B00]">Look</strong> sa souplesse exceptionnelle et son toucher soyeux, nous n&apos;utilisons que des pigments végétaux naturels : le <strong>safran de Taliouine</strong> pour les reflets dorés, l&apos;<strong>écorce de grenade séchée</strong> pour les mordorés profonds, et l&apos;<strong>huile d&apos;argan bio</strong> d&apos;Essaouira pour nourrir le grain.
+                Pour donner au cuir <strong className="text-[#1A3C34]">Tef</strong><strong className="text-[#C85A32]">Look</strong> sa souplesse exceptionnelle et son toucher soyeux, nous n&apos;utilisons que des pigments végétaux naturels : le <strong>safran de Taliouine</strong> pour les reflets dorés, l&apos;<strong>écorce de grenade séchée</strong> pour les mordorés profonds, et l&apos;<strong>huile d&apos;argan bio</strong> d&apos;Essaouira pour nourrir le grain.
               </p>
             </div>
 
@@ -114,8 +114,8 @@ export function EditorialStorySection() {
                     key={i}
                     className="p-4 rounded-2xl bg-white border border-[#E8E5DF] shadow-xs space-y-2"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-[#EBF4F5] flex items-center justify-center text-[#4A9099]">
-                      <Icon className="w-4 h-4 text-[#FF6B00]" />
+                    <div className="w-8 h-8 rounded-lg bg-[#EDF3F1] flex items-center justify-center text-[#1A3C34]">
+                      <Icon className="w-4 h-4 text-[#C85A32]" />
                     </div>
                     <h4 className="font-serif-brand font-bold text-sm text-[#1E293B]">
                       {pillar.title}
@@ -129,9 +129,9 @@ export function EditorialStorySection() {
             </div>
 
             {/* Quote Block */}
-            <blockquote className="p-4 rounded-2xl bg-white border-l-4 border-[#FF6B00] italic text-xs sm:text-sm text-[#334155]">
+            <blockquote className="p-4 rounded-2xl bg-white border-l-4 border-[#C85A32] italic text-xs sm:text-sm text-[#334155]">
               &quot;Une belle babouche ou une sandale en cuir véritable ne s&apos;achète pas pour une saison : elle s&apos;apprivoise, elle respire avec vous et se transmet comme un hommage aux artisans qui l&apos;ont fait naître.&quot;
-              <footer className="text-[11px] font-semibold text-[#4A9099] mt-1 not-italic">
+              <footer className="text-[11px] font-semibold text-[#1A3C34] mt-1 not-italic">
                 — Maâlem Abdellatif, Maître Bottier TefLook
               </footer>
             </blockquote>

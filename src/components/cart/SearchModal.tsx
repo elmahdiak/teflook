@@ -40,7 +40,7 @@ export function SearchModal() {
       <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-[#E8E5DF] z-10 overflow-hidden animate-in fade-in slide-in-from-top-4 duration-200">
         {/* Search Input Bar */}
         <div className="relative flex items-center px-6 py-4 border-b border-[#E8E5DF] bg-[#F9F8F6]">
-          <Search className="w-5 h-5 text-[#4A9099] shrink-0" />
+          <Search className="w-5 h-5 text-[#1A3C34] shrink-0" />
           <input
             type="text"
             placeholder="Rechercher un produit, une marque, un univers (poussette, jouet, biberon)..."
@@ -68,14 +68,14 @@ export function SearchModal() {
         {/* Categories Quick Filter Tags */}
         <div className="flex items-center gap-2 px-6 py-3 border-b border-[#E8E5DF] overflow-x-auto bg-white text-xs scrollbar-none">
           <span className="text-[#64748B] shrink-0 flex items-center gap-1 font-medium">
-            <Tag className="w-3 h-3 text-[#FF6B00]" /> Filtrer :
+            <Tag className="w-3 h-3 text-[#C85A32]" /> Filtrer :
           </span>
           <button
             onClick={() => setSelectedCat("all")}
             className={`px-3 py-1 rounded-full whitespace-nowrap transition-colors ${
               selectedCat === "all"
-                ? "bg-[#4A9099] text-white font-semibold"
-                : "bg-[#F9F8F6] text-[#334155] hover:bg-[#EBF4F5]"
+                ? "bg-[#1A3C34] text-white font-semibold"
+                : "bg-[#F9F8F6] text-[#334155] hover:bg-[#EDF3F1]"
             }`}
           >
             Tous les outils
@@ -86,8 +86,8 @@ export function SearchModal() {
               onClick={() => setSelectedCat(cat.slug)}
               className={`px-3 py-1 rounded-full whitespace-nowrap transition-colors ${
                 selectedCat === cat.slug
-                  ? "bg-[#4A9099] text-white font-semibold"
-                  : "bg-[#F9F8F6] text-[#334155] hover:bg-[#EBF4F5]"
+                  ? "bg-[#1A3C34] text-white font-semibold"
+                  : "bg-[#F9F8F6] text-[#334155] hover:bg-[#EDF3F1]"
               }`}
             >
               {cat.name}
@@ -129,10 +129,10 @@ export function SearchModal() {
                       />
                     </div>
                     <div>
-                      <span className="text-[10px] font-bold tracking-wider uppercase text-[#4A9099]">
+                      <span className="text-[10px] font-bold tracking-wider uppercase text-[#1A3C34]">
                         {item.categoryName}
                       </span>
-                      <h4 className="font-serif-brand font-medium text-sm text-[#1E293B] group-hover:text-[#FF6B00] transition-colors">
+                      <h4 className="font-serif-brand font-medium text-sm text-[#1E293B] group-hover:text-[#C85A32] transition-colors">
                         {item.name}
                       </h4>
                       <p className="text-xs text-[#64748B] line-clamp-1">{item.material}</p>
@@ -140,10 +140,10 @@ export function SearchModal() {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <span className="font-bold text-sm text-[#4A9099]">
+                    <span className="font-bold text-sm text-[#C85A32]">
                       {price} {currency}
                     </span>
-                    <div className="p-1.5 rounded-full bg-[#EBF4F5] text-[#4A9099] group-hover:bg-[#FF6B00] group-hover:text-white transition-colors">
+                    <div className="p-1.5 rounded-full bg-[#EDF3F1] text-[#1A3C34] group-hover:bg-[#C85A32] group-hover:text-white transition-colors">
                       <ArrowRight className="w-3.5 h-3.5" />
                     </div>
                   </div>

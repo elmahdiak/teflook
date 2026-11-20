@@ -18,9 +18,9 @@ export const metadata: Metadata = {
     "Artisanat Marocain",
   ],
   icons: {
-    icon: "/images/teflook-mark.png",
-    shortcut: "/images/teflook-mark.png",
-    apple: "/images/teflook-mark.png",
+    icon: "/images/logoo.png",
+    shortcut: "/images/logoo.png",
+    apple: "/images/logoo.png",
   },
   openGraph: {
     title: "TefLook — Développement, Éveil & Protection de l'Enfant",
@@ -47,7 +47,7 @@ export default function RootLayout({
   return (
     <html lang="fr" className="h-full scroll-smooth">
       <head>
-        <link rel="icon" href="/images/teflook-mark.png" />
+        <link rel="icon" href="/images/logoo.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -55,7 +55,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-full flex flex-col bg-[#F9F8F6] text-[#1E293B] antialiased selection:bg-[#FF6B00] selection:text-white">
+      <body className="min-h-full flex flex-col bg-[#F9F8F6] text-[#1A2825] antialiased selection:bg-[#C85A32] selection:text-white">
         {children}
         {/* Floating WhatsApp Contact Button (Active across all pages) */}
         <WhatsAppButton />

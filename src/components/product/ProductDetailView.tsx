@@ -118,11 +118,11 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
               <ArrowLeft size={15} />
               <span className="hidden sm:inline">Retour à la boutique</span>
             </Link>
-            <Link href="/" aria-label="TefLook accueil" className="flex items-center gap-2">
-              <img src="/images/teflook-mark.png" alt="TefLook" className="size-8 object-contain" />
+            <Link href="/" aria-label="TefLook accueil" className="flex items-center gap-2.5">
+              <img src="/images/logoo.png" alt="TefLook" className="size-9 rounded-xl object-contain shadow-xs" />
               <span className="font-display text-xl font-extrabold tracking-normal">
-                <span className="text-brand-teal">Tef</span>
-                <span className="text-brand-orange">Look</span>
+                <span className="text-brand-forest">Tef</span>
+                <span className="text-brand-terracotta">Look</span>
               </span>
             </Link>
           </div>
@@ -170,7 +170,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
             {/* Main Featured Image */}
             <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-border/80 bg-white shadow-xs group">
               <img
-                src={images[selectedImageIndex]?.url || "/images/teflook-mark.png"}
+                src={images[selectedImageIndex]?.url || "/images/logoo.png"}
                 alt={images[selectedImageIndex]?.altText || product.title}
                 className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
@@ -546,10 +546,11 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
       <footer className="mt-16 border-t border-border bg-primary text-primary-foreground">
         <div className="store-shell grid gap-8 py-10 sm:grid-cols-[1.5fr_1fr_1fr]">
           <div>
-            <div className="mb-3 flex items-center gap-2">
+            <div className="mb-3 flex items-center gap-2.5">
+              <img src="/images/logoodark.png" alt="TefLook" className="size-9 rounded-xl object-contain shadow-xs" />
               <span className="font-display text-2xl font-black tracking-normal text-white">
-                <span className="text-[#4A9099]">Tef</span>
-                <span className="text-[#FF6B00]">Look</span>
+                <span className="text-[#F9F8F6]">Tef</span>
+                <span className="text-[#E6A15C]">Look</span>
               </span>
             </div>
             <p className="font-display text-xl font-semibold">Grandir, ensemble.</p>

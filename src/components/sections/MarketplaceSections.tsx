@@ -90,12 +90,12 @@ export function MarketplaceSections({
           {/* Section Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 pb-6 border-b border-[#F1EFEA] gap-4">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-[#4A9099]/10 text-[#4A9099] border border-[#4A9099]/25 mb-2.5">
-                <SlidersHorizontal className="w-3.5 h-3.5 text-[#FF6B00]" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-[#1A3C34]/10 text-[#1A3C34] border border-[#1A3C34]/25 mb-2.5">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-[#C85A32]" />
                 <span>Système de Filtrage Dynamique</span>
               </div>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-[#1E293B] tracking-tight">
-                Catalogue <span className="text-[#FF6B00]">Pédagogique</span>
+                Catalogue <span className="text-[#C85A32]">Pédagogique</span>
               </h2>
               <p className="mt-1.5 text-xs sm:text-sm text-[#64748B] max-w-2xl leading-relaxed">
                 Filtrez instantanément par <strong>tranche d&apos;âge</strong>{" "}
@@ -111,7 +111,7 @@ export function MarketplaceSections({
                 placeholder="Filtrer par mot-clé..."
                 value={searchFilter}
                 onChange={(e) => setSearchFilter(e.target.value)}
-                className="w-full h-10 pl-9 pr-3 text-xs rounded-xl bg-[#FAF9F7] border border-[#E8E5DF] focus:border-[#4A9099] text-[#1E293B] placeholder:text-[#94A3B8] focus:outline-none transition-all"
+                className="w-full h-10 pl-9 pr-3 text-xs rounded-xl bg-[#FAF9F7] border border-[#E8E5DF] focus:border-[#1A3C34] text-[#1E293B] placeholder:text-[#94A3B8] focus:outline-none transition-all"
               />
               <Search className="w-4 h-4 text-[#94A3B8] absolute left-3 top-1/2 -translate-y-1/2" />
               {searchFilter && (
@@ -133,11 +133,11 @@ export function MarketplaceSections({
             <div>
               <div className="flex items-center justify-between mb-2.5">
                 <span className="text-xs font-extrabold uppercase tracking-wider text-[#1E293B] flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#FF6B00]" />
+                  <span className="w-2 h-2 rounded-full bg-[#C85A32]" />
                   <span>Filtrer par âge (Sélection multiple possible) :</span>
                 </span>
                 {selectedAges.length > 0 && (
-                  <span className="text-[11px] font-bold text-[#FF6B00]">
+                  <span className="text-[11px] font-bold text-[#C85A32]">
                     {selectedAges.length} tranche
                     {selectedAges.length > 1 ? "s" : ""} sélectionnée
                     {selectedAges.length > 1 ? "s" : ""}
@@ -151,7 +151,7 @@ export function MarketplaceSections({
                   className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                     selectedAges.length === 0
                       ? "bg-[#1E293B] text-white shadow-xs"
-                      : "bg-[#FAF9F7] text-[#334155] hover:bg-[#EBF4F5] border border-[#E8E5DF]"
+                      : "bg-[#FAF9F7] text-[#334155] hover:bg-[#EDF3F1] border border-[#E8E5DF]"
                   }`}
                 >
                   Tous les âges (5 - 15 ans)
@@ -165,8 +165,8 @@ export function MarketplaceSections({
                       onClick={() => toggleAgeBracket(bracket)}
                       className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black transition-all ${
                         isSelected
-                          ? "bg-[#FF6B00] text-white shadow-md scale-102"
-                          : "bg-[#FAF9F7] text-[#334155] hover:bg-[#FFF2EB] hover:text-[#FF6B00] border border-[#E8E5DF]"
+                          ? "bg-[#C85A32] text-white shadow-md scale-102"
+                          : "bg-[#FAF9F7] text-[#334155] hover:bg-[#FBF1EC] hover:text-[#C85A32] border border-[#E8E5DF]"
                       }`}
                     >
                       {isSelected && (
@@ -183,7 +183,7 @@ export function MarketplaceSections({
             <div>
               <div className="flex items-center justify-between mb-2.5">
                 <span className="text-xs font-extrabold uppercase tracking-wider text-[#1E293B] flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#4A9099]" />
+                  <span className="w-2 h-2 rounded-full bg-[#1A3C34]" />
                   <span>Filtrer par pilier de développement :</span>
                 </span>
               </div>
@@ -193,8 +193,8 @@ export function MarketplaceSections({
                   onClick={() => setSelectedCategory("all")}
                   className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
                     selectedCategory === "all"
-                      ? "bg-[#4A9099] text-white shadow-xs"
-                      : "bg-[#FAF9F7] text-[#334155] hover:bg-[#EBF4F5] border border-[#E8E5DF]"
+                      ? "bg-[#1A3C34] text-white shadow-xs"
+                      : "bg-[#FAF9F7] text-[#334155] hover:bg-[#EDF3F1] border border-[#E8E5DF]"
                   }`}
                 >
                   Tous les 6 piliers ({PRODUCTS.length})
@@ -211,11 +211,11 @@ export function MarketplaceSections({
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                         isSelected
                           ? isOrangeAccent
-                            ? "bg-[#FF6B00] text-white shadow-sm"
-                            : "bg-[#4A9099] text-white shadow-sm"
+                            ? "bg-[#C85A32] text-white shadow-sm"
+                            : "bg-[#1A3C34] text-white shadow-sm"
                           : isOrangeAccent
-                          ? "bg-[#FAF9F7] text-[#334155] hover:bg-[#FF6B00]/10 hover:text-[#FF6B00] border border-[#E8E5DF]"
-                          : "bg-[#FAF9F7] text-[#334155] hover:bg-[#4A9099]/10 hover:text-[#4A9099] border border-[#E8E5DF]"
+                          ? "bg-[#FAF9F7] text-[#334155] hover:bg-[#C85A32]/10 hover:text-[#C85A32] border border-[#E8E5DF]"
+                          : "bg-[#FAF9F7] text-[#334155] hover:bg-[#1A3C34]/10 hover:text-[#1A3C34] border border-[#E8E5DF]"
                       }`}
                     >
                       {cat.name}
@@ -236,7 +236,7 @@ export function MarketplaceSections({
               </span>
 
               {selectedCategory !== "all" && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-[#4A9099]/15 text-[#4A9099] font-bold text-[11px]">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-[#1A3C34]/15 text-[#1A3C34] font-bold text-[11px]">
                   Catégorie :{" "}
                   {
                     CATEGORIES.find((c) => c.slug === selectedCategory)?.name
@@ -253,7 +253,7 @@ export function MarketplaceSections({
               {selectedAges.map((age) => (
                 <span
                   key={age}
-                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-[#FF6B00]/15 text-[#FF6B00] font-bold text-[11px]"
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-[#C85A32]/15 text-[#C85A32] font-bold text-[11px]"
                 >
                   Âge : {age}
                   <button
@@ -283,7 +283,7 @@ export function MarketplaceSections({
               searchFilter) && (
               <button
                 onClick={clearAllFilters}
-                className="inline-flex items-center gap-1 text-[11px] font-bold text-[#E63946] hover:underline"
+                className="inline-flex items-center gap-1 text-[11px] font-bold text-[#C85A32] hover:underline"
               >
                 <RotateCcw className="w-3 h-3" />
                 <span>Réinitialiser tous les filtres</span>
@@ -305,7 +305,7 @@ export function MarketplaceSections({
                 </p>
                 <button
                   onClick={clearAllFilters}
-                  className="mt-2 px-5 py-2.5 rounded-full bg-[#4A9099] text-white text-xs font-bold shadow-xs hover:bg-[#3D7A82] transition-colors"
+                  className="mt-2 px-5 py-2.5 rounded-full bg-[#1A3C34] text-white text-xs font-bold shadow-xs hover:bg-[#132E27] transition-colors"
                 >
                   Voir tous les outils
                 </button>
@@ -343,13 +343,13 @@ export function MarketplaceSections({
                 <div
                   className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border mb-2.5 ${
                     isOrangeTheme
-                      ? "bg-[#FF6B00]/10 text-[#FF6B00] border-[#FF6B00]/25"
-                      : "bg-[#4A9099]/10 text-[#4A9099] border-[#4A9099]/25"
+                      ? "bg-[#C85A32]/10 text-[#C85A32] border-[#C85A32]/25"
+                      : "bg-[#1A3C34]/10 text-[#1A3C34] border-[#1A3C34]/25"
                   }`}
                 >
                   <Sparkles
                     className={`w-3.5 h-3.5 ${
-                      isOrangeTheme ? "text-[#FF6B00]" : "text-[#4A9099]"
+                      isOrangeTheme ? "text-[#C85A32]" : "text-[#1A3C34]"
                     }`}
                   />
                   <span>Pilier 0{idx + 1} • {cat.highlight}</span>
@@ -375,8 +375,8 @@ export function MarketplaceSections({
                 }}
                 className={`group inline-flex items-center gap-1.5 text-xs sm:text-sm font-extrabold transition-colors shrink-0 ${
                   isOrangeTheme
-                    ? "text-[#FF6B00] hover:text-[#E66000]"
-                    : "text-[#4A9099] hover:text-[#3D7A82]"
+                    ? "text-[#C85A32] hover:text-[#E66000]"
+                    : "text-[#1A3C34] hover:text-[#132E27]"
                 }`}
               >
                 <span>Filtrer ce pilier par tranche d&apos;âge</span>

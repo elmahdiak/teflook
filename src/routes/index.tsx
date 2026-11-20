@@ -151,11 +151,11 @@ function TefLookStorefront() {
 
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-md">
         <div className="store-shell flex h-[82px] items-center justify-between gap-3 sm:gap-5">
-          <Link to="/" aria-label="TefLook, accueil" className="flex shrink-0 items-center gap-2.5">
-            <img src={teflookLogo.url} alt="" className="size-[41px] object-contain" />
-            <span className="font-display text-[21px] font-extrabold tracking-normal">
-              <span className="text-brand-teal">Tef</span>
-              <span className="text-brand-orange">Look</span>
+          <Link to="/" aria-label="TefLook, accueil" className="flex shrink-0 items-center gap-3">
+            <img src="/images/logoo.png" alt="TefLook" className="size-11 rounded-xl object-contain shadow-xs" />
+            <span className="font-display text-[22px] font-extrabold tracking-normal">
+              <span className="text-brand-forest">Tef</span>
+              <span className="text-brand-terracotta">Look</span>
             </span>
           </Link>
 
@@ -481,7 +481,13 @@ function TefLookStorefront() {
       <footer className="border-t border-border bg-primary text-primary-foreground">
         <div className="store-shell grid gap-9 py-10 sm:grid-cols-[1.5fr_1fr_1fr] sm:py-12">
           <div>
-            <img src={teflookLogo.url} alt="" className="mb-3 size-12 object-contain" />
+            <div className="mb-3 flex items-center gap-2.5">
+              <img src="/images/logoodark.png" alt="TefLook" className="size-9 rounded-xl object-contain shadow-xs" />
+              <span className="font-display text-2xl font-black tracking-normal text-white">
+                <span className="text-[#F9F8F6]">Tef</span>
+                <span className="text-[#E6A15C]">Look</span>
+              </span>
+            </div>
             <p className="font-display text-xl font-semibold">{t("footer.tagline")}</p>
             <p className="mt-2 max-w-xs text-sm leading-6 text-primary-foreground/75">
               {t("footer.description")}

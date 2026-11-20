@@ -47,25 +47,25 @@ export function ChildSafetyDevelopmentSection() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                 <div className="absolute bottom-5 left-5 right-5 text-white">
-                  <span className="px-2.5 py-1 rounded-full bg-[#4A9099] text-[10px] font-bold uppercase tracking-wider">
+                  <span className="px-2.5 py-1 rounded-full bg-[#1A3C34] text-[10px] font-bold uppercase tracking-wider">
                     Protection Domestique
                   </span>
                   <p className="text-lg font-bold mt-1">Sécurité Préventive &amp; Zéro Risque</p>
                 </div>
               </div>
-              <div className="absolute -top-4 -left-4 w-20 h-20 bg-[#4A9099]/10 rounded-full blur-xl pointer-events-none" />
+              <div className="absolute -top-4 -left-4 w-20 h-20 bg-[#1A3C34]/10 rounded-full blur-xl pointer-events-none" />
             </div>
 
             {/* Right: Content & Value Propositions */}
             <div className="lg:col-span-6 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EBF4F5] text-[#4A9099] text-xs font-extrabold uppercase tracking-wider">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EDF3F1] text-[#1A3C34] text-xs font-extrabold uppercase tracking-wider">
                 <ShieldCheck className="w-4 h-4" />
                 <span>Protection Enfant</span>
               </div>
 
               <h2 className="text-3xl sm:text-4xl font-black text-[#1E293B] tracking-tight leading-tight">
                 Prévenir les accidents domestiques pour une{" "}
-                <span className="text-[#4A9099]">sérénité absolue</span>
+                <span className="text-[#1A3C34]">sérénité absolue</span>
               </h2>
 
               <p className="text-[#64748B] text-sm sm:text-base leading-relaxed">
@@ -80,7 +80,7 @@ export function ChildSafetyDevelopmentSection() {
                   "Verrous magnétiques invisibles pour tiroirs et placards de cuisine",
                 ].map((feat, idx) => (
                   <div key={idx} className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#4A9099] shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-5 h-5 text-[#1A3C34] shrink-0 mt-0.5" />
                     <span className="text-sm font-medium text-[#334155]">{feat}</span>
                   </div>
                 ))}
@@ -90,14 +90,14 @@ export function ChildSafetyDevelopmentSection() {
                 <div className="pt-4 flex flex-col sm:flex-row sm:items-center gap-4">
                   <button
                     onClick={() => addToCart(prodSafety)}
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#4A9099] hover:bg-[#3D7A82] text-white font-extrabold text-sm shadow-md transition-all active:scale-95"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#1A3C34] hover:bg-[#132E27] text-white font-extrabold text-sm shadow-md transition-all active:scale-95"
                   >
                     <ShoppingBag className="w-4 h-4" />
                     <span>Commander le Kit Sécurité ({currency === "MAD" ? `${prodSafety.priceMad} MAD` : `${prodSafety.priceEur.toFixed(2)} €`})</span>
                   </button>
                   <button
                     onClick={() => setActiveQuickProduct(prodSafety)}
-                    className="text-xs font-bold text-[#4A9099] hover:underline"
+                    className="text-xs font-bold text-[#1A3C34] hover:underline"
                   >
                     Voir tous les détails du kit →
                   </button>
@@ -121,14 +121,14 @@ export function ChildSafetyDevelopmentSection() {
             
             {/* Left: Content */}
             <div className="lg:col-span-6 space-y-6 order-2 lg:order-1">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FF6B00]/10 text-[#FF6B00] text-xs font-extrabold uppercase tracking-wider">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#C85A32]/10 text-[#C85A32] text-xs font-extrabold uppercase tracking-wider">
                 <Sparkles className="w-4 h-4" />
                 <span>Jouets d&apos;Éveil</span>
               </div>
 
               <h2 className="text-3xl sm:text-4xl font-black text-[#1E293B] tracking-tight leading-tight">
                 Éveiller la curiosité et la motricité avec des{" "}
-                <span className="text-[#FF6B00]">matières saines</span>
+                <span className="text-[#C85A32]">matières saines</span>
               </h2>
 
               <p className="text-[#64748B] text-sm sm:text-base leading-relaxed">
@@ -143,7 +143,7 @@ export function ChildSafetyDevelopmentSection() {
                   "Conception durable conçue pour traverser les générations de fratrie",
                 ].map((feat, idx) => (
                   <div key={idx} className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#FF6B00] shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-5 h-5 text-[#C85A32] shrink-0 mt-0.5" />
                     <span className="text-sm font-medium text-[#334155]">{feat}</span>
                   </div>
                 ))}
@@ -153,14 +153,14 @@ export function ChildSafetyDevelopmentSection() {
                 <div className="pt-4 flex flex-col sm:flex-row sm:items-center gap-4">
                   <button
                     onClick={() => addToCart(prodEveil)}
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#FF6B00] hover:bg-[#E66000] text-white font-extrabold text-sm shadow-md transition-all active:scale-95"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#C85A32] hover:bg-[#E66000] text-white font-extrabold text-sm shadow-md transition-all active:scale-95"
                   >
                     <ShoppingBag className="w-4 h-4" />
                     <span>Commander le Kit d&apos;Éveil ({currency === "MAD" ? `${prodEveil.priceMad} MAD` : `${prodEveil.priceEur.toFixed(2)} €`})</span>
                   </button>
                   <button
                     onClick={() => setActiveQuickProduct(prodEveil)}
-                    className="text-xs font-bold text-[#FF6B00] hover:underline"
+                    className="text-xs font-bold text-[#C85A32] hover:underline"
                   >
                     Voir le contenu sensoriel →
                   </button>
@@ -180,7 +180,7 @@ export function ChildSafetyDevelopmentSection() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                 <div className="absolute bottom-5 left-5 right-5 text-white">
-                  <span className="px-2.5 py-1 rounded-full bg-[#FF6B00] text-[10px] font-bold uppercase tracking-wider">
+                  <span className="px-2.5 py-1 rounded-full bg-[#C85A32] text-[10px] font-bold uppercase tracking-wider">
                     Méthode Sensorielle
                   </span>
                   <p className="text-lg font-bold mt-1">Apprendre en S&apos;amusant</p>
@@ -231,7 +231,7 @@ export function ChildSafetyDevelopmentSection() {
 
               <h2 className="text-3xl sm:text-4xl font-black text-[#1E293B] tracking-tight leading-tight">
                 Tisser des liens profonds et nourrir la{" "}
-                <span className="text-[#4A9099]">complicité familiale</span>
+                <span className="text-[#1A3C34]">complicité familiale</span>
               </h2>
 
               <p className="text-[#64748B] text-sm sm:text-base leading-relaxed">
@@ -246,7 +246,7 @@ export function ChildSafetyDevelopmentSection() {
                   "Convient dès 4 ans pour des souvenirs inoubliables en famille",
                 ].map((feat, idx) => (
                   <div key={idx} className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[#4A9099] shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-5 h-5 text-[#1A3C34] shrink-0 mt-0.5" />
                     <span className="text-sm font-medium text-[#334155]">{feat}</span>
                   </div>
                 ))}
@@ -263,7 +263,7 @@ export function ChildSafetyDevelopmentSection() {
                   </button>
                   <button
                     onClick={() => setActiveQuickProduct(prodConnexion)}
-                    className="text-xs font-bold text-[#4A9099] hover:underline"
+                    className="text-xs font-bold text-[#1A3C34] hover:underline"
                   >
                     Découvrir les exemples de questions →
                   </button>
@@ -284,13 +284,13 @@ export function ChildSafetyDevelopmentSection() {
       >
         <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center space-y-4 mb-14">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#4A9099]/10 text-[#4A9099] text-xs font-extrabold uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1A3C34]/10 text-[#1A3C34] text-xs font-extrabold uppercase tracking-wider">
               <Compass className="w-4 h-4" />
               <span>Notre Mission TefLook</span>
             </div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-[#1E293B] tracking-tight">
               Prendre soin de l&apos;enfant,{" "}
-              <span className="text-[#FF6B00]">accompagner les parents</span>
+              <span className="text-[#C85A32]">accompagner les parents</span>
             </h2>
             <p className="text-[#64748B] text-sm sm:text-base leading-relaxed">
               TefLook est née de la conviction que chaque enfant mérite un cadre sécurisant, stimulant et rempli d&apos;amour. En alliant l&apos;exigence artisanale marocaine aux meilleures pratiques pédiatriques, nous concevons des solutions durables pour chaque étape du développement.
@@ -299,7 +299,7 @@ export function ChildSafetyDevelopmentSection() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             <div className="bg-white p-7 rounded-3xl border border-[#E8E5DF] shadow-xs space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-[#EBF4F5] text-[#4A9099] flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-[#EDF3F1] text-[#1A3C34] flex items-center justify-center">
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <h3 className="font-extrabold text-lg text-[#1E293B]">Exigence &amp; Sécurité</h3>
@@ -309,7 +309,7 @@ export function ChildSafetyDevelopmentSection() {
             </div>
 
             <div className="bg-white p-7 rounded-3xl border border-[#E8E5DF] shadow-xs space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-[#FFF2EB] text-[#FF6B00] flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-[#FBF1EC] text-[#C85A32] flex items-center justify-center">
                 <Award className="w-6 h-6" />
               </div>
               <h3 className="font-extrabold text-lg text-[#1E293B]">Artisanat &amp; Matières Nobles</h3>
@@ -319,7 +319,7 @@ export function ChildSafetyDevelopmentSection() {
             </div>
 
             <div className="bg-white p-7 rounded-3xl border border-[#E8E5DF] shadow-xs space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-[#EBF4F5] text-[#4A9099] flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-[#EDF3F1] text-[#1A3C34] flex items-center justify-center">
                 <Users className="w-6 h-6" />
               </div>
               <h3 className="font-extrabold text-lg text-[#1E293B]">Proximité &amp; Écoute</h3>
