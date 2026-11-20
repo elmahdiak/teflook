@@ -1,5 +1,6 @@
 import { PRODUCTS, type ProductItem } from "@/data/teflookData";
 import type { ChildStoreCategory } from "./teflook-categories";
+import { PRODUCT_TRANSLATIONS_AR } from "./product-localization";
 
 export interface ShopifyImage {
   url: string;
@@ -28,17 +29,27 @@ export interface ShopifyVariant {
 export interface ShopifyProduct {
   id: string;
   title: string;
+  title_fr?: string;
+  title_ar?: string;
   handle: string;
   description: string;
+  description_fr?: string;
+  description_ar?: string;
   vendor: string;
+  vendor_ar?: string;
   productType: string;
+  productType_ar?: string;
+  categoryNameAr?: string;
   tags?: string[];
   category?: ChildStoreCategory;
   material?: string;
+  material_ar?: string;
   origin?: string;
+  origin_ar?: string;
   rating?: number;
   reviewsCount?: number;
   features?: string[];
+  features_ar?: string[];
   images: {
     edges: { node: ShopifyImage }[];
   };
@@ -99,20 +110,31 @@ export const MOCK_SHOPIFY_PRODUCTS: ShopifyProduct[] = PRODUCTS.map((item: Produ
     : rawImages;
 
   const compareAtAmount = item.oldPriceMad ? item.oldPriceMad.toFixed(2) : undefined;
+  const trAr = PRODUCT_TRANSLATIONS_AR[item.id];
 
   return {
     id: item.id,
     title: item.name,
+    title_fr: item.name,
+    title_ar: trAr?.title || item.name,
     handle: item.id,
     description: item.description,
+    description_fr: item.description,
+    description_ar: trAr?.description || item.description,
     vendor: item.brand || "TefLook",
+    vendor_ar: "تيفلوك",
     productType: item.categoryName,
+    productType_ar: trAr?.categoryName || item.categoryName,
+    categoryNameAr: trAr?.categoryName || item.categoryName,
     category,
     material: item.material,
+    material_ar: trAr?.material || item.material,
     origin: item.origin,
+    origin_ar: trAr?.origin || item.origin,
     rating: item.rating || 4.9,
     reviewsCount: item.reviewsCount || 48,
     features: item.features || [],
+    features_ar: trAr?.features || item.features || [],
     tags: [category, item.categorySlug, item.ageBracket, ...(item.features || [])],
     images: {
       edges: finalImages.map((url) => ({

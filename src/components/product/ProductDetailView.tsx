@@ -37,6 +37,8 @@ import { useCartStore } from "@/lib/shopify-cart";
 import type { ShopifyProduct } from "@/lib/shopify-storefront";
 import { CHILD_STORE_CATEGORIES, getChildStoreCategory } from "@/lib/teflook-categories";
 import { CHILD_STORE_CATEGORY_MESSAGE_KEYS, useTefLookLanguage } from "@/lib/teflook-language";
+import { getLocalizedProduct, getLocalizedCategoryBadge } from "@/lib/product-localization";
+import { cn } from "@/lib/utils";
 
 interface ProductDetailViewProps {
   product: ShopifyProduct;
@@ -78,9 +80,8 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
       : null;
 
   const categoryConfig = CHILD_STORE_CATEGORIES.find((c) => c.value === product.category);
-  const categoryLabel = product.category
-    ? t(CHILD_STORE_CATEGORY_MESSAGE_KEYS[product.category])
-    : product.productType;
+  const localized = getLocalizedProduct(product, locale);
+  const categoryLabel = localized.categoryName;
 
   async function handleAddToCart() {
     if (!currentVariant || adding) return;
@@ -98,13 +99,15 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
     if (error) {
       setNotice(error);
     } else {
-      setNotice(`${t("product.addedPrefix")}${product.title}`);
+      setNotice(`${t("product.addedPrefix")}${localized.title}`);
       setIsCartOpen(true);
     }
   }
 
   const whatsappOrderUrl = `https://wa.me/212600000000?text=${encodeURIComponent(
-    `Bonjour TefLook, je souhaite commander : ${product.title} (${currentPrice} MAD) en quantité ${quantity}.`
+    locale === "ar"
+      ? `مرحباً تيفلوك، أود طلب المنتج : ${localized.title} (${currentPrice} درهم) بالكمية ${quantity}.`
+      : `Bonjour TefLook, je souhaite commander : ${localized.title} (${currentPrice} MAD) en quantité ${quantity}.`
   )}`;
 
   return (
@@ -117,8 +120,10 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
               href="/"
               className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-brand-teal hover:text-foreground"
             >
-              <ArrowLeft size={15} />
-              <span className="hidden sm:inline">Retour à la boutique</span>
+              <ArrowLeft size={15} className={cn(locale === "ar" && "rotate-180")} />
+              <span className="hidden sm:inline">
+                {locale === "ar" ? "العودة إلى المتجر" : "Retour à la boutique"}
+              </span>
             </Link>
             <BrandLogo size="md" />
           </div>
@@ -144,17 +149,20 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
       </header>
 
       {/* 2. Breadcrumb */}
-      <nav aria-label="Fil d'Ariane" className="border-b border-border/60 bg-card/40 py-2.5">
+      <nav
+        aria-label={locale === "ar" ? "مسار التنقل" : "Fil d'Ariane"}
+        className="border-b border-border/60 bg-card/40 py-2.5"
+      >
         <div className="store-shell flex items-center gap-2 text-xs text-muted-foreground truncate">
           <Link href="/" className="hover:text-brand-teal transition-colors">
-            Accueil
+            {locale === "ar" ? "الرئيسية" : "Accueil"}
           </Link>
-          <ChevronRight size={12} className="shrink-0 text-muted-foreground/60" />
+          <ChevronRight size={12} className={cn("shrink-0 text-muted-foreground/60", locale === "ar" && "rotate-180")} />
           <Link href="/#boutique" className="hover:text-brand-teal transition-colors">
-            {categoryLabel}
+            {localized.categoryName}
           </Link>
-          <ChevronRight size={12} className="shrink-0 text-muted-foreground/60" />
-          <span className="truncate font-medium text-foreground">{product.title}</span>
+          <ChevronRight size={12} className={cn("shrink-0 text-muted-foreground/60", locale === "ar" && "rotate-180")} />
+          <span className="truncate font-medium text-foreground">{localized.title}</span>
         </div>
       </nav>
 
@@ -167,7 +175,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
             <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-border/80 bg-white shadow-xs group">
               <img
                 src={images[selectedImageIndex]?.url || "/images/Untitled Design.png"}
-                alt={images[selectedImageIndex]?.altText || product.title}
+                alt={images[selectedImageIndex]?.altText || localized.title}
                 className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
               {discountPercent && (
@@ -177,7 +185,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
               )}
               <span className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-card/90 backdrop-blur-xs px-3 py-1 text-xs font-semibold text-brand-teal shadow-xs border border-border/50">
                 <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-                En stock · Expédié sous 24h
+                {locale === "ar" ? "متوفر في المخزون · شحن خلال 24 ساعة" : "En stock · Expédié sous 24h"}
               </span>
             </div>
 
@@ -209,14 +217,14 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
             <div>
               <div className="flex items-center justify-between gap-2 mb-2">
                 <span className="text-xs font-bold uppercase tracking-widest text-brand-teal">
-                  {product.vendor || "TefLook Collection"}
+                  {localized.vendor}
                 </span>
                 <span className="inline-flex items-center gap-1 rounded-full bg-brand-mist px-2.5 py-0.5 text-xs font-bold text-brand-teal">
-                  {categoryConfig?.subtitle || "Éveil"}
+                  {localized.categoryBadge}
                 </span>
               </div>
-              <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold text-foreground leading-[1.15]">
-                {product.title}
+              <h1 className={cn("font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold text-foreground leading-[1.15]", locale === "ar" && "font-sans leading-snug")}>
+                {localized.title}
               </h1>
 
               {/* Star rating */}
@@ -244,14 +252,16 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                 )}
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
-                TVA incluse · Paiement en espèces à la livraison partout au Maroc
+                {locale === "ar"
+                  ? "شامل للضريبة · الدفع نقداً عند الاستلام في جميع أنحاء المغرب"
+                  : "TVA incluse · Paiement en espèces à la livraison partout au Maroc"}
               </p>
 
               {/* Variant Selector */}
               {product.variants.edges.length > 0 && currentVariant?.selectedOptions && (
                 <div className="mt-5 border-t border-border/60 pt-4">
                   <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2.5">
-                    Tranche d'âge & Niveau :
+                    {locale === "ar" ? "المرحلة العمرية والمستوى :" : "Tranche d'âge & Niveau :"}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {product.variants.edges.map(({ node: v }) => (
@@ -274,7 +284,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                       type="button"
                       disabled={quantity <= 1}
                       onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      aria-label="Diminuer la quantité"
+                      aria-label={locale === "ar" ? "تقليل الكمية" : "Diminuer la quantité"}
                       className="grid size-10 place-items-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground disabled:opacity-40"
                     >
                       <Minus size={15} />
@@ -283,7 +293,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                     <button
                       type="button"
                       onClick={() => setQuantity((q) => q + 1)}
-                      aria-label="Augmenter la quantité"
+                      aria-label={locale === "ar" ? "زيادة الكمية" : "Augmenter la quantité"}
                       className="grid size-10 place-items-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground"
                     >
                       <Plus size={15} />
@@ -300,8 +310,10 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                       <LoaderCircle className="animate-spin size-5" />
                     ) : (
                       <>
-                        <ShoppingBag size={18} className="mr-2" />
-                        Ajouter au panier • {currentPrice * quantity} MAD
+                        <ShoppingBag size={18} className={cn(locale === "ar" ? "ml-2" : "mr-2")} />
+                        {locale === "ar"
+                          ? `إضافة إلى السلة • ${currentPrice * quantity} درهم`
+                          : `Ajouter au panier • ${currentPrice * quantity} MAD`}
                       </>
                     )}
                   </Button>
@@ -319,7 +331,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                     alt=""
                     className="size-4"
                   />
-                  Commander directement via WhatsApp
+                  {locale === "ar" ? "طلب مباشر عبر واتساب" : "Commander directement via WhatsApp"}
                 </a>
               </div>
             </div>
@@ -329,29 +341,45 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
               <div className="flex items-start gap-2.5 rounded-xl border border-border/60 bg-card/60 p-3">
                 <Truck size={18} className="text-brand-teal shrink-0 mt-0.5" />
                 <div className="text-xs leading-snug">
-                  <span className="font-bold block text-foreground">Livraison Express</span>
-                  <span className="text-muted-foreground">24 à 48h partout au Maroc</span>
+                  <span className="font-bold block text-foreground">
+                    {locale === "ar" ? "توصيل سريع" : "Livraison Express"}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {locale === "ar" ? "24 إلى 48 ساعة في كافة مدن المغرب" : "24 à 48h partout au Maroc"}
+                  </span>
                 </div>
               </div>
               <div className="flex items-start gap-2.5 rounded-xl border border-border/60 bg-card/60 p-3">
                 <ShieldCheck size={18} className="text-brand-teal shrink-0 mt-0.5" />
                 <div className="text-xs leading-snug">
-                  <span className="font-bold block text-foreground">Paiement Sécurisé</span>
-                  <span className="text-muted-foreground">À la réception de votre colis</span>
+                  <span className="font-bold block text-foreground">
+                    {locale === "ar" ? "دفع آمن" : "Paiement Sécurisé"}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {locale === "ar" ? "عند استلام ومعاينة طلبيتك" : "À la réception de votre colis"}
+                  </span>
                 </div>
               </div>
               <div className="flex items-start gap-2.5 rounded-xl border border-border/60 bg-card/60 p-3">
                 <Sparkles size={18} className="text-brand-orange shrink-0 mt-0.5" />
                 <div className="text-xs leading-snug">
-                  <span className="font-bold block text-foreground">100% Non Toxique</span>
-                  <span className="text-muted-foreground">Matériaux certifiés sûrs</span>
+                  <span className="font-bold block text-foreground">
+                    {locale === "ar" ? "100% غير سام" : "100% Non Toxique"}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {locale === "ar" ? "مواد آمنة ومعتمدة للأطفال" : "Matériaux certifiés sûrs"}
+                  </span>
                 </div>
               </div>
               <div className="flex items-start gap-2.5 rounded-xl border border-border/60 bg-card/60 p-3">
                 <RotateCcw size={18} className="text-brand-teal shrink-0 mt-0.5" />
                 <div className="text-xs leading-snug">
-                  <span className="font-bold block text-foreground">Garantie TefLook</span>
-                  <span className="text-muted-foreground">Échange & retour faciles</span>
+                  <span className="font-bold block text-foreground">
+                    {locale === "ar" ? "ضمان تيفلوك" : "Garantie TefLook"}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {locale === "ar" ? "إرجاع واستبدال بكل سهولة" : "Échange & retour faciles"}
+                  </span>
                 </div>
               </div>
             </div>
@@ -367,7 +395,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                   }
                   className="flex w-full items-center justify-between text-left text-sm font-bold text-foreground"
                 >
-                  <span>Description du produit</span>
+                  <span>{locale === "ar" ? "وصف المنتج" : "Description du produit"}</span>
                   <ChevronDown
                     size={16}
                     className={`transition-transform duration-200 ${
@@ -376,11 +404,22 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                   />
                 </button>
                 {openAccordion === "description" && (
-                  <div className="pt-3 text-xs sm:text-sm text-foreground/80 leading-relaxed">
-                    <p>{product.description}</p>
-                    {product.features && product.features.length > 0 && (
-                      <ul className="mt-3 space-y-1.5 list-disc list-inside text-foreground/85">
-                        {product.features.map((feat, i) => (
+                  <div
+                    dir={direction}
+                    className={cn(
+                      "pt-3 text-xs sm:text-sm text-foreground/80 leading-relaxed",
+                      locale === "ar" ? "text-right font-sans" : "text-left"
+                    )}
+                  >
+                    <p>{localized.description}</p>
+                    {localized.features && localized.features.length > 0 && (
+                      <ul
+                        className={cn(
+                          "mt-3 space-y-1.5 list-disc list-inside text-foreground/85",
+                          locale === "ar" && "font-sans"
+                        )}
+                      >
+                        {localized.features.map((feat, i) => (
                           <li key={i}>{feat}</li>
                         ))}
                       </ul>
@@ -398,7 +437,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                   }
                   className="flex w-full items-center justify-between text-left text-sm font-bold text-foreground"
                 >
-                  <span>Matériaux & Origine</span>
+                  <span>{locale === "ar" ? "المواد والمصدر" : "Matériaux & Origine"}</span>
                   <ChevronDown
                     size={16}
                     className={`transition-transform duration-200 ${
@@ -407,14 +446,26 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                   />
                 </button>
                 {openAccordion === "materials" && (
-                  <div className="pt-3 text-xs sm:text-sm text-foreground/80 space-y-2">
+                  <div
+                    dir={direction}
+                    className={cn(
+                      "pt-3 text-xs sm:text-sm text-foreground/80 space-y-2",
+                      locale === "ar" ? "text-right font-sans" : "text-left"
+                    )}
+                  >
                     <p>
-                      <strong>Composition :</strong>{" "}
-                      {product.material || "Bois naturel certifié FSC et pigments non toxiques"}
+                      <strong>{locale === "ar" ? "المكونات :" : "Composition :"}</strong>{" "}
+                      {localized.material ||
+                        (locale === "ar"
+                          ? "خشب طبيعي معتمد ودهانات غير سامة"
+                          : "Bois naturel certifié FSC et pigments non toxiques")}
                     </p>
                     <p>
-                      <strong>Conception :</strong>{" "}
-                      {product.origin || "Fabriqué avec passion selon les normes de sécurité internationales"}
+                      <strong>{locale === "ar" ? "التصنيع :" : "Conception :"}</strong>{" "}
+                      {localized.origin ||
+                        (locale === "ar"
+                          ? "صُنع بعناية فائقة وفق معايير الأمان الدولية"
+                          : "Fabriqué avec passion selon les normes de sécurité internationales")}
                     </p>
                   </div>
                 )}
@@ -429,7 +480,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                   }
                   className="flex w-full items-center justify-between text-left text-sm font-bold text-foreground"
                 >
-                  <span>Livraison & Modalités</span>
+                  <span>{locale === "ar" ? "التوصيل والدفع" : "Livraison & Modalités"}</span>
                   <ChevronDown
                     size={16}
                     className={`transition-transform duration-200 ${
@@ -438,10 +489,26 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                   />
                 </button>
                 {openAccordion === "shipping" && (
-                  <div className="pt-3 text-xs sm:text-sm text-foreground/80 space-y-1.5 leading-relaxed">
-                    <p>• Expédition sous 24h ouvrées depuis nos entrepôts au Maroc.</p>
-                    <p>• Livraison à domicile : Casablanca (24h), Rabat, Marrakech, Tanger, Fès et toutes villes (48h).</p>
-                    <p>• Règlement en espèces lors de la réception du colis.</p>
+                  <div
+                    dir={direction}
+                    className={cn(
+                      "pt-3 text-xs sm:text-sm text-foreground/80 space-y-1.5 leading-relaxed",
+                      locale === "ar" ? "text-right font-sans" : "text-left"
+                    )}
+                  >
+                    {locale === "ar" ? (
+                      <>
+                        <p>• الشحن خلال 24 ساعة من مستودعاتنا في المغرب.</p>
+                        <p>• توصيل سريع إلى باب المنزل : الدار البيضاء (24 ساعة)، الرباط، مراكش، طنجة، فاس وكافة المدن (48 ساعة).</p>
+                        <p>• الدفع نقداً عند الاستلام بعد معاينة طلبيتك.</p>
+                      </>
+                    ) : (
+                      <>
+                        <p>• Expédition sous 24h ouvrées depuis nos entrepôts au Maroc.</p>
+                        <p>• Livraison à domicile : Casablanca (24h), Rabat, Marrakech, Tanger, Fès et toutes villes (48h).</p>
+                        <p>• Règlement en espèces lors de la réception du colis.</p>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
@@ -455,17 +522,17 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
             <div className="mb-8 flex items-end justify-between">
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#ff3500]">
-                  Complétez votre sélection
+                  {locale === "ar" ? "أكمل تشكيلتك المختارة" : "Complétez votre sélection"}
                 </p>
                 <h2 className="mt-2 font-display text-2xl sm:text-3xl font-extrabold text-[#1E293B]">
-                  Vous aimerez aussi
+                  {locale === "ar" ? "قد يعجبك أيضاً" : "Vous aimerez aussi"}
                 </h2>
               </div>
               <Link
                 href="/#boutique"
                 className="text-xs font-bold text-[#4b9797] hover:text-[#ff3500] transition-colors"
               >
-                Explorer toute la boutique →
+                {locale === "ar" ? "استكشف كامل المتجر ←" : "Explorer toute la boutique →"}
               </Link>
             </div>
 
@@ -474,24 +541,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                 const img = rel.images.edges[0]?.node?.url;
                 const price = Number(rel.priceRange.minVariantPrice.amount);
                 const isItemAdded = addedRelatedId === rel.id;
-
-                // Category label e.g. "TEFLOOK WOODCRAFT", "TEFLOOK FOCUS", "TEFLOOK ÉMOTIONS"
-                const cat = getChildStoreCategory(rel);
-                const mapping: Record<string, string> = {
-                  discipline: "TEFLOOK FOCUS",
-                  emotionalIntelligence: "TEFLOOK ÉMOTIONS",
-                  independence: "TEFLOOK AUTONOMIE",
-                  confidence: "TEFLOOK SOCIAL",
-                  creativity: "TEFLOOK CRÉATIVITÉ",
-                  criticalThinking: "TEFLOOK LOGIQUE",
-                };
-                let categoryLabel = "TEFLOOK";
-                if (rel.vendor) {
-                  const v = rel.vendor.toUpperCase();
-                  categoryLabel = v.startsWith("TEFLOOK") ? v : `TEFLOOK ${v}`;
-                } else if (cat && mapping[cat]) {
-                  categoryLabel = mapping[cat];
-                }
+                const relLocalized = getLocalizedProduct(rel, locale);
 
                 // Deterministic rating based on title
                 const rating = 4.8 + ((rel.title.length % 3) * 0.1);
@@ -500,6 +550,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                 return (
                   <article
                     key={rel.id}
+                    dir={direction}
                     className="group relative flex h-full flex-col justify-between rounded-2xl sm:rounded-3xl border border-[#E6E1D8]/80 bg-white p-2.5 sm:p-4 shadow-xs hover:shadow-xl hover:shadow-black/5 hover:border-[#4b9797]/40 hover:-translate-y-1 transition-all duration-300 select-none"
                   >
                     <div>
@@ -507,13 +558,13 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                       <div className="relative aspect-square w-full overflow-hidden rounded-xl sm:rounded-2xl bg-[#F9F8F6]">
                         <Link
                           href={`/product/${rel.handle}`}
-                          aria-label={`Voir ${rel.title}`}
+                          aria-label={`Voir ${relLocalized.title}`}
                           className="absolute inset-0 block z-0"
                         >
                           {img ? (
                             <img
                               src={img}
-                              alt={rel.title}
+                              alt={relLocalized.title}
                               className="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                               loading="lazy"
                             />
@@ -532,18 +583,18 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
 
                       {/* Content & Typography */}
                       <div className="pt-2.5 sm:pt-3.5 flex flex-col">
-                        {/* Category Label: Uppercase, small, tracked out, colored in #4b9797 */}
+                        {/* Category Label */}
                         <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.14em] text-[#4b9797] truncate block mb-1">
-                          {categoryLabel}
+                          {relLocalized.categoryBadge}
                         </span>
 
-                        {/* Product Title: Bold, clean sans-serif font, dark charcoal */}
+                        {/* Product Title */}
                         <Link
                           href={`/product/${rel.handle}`}
                           className="line-clamp-2 text-[13px] sm:text-[15px] font-bold leading-snug text-[#1E293B] transition-colors group-hover:text-[#4b9797] min-h-[2.3rem] sm:min-h-[2.6rem]"
-                          title={rel.title}
+                          title={relLocalized.title}
                         >
-                          {rel.title}
+                          {relLocalized.title}
                         </Link>
 
                         {/* Subtle Star Ratings in #ffbf00 */}

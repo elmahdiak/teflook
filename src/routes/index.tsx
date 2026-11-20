@@ -48,6 +48,7 @@ import {
   type ChildStoreCategory,
 } from "@/lib/teflook-categories";
 import { CHILD_STORE_CATEGORY_MESSAGE_KEYS, useTefLookLanguage } from "@/lib/teflook-language";
+import { getLocalizedProduct } from "@/lib/product-localization";
 
 export const Route = createFileRoute("/" as any)({
   loader: ({ context }: { context: any }) => context.queryClient.ensureQueryData(productsQueryOptions),
@@ -591,13 +592,14 @@ function ProductCard({
   onAdded: () => void;
   onNotice: (message: string) => void;
 }) {
-  const { locale, t } = useTefLookLanguage();
+  const { locale, direction, t } = useTefLookLanguage();
   const [adding, setAdding] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const variant = product.variants.edges.find((edge) => edge.node.availableForSale)?.node;
   const image = product.images.edges[0]?.node;
 
-  const categoryLabel = getProductCategoryBadge(product);
+  const localized = getLocalizedProduct(product, locale);
+  const categoryLabel = localized.categoryBadge;
 
   // Formatting price to match exact "279,00 MAD" specification
   const priceAmount = Number(product.priceRange.minVariantPrice.amount);
@@ -632,26 +634,29 @@ function ProductCard({
     } else {
       setIsSuccess(true);
       setTimeout(() => setIsSuccess(false), 1600);
-      onNotice(`${t("product.addedPrefix")}${product.title}`);
+      onNotice(`${t("product.addedPrefix")}${localized.title}`);
       onAdded();
     }
   }
 
   return (
-    <article className="group relative flex h-full flex-col justify-between rounded-2xl sm:rounded-3xl border border-[#E6E1D8]/80 bg-white p-2.5 sm:p-4 shadow-xs hover:shadow-xl hover:shadow-black/5 hover:border-[#4b9797]/40 hover:-translate-y-1 transition-all duration-300 select-none">
+    <article
+      dir={direction}
+      className="group relative flex h-full flex-col justify-between rounded-2xl sm:rounded-3xl border border-[#E6E1D8]/80 bg-white p-2.5 sm:p-4 shadow-xs hover:shadow-xl hover:shadow-black/5 hover:border-[#4b9797]/40 hover:-translate-y-1 transition-all duration-300 select-none"
+    >
       <div>
         {/* 1. Product Image Container */}
         <div className="relative aspect-square w-full overflow-hidden rounded-xl sm:rounded-2xl bg-[#F9F8F6]">
           <Link
             to="/product/$handle"
             params={{ handle: product.handle }}
-            aria-label={`Voir ${product.title}`}
+            aria-label={`Voir ${localized.title}`}
             className="absolute inset-0 block z-0"
           >
             {image ? (
               <img
                 src={image.url}
-                alt={image.altText || product.title}
+                alt={image.altText || localized.title}
                 loading="lazy"
                 className="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
               />
@@ -671,30 +676,30 @@ function ProductCard({
           {/* Top Badges */}
           {!variant ? (
             <span className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 z-10 rounded-full bg-[#1E293B]/85 backdrop-blur-xs px-2 sm:px-2.5 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-white shadow-xs">
-              Épuisé
+              {locale === "ar" ? "نفدت الكمية" : "Épuisé"}
             </span>
           ) : (
             <span className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 z-10 rounded-full bg-[#ff3500] px-2 sm:px-2.5 py-0.5 text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wide text-white shadow-xs">
-              Bestseller
+              {locale === "ar" ? "الأكثر طلباً" : "Bestseller"}
             </span>
           )}
         </div>
 
         {/* 2. Content & Typography Hierarchy */}
         <div className="pt-2.5 sm:pt-3.5 flex flex-col">
-          {/* Category Label: Uppercase, small, tracked out, colored in #4b9797 */}
+          {/* Category Label */}
           <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.14em] text-[#4b9797] truncate block mb-1">
             {categoryLabel}
           </span>
 
-          {/* Product Title: Bold, clean sans-serif font, dark charcoal #1E293B for high legibility */}
+          {/* Product Title */}
           <Link
             to="/product/$handle"
             params={{ handle: product.handle }}
             className="line-clamp-2 text-[13px] sm:text-[15px] font-bold leading-snug text-[#1E293B] transition-colors group-hover:text-[#4b9797] min-h-[2.3rem] sm:min-h-[2.6rem]"
-            title={product.title}
+            title={localized.title}
           >
-            {product.title}
+            {localized.title}
           </Link>
 
           {/* Subtle Star Ratings in #ffbf00 */}
