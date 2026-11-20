@@ -83,6 +83,11 @@ body {
   font-family: 'Playfair Display', Georgia, serif;
 }
 
+.font-brand-logo {
+  font-family: 'Poppins', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.02em;
+}
+
 /* TefLook Brand utilities */
 .text-brand-teal {
   color: var(--brand-teal);

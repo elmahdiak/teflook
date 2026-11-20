@@ -137,7 +137,7 @@ export function TrendingProductsSection() {
                   {/* Top Left Badge */}
                   <div className="absolute top-3.5 left-3.5 z-10 flex flex-col gap-1.5">
                     {product.badge && (
-                      <span className="px-3 py-1 rounded-full text-xs font-extrabold tracking-wide uppercase bg-[#FE7C58] text-white shadow-md">
+                      <span className="px-3 py-1 rounded-full text-xs font-extrabold tracking-wide uppercase bg-[#ff3500] text-white shadow-md">
                         {product.badge}
                       </span>
                     )}
@@ -147,7 +147,7 @@ export function TrendingProductsSection() {
                   <div className="absolute top-3.5 right-3.5 z-10 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
                     <button
                       onClick={() => setActiveQuickProduct(product)}
-                      className="p-2.5 rounded-full bg-white/95 hover:bg-white text-[#1E293B] hover:text-[#4C9A9C] shadow-lg transition-transform hover:scale-110 active:scale-95"
+                      className="p-2.5 rounded-full bg-white/95 hover:bg-white text-[#1E293B] hover:text-[#4b9797] shadow-lg transition-transform hover:scale-110 active:scale-95"
                       aria-label="Aperçu rapide"
                       title="Aperçu rapide"
                     >
@@ -157,8 +157,8 @@ export function TrendingProductsSection() {
 
                   {/* Category Pill Tag at Bottom of Image */}
                   <div className="absolute bottom-3 left-3.5 z-10">
-                    <span className="px-2.5 py-1 rounded-lg bg-white/90 backdrop-blur-md text-[11px] font-bold text-[#4C9A9C] border border-white/40 shadow-xs">
-                      {product.categoryName}
+                    <span className="px-2.5 py-1 rounded-lg bg-white/95 backdrop-blur-md text-[11px] font-bold uppercase tracking-wider text-[#4b9797] border border-white/40 shadow-xs">
+                      TEFLOOK {product.categoryName.toUpperCase()}
                     </span>
                   </div>
                 </div>

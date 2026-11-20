@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { isAuthenticated, logoutAdmin } from "@/lib/admin-auth";
 import { Button } from "@/components/ui/button";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -86,18 +87,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div>
         {/* Brand */}
         <div className="flex items-center justify-between pb-6 border-b border-white/10">
-          <Link href="/admin" className="flex items-center gap-2.5">
-            <img src="/images/Untitled design (1).png" alt="TefLook" className="size-9 rounded-xl object-contain shadow-xs" />
-            <div>
-              <span className="font-display text-xl font-extrabold tracking-tight text-white">
-                <span className="text-[#FBF9F5]">Tef</span>
-                <span className="text-[#FEC748]">Look</span>
-              </span>
-              <span className="block text-[10px] font-bold uppercase tracking-widest text-[#FEC748]">
-                Admin Console
-              </span>
-            </div>
-          </Link>
+          <BrandLogo size="md" variant="dark" href="/admin" subtitle="Admin Console" />
           <button
             type="button"
             onClick={() => setMobileSidebarOpen(false)}

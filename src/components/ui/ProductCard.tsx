@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Star, ShoppingBag, Eye, Check } from "lucide-react";
+import { Star, Eye, Check, Plus, LoaderCircle } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { ProductItem } from "@/data/teflookData";
 
@@ -21,7 +21,7 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
     setIsAdded(true);
     setTimeout(() => {
       setIsAdded(false);
-    }, 1800);
+    }, 1600);
   };
 
   const handleCardClick = () => {
@@ -30,150 +30,134 @@ export function ProductCard({ product, className = "" }: ProductCardProps) {
 
   const currentPrice =
     currency === "MAD"
-      ? `${product.priceMad} MAD`
+      ? `${product.priceMad.toFixed(2).replace(".", ",")} MAD`
       : `${product.priceEur.toFixed(2).replace(".", ",")} €`;
 
   const oldPrice =
     product.oldPriceMad && product.oldPriceEur
       ? currency === "MAD"
-        ? `${product.oldPriceMad} MAD`
+        ? `${product.oldPriceMad.toFixed(2).replace(".", ",")} MAD`
         : `${product.oldPriceEur.toFixed(2).replace(".", ",")} €`
       : null;
+
+  const categoryLabel = `TEFLOOK ${product.categoryName.toUpperCase()}`;
 
   return (
     <div
       onClick={handleCardClick}
-      className={`group flex flex-col bg-card rounded-2xl overflow-hidden border border-border hover:border-[#4C9A9C]/40 hover:shadow-xl hover:shadow-[#4C9A9C]/10 transition-all duration-300 cursor-pointer select-none ${className}`}
+      className={`group relative flex h-full flex-col justify-between rounded-2xl sm:rounded-3xl border border-[#E6E1D8]/80 bg-white p-2.5 sm:p-4 shadow-xs hover:shadow-xl hover:shadow-black/5 hover:border-[#4b9797]/40 hover:-translate-y-1 transition-all duration-300 cursor-pointer select-none ${className}`}
     >
-      {/* 1. Media & Image Container */}
-      <div className="relative aspect-square w-full overflow-hidden bg-brand-cream">
-        <Image
-          src={product.images[0]}
-          alt={product.name}
-          fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-          className="object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
-        />
+      <div>
+        {/* 1. Media & Image Container */}
+        <div className="relative aspect-square w-full overflow-hidden rounded-xl sm:rounded-2xl bg-[#F9F8F6]">
+          <Image
+            src={product.images[0]}
+            alt={product.name}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            className="object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
+          />
 
-        {/* Hover vignette */}
-        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          {/* Hover vignette */}
+          <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
-        {/* Top Left Badges: Discount & Promo */}
-        <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1">
-          {product.discountPercentage && (
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-[#FE7C58] text-white shadow-xs">
-              -{product.discountPercentage}%
-            </span>
-          )}
-          {product.badge && (
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-[#4C9A9C] text-white shadow-xs">
-              {product.badge}
-            </span>
-          )}
+          {/* Top Left Badges: Discount & Promo */}
+          <div className="absolute top-2 left-2 sm:top-2.5 sm:left-2.5 z-10 flex flex-col gap-1">
+            {product.discountPercentage ? (
+              <span className="px-2 sm:px-2.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-extrabold uppercase bg-[#ff3500] text-white shadow-xs">
+                -{product.discountPercentage}%
+              </span>
+            ) : product.badge ? (
+              <span className="px-2 sm:px-2.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-extrabold uppercase bg-[#ff3500] text-white shadow-xs">
+                {product.badge}
+              </span>
+            ) : (
+              <span className="px-2 sm:px-2.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-extrabold uppercase bg-[#ff3500] text-white shadow-xs">
+                Bestseller
+              </span>
+            )}
+          </div>
+
+          {/* Top Right: Quick View Button */}
+          <div className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 z-10 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveQuickProduct(product);
+              }}
+              className="p-1.5 sm:p-2 rounded-full bg-white/95 hover:bg-white text-[#1E293B] hover:text-[#4b9797] shadow-md transition-transform hover:scale-110 active:scale-95 cursor-pointer"
+              aria-label="Aperçu rapide"
+              title="Aperçu rapide"
+            >
+              <Eye className="size-3.5 sm:size-4" />
+            </button>
+          </div>
         </div>
 
-        {/* Top Right: Quick View Button */}
-        <div className="absolute top-2.5 right-2.5 z-10 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setActiveQuickProduct(product);
-            }}
-            className="p-2 rounded-full bg-white/95 hover:bg-white text-foreground hover:text-brand-teal shadow-md transition-transform hover:scale-110 active:scale-95"
-            aria-label="Aperçu rapide"
-            title="Aperçu rapide"
-          >
-            <Eye className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {/* Bottom Floating: Category Pill */}
-        <div className="absolute bottom-2.5 left-2.5 right-2.5 z-10 flex items-center justify-between gap-1 pointer-events-none">
-          <span className="px-2.5 py-1 rounded-lg bg-white/90 backdrop-blur-md text-[10px] font-extrabold text-[#4C9A9C] border border-white/60 shadow-xs truncate max-w-[70%]">
-            {product.categoryName}
+        {/* 2. Content Details & Typography Hierarchy */}
+        <div className="pt-2.5 sm:pt-3.5 flex flex-col">
+          {/* Category label: Uppercase, small, tracked out, colored in #4b9797 */}
+          <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.14em] text-[#4b9797] truncate block mb-1">
+            {categoryLabel}
           </span>
-          <span className="px-2 py-1 rounded-lg bg-[#FE7C58] text-white text-[10px] font-black shadow-xs shrink-0">
-            {product.ageBracket}
-          </span>
-        </div>
-      </div>
 
-      {/* 2. Content Details */}
-      <div className="flex-1 p-3.5 sm:p-4 flex flex-col justify-between">
-        <div>
-          {/* Star Rating & Reviews */}
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <div className="flex items-center text-[#FEC748]">
+          {/* Product Title: Bold, clean sans-serif font, dark charcoal text color */}
+          <h3 className="line-clamp-2 text-[13px] sm:text-[15px] font-bold leading-snug text-[#1E293B] group-hover:text-[#4b9797] transition-colors min-h-[2.3rem] sm:min-h-[2.6rem]">
+            {product.name}
+          </h3>
+
+          {/* Star Rating & Reviews in Golden Yellow / Amber (#ffbf00) */}
+          <div className="flex items-center gap-1 sm:gap-1.5 mt-1.5 mb-0.5">
+            <div className="flex items-center text-[#ffbf00]">
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`w-3 h-3 ${
+                  className={`size-3 ${
                     i < Math.floor(product.rating)
-                      ? "fill-[#FEC748] text-[#FEC748]"
+                      ? "fill-[#ffbf00] text-[#ffbf00]"
                       : "text-slate-200 fill-slate-200"
                   }`}
                 />
               ))}
             </div>
-            <span className="text-[11px] font-bold text-foreground">
+            <span className="text-[10px] sm:text-[11px] font-bold text-[#1E293B]">
               {product.rating.toFixed(1)}
             </span>
-            <span className="text-[10px] text-muted-foreground">
-              ({product.reviewsCount} avis)
+            <span className="text-[9px] sm:text-[10px] text-muted-foreground">
+              ({product.reviewsCount})
             </span>
           </div>
+        </div>
+      </div>
 
-          {/* Product Title */}
-          <h3 className="font-bold text-xs sm:text-sm text-foreground group-hover:text-brand-teal transition-colors line-clamp-2 leading-snug min-h-[2.5rem]">
-            {product.name}
-          </h3>
-
-          {/* Key pedagogical benefit / feature */}
-          {product.features && product.features[0] && (
-            <p className="mt-1 text-[11px] text-[#4C9A9C] line-clamp-1 font-medium">
-              ✓ {product.features[0]}
-            </p>
+      {/* 3. Action & Price Area */}
+      <div className="mt-2.5 sm:mt-3.5 pt-2.5 sm:pt-3 border-t border-[#F1ECE4] flex items-center justify-between gap-1.5 sm:gap-2">
+        {/* Pricing clearly on left in bold #ff3500 */}
+        <div className="flex flex-col min-w-0">
+          {oldPrice && (
+            <span className="text-[10px] sm:text-[11px] text-muted-foreground line-through font-semibold leading-none mb-0.5">
+              {oldPrice}
+            </span>
           )}
+          <span className="truncate text-[14px] sm:text-[17px] font-black tracking-tight text-[#ff3500] leading-none">
+            {currentPrice}
+          </span>
         </div>
 
-        {/* 3. Footer: Pricing & Add to Cart Button */}
-        <div className="mt-3 pt-3 border-t border-border flex items-center justify-between gap-2">
-          {/* Pricing */}
-          <div className="flex flex-col">
-            {oldPrice && (
-              <span className="text-[11px] text-muted-foreground line-through font-semibold leading-none">
-                {oldPrice}
-              </span>
-            )}
-            <span className="text-sm sm:text-base font-black text-foreground leading-tight">
-              {currentPrice}
-            </span>
-          </div>
-
-          {/* Interactive "Ajouter au panier" Button */}
-          <button
-            onClick={handleAddToCart}
-            disabled={isAdded}
-            className={`relative inline-flex items-center gap-1.5 px-3 py-2 rounded-xl font-bold text-xs transition-all duration-200 active:scale-95 shadow-xs ${
-              isAdded
-                ? "bg-emerald-600 text-white cursor-default"
-                : "bg-[#FE7C58] hover:bg-[#E96843] text-white hover:shadow-md cursor-pointer"
-            }`}
-            aria-label={`Ajouter ${product.name} au panier`}
-          >
-            {isAdded ? (
-              <>
-                <Check className="w-3.5 h-3.5 stroke-[3] animate-in zoom-in" />
-                <span className="hidden sm:inline">Ajouté !</span>
-              </>
-            ) : (
-              <>
-                <ShoppingBag className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Ajouter</span>
-              </>
-            )}
-          </button>
-        </div>
+        {/* Add to Cart button: Clean rounded-xl shape, soft hover background in #ffbf00 */}
+        <button
+          onClick={handleAddToCart}
+          disabled={isAdded}
+          className="size-8 sm:size-9 shrink-0 rounded-xl border border-[#E6E1D8] bg-[#F9F8F6] text-[#1E293B] shadow-xs grid place-items-center transition-all duration-200 hover:bg-[#ffbf00] hover:border-[#ffbf00] hover:text-[#1E293B] hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ffbf00] cursor-pointer"
+          aria-label={`Ajouter ${product.name} au panier`}
+          title="Ajouter au panier"
+        >
+          {isAdded ? (
+            <Check className="size-3.5 sm:size-4 text-emerald-600 stroke-[3] animate-in zoom-in" />
+          ) : (
+            <Plus className="size-3.5 sm:size-4 stroke-[2.5]" />
+          )}
+        </button>
       </div>
     </div>
   );

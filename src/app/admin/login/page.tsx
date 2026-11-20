@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, KeyRound, LoaderCircle, Lock, ShieldCheck, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { loginAdmin } from "@/lib/admin-auth";
 
 export default function AdminLoginPage() {
@@ -47,15 +48,10 @@ export default function AdminLoginPage() {
         {/* Login Box */}
         <div className="rounded-3xl border border-border bg-card p-7 sm:p-9 shadow-xl shadow-black/5">
           {/* Logo & Header */}
-          <div className="text-center mb-8">
-            <div className="mx-auto mb-4 size-16 overflow-hidden rounded-2xl shadow-sm">
-              <img src="/images/Untitled Design.png" alt="TefLook" className="size-full object-cover" />
+          <div className="text-center mb-8 flex flex-col items-center">
+            <div className="mb-3">
+              <BrandLogo size="lg" asLink={false} subtitle="Portail Admin" />
             </div>
-            <h1 className="font-display text-2xl font-black tracking-tight text-foreground">
-              <span className="text-[#4C9A9C]">Tef</span>
-              <span className="text-[#FE7C58]">Look</span>{" "}
-              <span className="text-foreground/90">Admin</span>
-            </h1>
             <p className="mt-1 text-xs text-muted-foreground">
               Portail sécurisé de gestion des commandes COD & du catalogue
             </p>

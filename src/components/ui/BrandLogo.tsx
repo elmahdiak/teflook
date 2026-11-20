@@ -1,17 +1,17 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-interface BrandLogoProps {
+export interface BrandLogoProps {
   className?: string;
   size?: "sm" | "md" | "lg" | "xl";
   asLink?: boolean;
   href?: string;
   variant?: "light" | "dark";
   showText?: boolean;
+  subtitle?: string;
 }
 
 export function BrandLogo({
@@ -21,60 +21,72 @@ export function BrandLogo({
   href = "/",
   variant = "light",
   showText = true,
+  subtitle,
 }: BrandLogoProps) {
   const markSizes = {
-    sm: "size-8 sm:size-9",
-    md: "size-10 sm:size-11",
-    lg: "size-12 sm:size-14",
-    xl: "size-16 sm:size-20",
+    sm: "size-8 sm:size-9 rounded-xl p-1",
+    md: "size-10 sm:size-11 rounded-xl sm:rounded-2xl p-1 sm:p-1.5",
+    lg: "size-12 sm:size-14 rounded-2xl p-1.5 sm:p-2",
+    xl: "size-16 sm:size-20 rounded-2xl sm:rounded-3xl p-2 sm:p-2.5",
   };
 
   const textSizes = {
     sm: "text-lg sm:text-xl",
-    md: "text-2xl sm:text-[26px]",
-    lg: "text-3xl sm:text-4xl",
+    md: "text-[22px] sm:text-2xl",
+    lg: "text-2xl sm:text-3xl",
     xl: "text-4xl sm:text-5xl",
   };
 
+  // Light variant uses the full-color mark on a crisp white card; dark variant uses the inverted/white mark
   const logoSrc = variant === "dark" ? "/images/Untitled design (1).png" : "/images/Untitled Design.png";
 
   const content = (
     <div className={cn("inline-flex items-center gap-2.5 sm:gap-3 group select-none", className)}>
-      {/* 1. Logo Icon with subtle rounded corners */}
+      {/* 1. Icon Container: Rounded white card with subtle padding, modern border & soft shadow */}
       <div
         className={cn(
-          "relative shrink-0 overflow-hidden rounded-xl shadow-xs transition-transform duration-300 group-hover:scale-105",
+          "relative shrink-0 overflow-hidden bg-white border border-[#E6E1D8]/80 shadow-xs sm:shadow-sm flex items-center justify-center transition-all duration-300 group-hover:scale-105 group-hover:shadow-sm",
           markSizes[size]
         )}
       >
-        <Image
+        <img
           src={logoSrc}
-          alt="TefLook Logo"
-          fill
-          sizes="96px"
-          priority
-          className="object-cover"
+          alt="TefLook"
+          className="size-full object-contain"
+          loading="eager"
         />
       </div>
 
-      {/* 2. Sharp Wordmark ('Tef' in Teal / Cream, 'Look' in Warm Coral-Orange / Amber) */}
+      {/* 2. Wordmark: Modern rounded geometric sans typography with exact dual-color split */}
       {showText && (
-        <div
-          className={cn(
-            "font-black tracking-tight leading-none flex items-baseline font-sans transition-colors",
-            textSizes[size]
-          )}
-        >
-          {variant === "dark" ? (
-            <>
-              <span className="text-[#FBF9F5] tracking-tight">Tef</span>
-              <span className="text-[#FEC748] tracking-tight">Look</span>
-            </>
-          ) : (
-            <>
-              <span className="text-[#4C9A9C] tracking-tight">Tef</span>
-              <span className="text-[#FE7C58] tracking-tight">Look</span>
-            </>
+        <div className="flex flex-col justify-center leading-none select-none font-brand-logo">
+          <div
+            className={cn(
+              "font-bold tracking-tight flex items-baseline leading-none transition-colors",
+              textSizes[size]
+            )}
+          >
+            {variant === "dark" ? (
+              <>
+                <span className="text-[#FFFFFF] tracking-tight">Tef</span>
+                <span className="text-[#FEC748] tracking-tight">Look</span>
+              </>
+            ) : (
+              <>
+                <span className="text-[#2B6E73] tracking-tight">Tef</span>
+                <span className="text-[#E06D53] tracking-tight">Look</span>
+              </>
+            )}
+          </div>
+          {subtitle && (
+            <span
+              className={cn(
+                "block text-[10px] font-bold uppercase tracking-widest mt-1",
+                variant === "dark" ? "text-[#FEC748]" : "text-[#2B6E73]"
+              )}
+            >
+              {subtitle}
+            </span>
           )}
         </div>
       )}
@@ -85,7 +97,7 @@ export function BrandLogo({
     return (
       <Link
         href={href}
-        className="inline-flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FE7C58] rounded-xl"
+        className="inline-flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E06D53] rounded-xl"
         aria-label="TefLook - Accueil"
       >
         {content}
