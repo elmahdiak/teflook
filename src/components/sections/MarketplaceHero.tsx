@@ -33,7 +33,7 @@ export function MarketplaceHero({
       image:
         "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=400&auto=format&fit=crop",
       highlight: "Focus",
-      color: "#1A3C34",
+      color: "#4C9A9C",
     },
     {
       name: "Émotions & Empathie",
@@ -41,7 +41,7 @@ export function MarketplaceHero({
       image:
         "https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=400&auto=format&fit=crop",
       highlight: "Sérénité",
-      color: "#C85A32",
+      color: "#FE7C58",
     },
     {
       name: "Autonomie & Vie",
@@ -49,7 +49,7 @@ export function MarketplaceHero({
       image:
         "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=400&auto=format&fit=crop",
       highlight: "Pratique",
-      color: "#1A3C34",
+      color: "#4C9A9C",
     },
     {
       name: "Confiance & Social",
@@ -57,7 +57,7 @@ export function MarketplaceHero({
       image:
         "https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=400&auto=format&fit=crop",
       highlight: "Éloquence",
-      color: "#C85A32",
+      color: "#FE7C58",
     },
     {
       name: "Créativité & Art",
@@ -65,7 +65,7 @@ export function MarketplaceHero({
       image:
         "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?q=80&w=400&auto=format&fit=crop",
       highlight: "Inventivité",
-      color: "#1A3C34",
+      color: "#4C9A9C",
     },
     {
       name: "Esprit Critique & Logique",
@@ -73,7 +73,7 @@ export function MarketplaceHero({
       image:
         "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?q=80&w=400&auto=format&fit=crop",
       highlight: "Stratégie",
-      color: "#C85A32",
+      color: "#FE7C58",
     },
   ];
 
@@ -100,7 +100,7 @@ export function MarketplaceHero({
           {/* Banner Text & CTAs */}
           <div className="relative z-10 px-6 sm:px-10 lg:px-14 py-12 sm:py-16 lg:py-20 max-w-2xl text-white space-y-5 sm:space-y-6">
             {/* Promo Tag */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#C85A32] text-white text-xs font-black uppercase tracking-wider shadow-md">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FE7C58] text-white text-xs font-black uppercase tracking-wider shadow-md">
               <Sparkles className="w-3.5 h-3.5" />
               <span>Les 6 Piliers du Développement</span>
             </div>
@@ -108,7 +108,7 @@ export function MarketplaceHero({
             {/* Headline */}
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.15]">
               L&apos;Épanouissement Éducatif &amp; le Développement de{" "}
-              <span className="text-[#C85A32]">vos Enfants</span>
+              <span className="text-[#FE7C58]">vos Enfants</span>
             </h1>
 
             {/* Subtitle */}
@@ -123,7 +123,7 @@ export function MarketplaceHero({
             <div className="pt-2 flex flex-wrap items-center gap-3 sm:gap-4">
               <a
                 href="#catalogue-interactif"
-                className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-full bg-[#C85A32] hover:bg-[#E66000] text-white font-extrabold text-sm shadow-lg shadow-[#C85A32]/30 hover:-translate-y-0.5 transition-all group"
+                className="inline-flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-full bg-[#FE7C58] hover:bg-[#E66000] text-white font-extrabold text-sm shadow-lg shadow-[#FE7C58]/30 hover:-translate-y-0.5 transition-all group"
               >
                 <span>Filtrer par Âge &amp; Catégorie</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -140,11 +140,11 @@ export function MarketplaceHero({
             {/* Reassurance Micro-Row */}
             <div className="pt-4 flex flex-wrap items-center gap-6 text-xs text-slate-300 border-t border-white/10">
               <div className="flex items-center gap-2">
-                <Truck className="w-4 h-4 text-[#1A3C34]" />
+                <Truck className="w-4 h-4 text-[#4C9A9C]" />
                 <span>Livraison 24/48h au Maroc</span>
               </div>
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-[#C85A32]" />
+                <ShieldCheck className="w-4 h-4 text-[#FE7C58]" />
                 <span>Paiement à la livraison (COD)</span>
               </div>
               <div className="flex items-center gap-2">
@@ -160,8 +160,8 @@ export function MarketplaceHero({
         {/* ============================================================== */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-[#1A3C34] flex items-center gap-2">
-              <Brain className="w-4 h-4 text-[#C85A32]" />
+            <h2 className="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-[#4C9A9C] flex items-center gap-2">
+              <Brain className="w-4 h-4 text-[#FE7C58]" />
               <span>Les 6 Piliers Fondamentaux</span>
             </h2>
             <span className="text-xs text-[#94A3B8]">
@@ -174,14 +174,14 @@ export function MarketplaceHero({
               <a
                 key={cat.slug}
                 href={`#${cat.slug}`}
-                className="group flex flex-col items-center p-3 rounded-2xl bg-white hover:bg-[#EDF3F1]/60 border border-[#E8E5DF] hover:border-[#1A3C34] shadow-2xs hover:shadow-md transition-all duration-200 cursor-pointer"
+                className="group flex flex-col items-center p-3 rounded-2xl bg-white hover:bg-[#EBF5F5]/60 border border-[#E8E5DF] hover:border-[#4C9A9C] shadow-2xs hover:shadow-md transition-all duration-200 cursor-pointer"
               >
                 {/* Circular Image Container */}
                 <div
                   className={`relative w-16 h-16 sm:w-18 sm:h-18 rounded-full overflow-hidden mb-2.5 border-2 transition-all group-hover:scale-105 ${
                     idx % 2 === 1
-                      ? "border-[#C85A32]/40 group-hover:border-[#C85A32]"
-                      : "border-[#1A3C34]/40 group-hover:border-[#1A3C34]"
+                      ? "border-[#FE7C58]/40 group-hover:border-[#FE7C58]"
+                      : "border-[#4C9A9C]/40 group-hover:border-[#4C9A9C]"
                   }`}
                 >
                   <Image
@@ -194,7 +194,7 @@ export function MarketplaceHero({
                 </div>
 
                 {/* Label */}
-                <span className="text-xs font-black text-[#1E293B] group-hover:text-[#1A3C34] transition-colors line-clamp-1">
+                <span className="text-xs font-black text-[#1E293B] group-hover:text-[#4C9A9C] transition-colors line-clamp-1">
                   {cat.name}
                 </span>
 
@@ -216,7 +216,7 @@ export function MarketplaceHero({
         <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#E8E5DF] shadow-xs">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-[#EDF3F1] text-[#1A3C34] flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-[#EBF5F5] text-[#4C9A9C] flex items-center justify-center shrink-0">
                 <Target className="w-5 h-5" />
               </div>
               <div>
@@ -241,8 +241,8 @@ export function MarketplaceHero({
                     onClick={() => onSelectAge && onSelectAge(bracket)}
                     className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-black transition-all cursor-pointer shadow-2xs ${
                       isSelected
-                        ? "bg-[#C85A32] text-white shadow-md scale-105"
-                        : "bg-[#FAF9F7] text-[#334155] hover:bg-[#EDF3F1] hover:text-[#1A3C34] border border-[#E8E5DF]"
+                        ? "bg-[#FE7C58] text-white shadow-md scale-105"
+                        : "bg-[#FAF9F7] text-[#334155] hover:bg-[#EBF5F5] hover:text-[#4C9A9C] border border-[#E8E5DF]"
                     }`}
                   >
                     <span>{bracket}</span>
@@ -252,7 +252,7 @@ export function MarketplaceHero({
               {selectedAge && (
                 <button
                   onClick={() => onSelectAge && onSelectAge("")}
-                  className="text-xs font-bold text-[#94A3B8] hover:text-[#C85A32] px-2 py-1 underline transition-colors"
+                  className="text-xs font-bold text-[#94A3B8] hover:text-[#FE7C58] px-2 py-1 underline transition-colors"
                 >
                   Réinitialiser
                 </button>
@@ -268,10 +268,10 @@ export function MarketplaceHero({
           {/* Banner 1: Intelligence Émotionnelle */}
           <a
             href="#intelligence-emotionnelle"
-            className="group relative rounded-2xl overflow-hidden p-6 bg-gradient-to-br from-[#FBF1EC] to-[#FFE3D4] border border-[#FFD2BC] shadow-xs hover:shadow-md transition-all flex items-center justify-between"
+            className="group relative rounded-2xl overflow-hidden p-6 bg-gradient-to-br from-[#FDF2EE] to-[#FFE3D4] border border-[#FFD2BC] shadow-xs hover:shadow-md transition-all flex items-center justify-between"
           >
             <div className="space-y-1.5 z-10 max-w-[65%]">
-              <span className="text-[10px] font-black uppercase tracking-wider text-[#C85A32] bg-white px-2 py-0.5 rounded-full shadow-2xs">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#FE7C58] bg-white px-2 py-0.5 rounded-full shadow-2xs">
                 Intelligence Émotionnelle
               </span>
               <h3 className="text-base sm:text-lg font-black text-[#1E293B] leading-tight">
@@ -294,10 +294,10 @@ export function MarketplaceHero({
           {/* Banner 2: Autonomie & Vie */}
           <a
             href="#autonomie-competences-de-vie"
-            className="group relative rounded-2xl overflow-hidden p-6 bg-gradient-to-br from-[#EDF3F1] to-[#D5EAEB] border border-[#BCE1E3] shadow-xs hover:shadow-md transition-all flex items-center justify-between"
+            className="group relative rounded-2xl overflow-hidden p-6 bg-gradient-to-br from-[#EBF5F5] to-[#D5EAEB] border border-[#BCE1E3] shadow-xs hover:shadow-md transition-all flex items-center justify-between"
           >
             <div className="space-y-1.5 z-10 max-w-[65%]">
-              <span className="text-[10px] font-black uppercase tracking-wider text-[#1A3C34] bg-white px-2 py-0.5 rounded-full shadow-2xs">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#4C9A9C] bg-white px-2 py-0.5 rounded-full shadow-2xs">
                 Compétences de Vie
               </span>
               <h3 className="text-base sm:text-lg font-black text-[#1E293B] leading-tight">

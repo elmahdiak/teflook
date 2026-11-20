@@ -44,7 +44,7 @@ export function AccountModal({ isOpen, onClose }: AccountModalProps) {
 
         {/* Header */}
         <div className="text-center mb-6 space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-[#EDF3F1] border border-[#1A3C34]/30 flex items-center justify-center mx-auto text-[#1A3C34]">
+          <div className="w-12 h-12 rounded-2xl bg-[#EBF5F5] border border-[#4C9A9C]/30 flex items-center justify-center mx-auto text-[#4C9A9C]">
             <User className="w-6 h-6" />
           </div>
           <h3 className="font-serif-brand text-2xl font-bold text-[#1E293B]">
@@ -76,7 +76,7 @@ export function AccountModal({ isOpen, onClose }: AccountModalProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="votre.email@exemple.com"
-              className="w-full text-xs sm:text-sm px-4 py-2.5 rounded-xl bg-[#F9F8F6] border border-[#E8E5DF] text-[#1E293B] focus:outline-none focus:border-[#1A3C34]"
+              className="w-full text-xs sm:text-sm px-4 py-2.5 rounded-xl bg-[#F9F8F6] border border-[#E8E5DF] text-[#1E293B] focus:outline-none focus:border-[#4C9A9C]"
             />
           </div>
 
@@ -86,7 +86,7 @@ export function AccountModal({ isOpen, onClose }: AccountModalProps) {
                 Mot de passe
               </label>
               {isLogin && (
-                <span className="text-[11px] text-[#1A3C34] hover:underline cursor-pointer">
+                <span className="text-[11px] text-[#4C9A9C] hover:underline cursor-pointer">
                   Mot de passe oublié ?
                 </span>
               )}
@@ -97,7 +97,7 @@ export function AccountModal({ isOpen, onClose }: AccountModalProps) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full text-xs sm:text-sm px-4 py-2.5 rounded-xl bg-[#F9F8F6] border border-[#E8E5DF] text-[#1E293B] focus:outline-none focus:border-[#1A3C34]"
+              className="w-full text-xs sm:text-sm px-4 py-2.5 rounded-xl bg-[#F9F8F6] border border-[#E8E5DF] text-[#1E293B] focus:outline-none focus:border-[#4C9A9C]"
             />
           </div>
 
@@ -111,7 +111,7 @@ export function AccountModal({ isOpen, onClose }: AccountModalProps) {
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
-              className="text-xs text-[#64748B] hover:text-[#C85A32] transition-colors"
+              className="text-xs text-[#64748B] hover:text-[#FE7C58] transition-colors"
             >
               {isLogin
                 ? "Pas encore de compte ? Créer un compte"
@@ -125,13 +125,13 @@ export function AccountModal({ isOpen, onClose }: AccountModalProps) {
           <Link
             href="/dashboard"
             onClick={onClose}
-            className="flex items-center gap-1.5 text-[#1A3C34] hover:text-[#C85A32] font-semibold transition-colors"
+            className="flex items-center gap-1.5 text-[#4C9A9C] hover:text-[#FE7C58] font-semibold transition-colors"
           >
             <span>Accéder au Dashboard</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
           <span className="flex items-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#C85A32]" />
+            <ShieldCheck className="w-3.5 h-3.5 text-[#FE7C58]" />
             Connexion sécurisée
           </span>
         </div>

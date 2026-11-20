@@ -91,7 +91,7 @@ export const CATEGORIES: CategoryItem[] = [
       "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=1000&auto=format&fit=crop",
     itemCount: 6,
     highlight: "Essentiel",
-    color: "#1A3C34",
+    color: "#4C9A9C",
   },
   {
     id: "cat-2",
@@ -105,7 +105,7 @@ export const CATEGORIES: CategoryItem[] = [
       "https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=1000&auto=format&fit=crop",
     itemCount: 6,
     highlight: "Coup de Cœur",
-    color: "#C85A32",
+    color: "#FE7C58",
   },
   {
     id: "cat-3",
@@ -119,7 +119,7 @@ export const CATEGORIES: CategoryItem[] = [
       "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=1000&auto=format&fit=crop",
     itemCount: 6,
     highlight: "Pratique",
-    color: "#1A3C34",
+    color: "#4C9A9C",
   },
   {
     id: "cat-4",
@@ -133,7 +133,7 @@ export const CATEGORIES: CategoryItem[] = [
       "https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=1000&auto=format&fit=crop",
     itemCount: 6,
     highlight: "Recommandé",
-    color: "#C85A32",
+    color: "#FE7C58",
   },
   {
     id: "cat-5",
@@ -147,7 +147,7 @@ export const CATEGORIES: CategoryItem[] = [
       "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?q=80&w=1000&auto=format&fit=crop",
     itemCount: 6,
     highlight: "Créatif",
-    color: "#1A3C34",
+    color: "#4C9A9C",
   },
   {
     id: "cat-6",
@@ -161,7 +161,7 @@ export const CATEGORIES: CategoryItem[] = [
       "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?q=80&w=1000&auto=format&fit=crop",
     itemCount: 6,
     highlight: "Challenge",
-    color: "#C85A32",
+    color: "#FE7C58",
   },
 ];
 

@@ -14,26 +14,26 @@ export function ReviewsSection() {
       : REVIEWS.filter((r) => r.city.toLowerCase().includes(filterCity.toLowerCase()));
 
   return (
-    <section id="temoignages" className="py-20 sm:py-28 bg-[#F9F8F6] border-b border-[#E8E5DF]">
+    <section id="temoignages" className="py-20 sm:py-28 bg-[#FBF9F5] border-b border-[#E8E5DF]">
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-14 space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#FBF1EC] border border-[#C85A32]/30 text-xs font-semibold text-[#C85A32]">
-            <Heart className="w-3.5 h-3.5 text-[#C85A32] fill-[#C85A32]" />
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#FDF2EE] border border-[#FE7C58]/30 text-xs font-semibold text-[#FE7C58]">
+            <Heart className="w-3.5 h-3.5 text-[#FE7C58] fill-[#FE7C58]" />
             <span>La Confiance de Nos Passionnés</span>
           </div>
           <h2 className="font-serif-brand text-3xl sm:text-4xl md:text-5xl font-bold text-[#1E293B] tracking-tight">
             Nos clients témoignent
           </h2>
-          <p className="font-arabic text-lg text-[#C85A32] font-bold">
+          <p className="font-arabic text-lg text-[#FE7C58] font-bold">
             شهادات عملائنا الكرام في المغرب وعبر العالم
           </p>
 
           {/* Aggregate Rating Banner */}
           <div className="pt-2 flex items-center justify-center gap-3">
-            <div className="flex text-[#E6A15C]">
+            <div className="flex text-[#FEC748]">
               {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-5 h-5 fill-[#E6A15C]" />
+                <Star key={i} className="w-5 h-5 fill-[#FEC748]" />
               ))}
             </div>
             <span className="font-bold text-2xl text-[#1E293B]">4.9 / 5</span>
@@ -53,8 +53,8 @@ export function ReviewsSection() {
                 onClick={() => setFilterCity(c)}
                 className={`px-3.5 py-1.5 rounded-xl font-medium transition-all ${
                   filterCity === c
-                    ? "bg-[#1A3C34] text-white font-semibold shadow-xs"
-                    : "bg-white text-[#334155] border border-[#E8E5DF] hover:bg-[#EDF3F1] hover:text-[#1A3C34]"
+                    ? "bg-[#4C9A9C] text-white font-semibold shadow-xs"
+                    : "bg-white text-[#334155] border border-[#E8E5DF] hover:bg-[#EBF5F5] hover:text-[#4C9A9C]"
                 }`}
               >
                 {c === "all" ? "Tous les avis" : c}
@@ -71,12 +71,12 @@ export function ReviewsSection() {
               className="rounded-3xl bg-white border border-[#E8E5DF] p-6 sm:p-7 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative group"
             >
               {/* Subtle top quote emblem */}
-              <Quote className="w-8 h-8 text-[#F9F8F6] absolute top-6 right-6 group-hover:text-[#EDF3F1] transition-colors" />
+              <Quote className="w-8 h-8 text-[#FBF9F5] absolute top-6 right-6 group-hover:text-[#EBF5F5] transition-colors" />
 
               <div className="space-y-4">
                 {/* Product preview pill */}
                 <div className="flex items-center gap-3 pb-3 border-b border-[#F1F5F9]">
-                  <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-[#F9F8F6] shrink-0 border border-[#E8E5DF]">
+                  <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-[#FBF9F5] shrink-0 border border-[#E8E5DF]">
                     <Image
                       src={rev.productImage}
                       alt={rev.productName}
@@ -97,9 +97,9 @@ export function ReviewsSection() {
 
                 {/* Stars */}
                 <div className="flex items-center gap-1.5">
-                  <div className="flex text-[#E6A15C]">
+                  <div className="flex text-[#FEC748]">
                     {[...Array(rev.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-[#E6A15C]" />
+                      <Star key={i} className="w-4 h-4 fill-[#FEC748]" />
                     ))}
                   </div>
                   {rev.verified && (
@@ -122,7 +122,7 @@ export function ReviewsSection() {
                   <h6 className="font-serif-brand font-bold text-sm text-[#1E293B]">
                     {rev.authorName}
                   </h6>
-                  <p className="text-xs text-[#1A3C34] font-medium">{rev.city}</p>
+                  <p className="text-xs text-[#4C9A9C] font-medium">{rev.city}</p>
                 </div>
                 <span className="text-[11px] text-[#94A3B8]">{rev.date}</span>
               </div>
@@ -133,19 +133,19 @@ export function ReviewsSection() {
         {/* Social Proof Badges Strip */}
         <div className="mt-16 p-6 sm:p-8 rounded-3xl bg-white border border-[#E8E5DF] shadow-xs grid grid-cols-2 lg:grid-cols-4 gap-6 text-center">
           <div>
-            <p className="font-serif-brand text-3xl sm:text-4xl font-bold text-[#1A3C34]">99.4%</p>
+            <p className="font-serif-brand text-3xl sm:text-4xl font-bold text-[#4C9A9C]">99.4%</p>
             <p className="text-xs text-[#64748B] mt-1">Satisfaction client certifiée</p>
           </div>
           <div>
-            <p className="font-serif-brand text-3xl sm:text-4xl font-bold text-[#C85A32]">24/48h</p>
+            <p className="font-serif-brand text-3xl sm:text-4xl font-bold text-[#FE7C58]">24/48h</p>
             <p className="text-xs text-[#64748B] mt-1">Délai moyen de livraison au Maroc</p>
           </div>
           <div>
-            <p className="font-serif-brand text-3xl sm:text-4xl font-bold text-[#1A3C34]">14 Jours</p>
+            <p className="font-serif-brand text-3xl sm:text-4xl font-bold text-[#4C9A9C]">14 Jours</p>
             <p className="text-xs text-[#64748B] mt-1">Échange de pointure sans frais</p>
           </div>
           <div>
-            <p className="font-serif-brand text-3xl sm:text-4xl font-bold text-[#C85A32]">100%</p>
+            <p className="font-serif-brand text-3xl sm:text-4xl font-bold text-[#FE7C58]">100%</p>
             <p className="text-xs text-[#64748B] mt-1">Cuir naturel tanné végétal</p>
           </div>
         </div>

@@ -20,21 +20,21 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "default", size = "md", asChild = false, children, ...props }, ref) => {
     const variants = {
       default:
-        "bg-[#1A3C34] text-white hover:bg-[#132E27] shadow-md shadow-[#1A3C34]/20 active:scale-[0.98] border border-transparent",
+        "bg-[#4C9A9C] text-white hover:bg-[#3E8688] shadow-md shadow-[#4C9A9C]/20 active:scale-[0.98] border border-transparent",
       teal:
-        "bg-[#1A3C34] text-white hover:bg-[#132E27] shadow-md shadow-[#1A3C34]/20 active:scale-[0.98] border border-transparent",
+        "bg-[#4C9A9C] text-white hover:bg-[#3E8688] shadow-md shadow-[#4C9A9C]/20 active:scale-[0.98] border border-transparent",
       orange:
-        "bg-[#C85A32] text-white font-semibold hover:bg-[#B24E2A] shadow-md shadow-[#C85A32]/25 active:scale-[0.98] border border-transparent",
+        "bg-[#FE7C58] text-white font-semibold hover:bg-[#E96843] shadow-md shadow-[#FE7C58]/25 active:scale-[0.98] border border-transparent",
       gold:
-        "bg-[#E6A15C] text-[#1A2825] font-semibold hover:bg-[#D7924A] shadow-md shadow-[#E6A15C]/25 active:scale-[0.98] border border-transparent",
+        "bg-[#FEC748] text-[#1C2A2B] font-semibold hover:bg-[#EDB330] shadow-md shadow-[#FEC748]/25 active:scale-[0.98] border border-transparent",
       secondary:
-        "bg-[#F9F8F6] text-[#1A2825] hover:bg-[#F2EFEB] border border-[#E5E1D8] active:scale-[0.98]",
+        "bg-[#FBF9F5] text-[#1C2A2B] hover:bg-[#F3EFE9] border border-[#E6E1D8] active:scale-[0.98]",
       outline:
-        "border border-[#1A3C34] text-[#1A3C34] hover:bg-[#1A3C34] hover:text-white active:scale-[0.98]",
+        "border border-[#4C9A9C] text-[#4C9A9C] hover:bg-[#4C9A9C] hover:text-white active:scale-[0.98]",
       orangeOutline:
-        "border border-[#C85A32] text-[#C85A32] hover:bg-[#C85A32] hover:text-white active:scale-[0.98]",
+        "border border-[#FE7C58] text-[#FE7C58] hover:bg-[#FE7C58] hover:text-white active:scale-[0.98]",
       ghost:
-        "text-[#1A2825] hover:bg-[#EDF3F1] hover:text-[#1A3C34]",
+        "text-[#1C2A2B] hover:bg-[#EBF5F5] hover:text-[#4C9A9C]",
     };
 
     const sizes = {
@@ -45,7 +45,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const combinedClassName = cn(
-      "inline-flex items-center justify-center font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C85A32] disabled:pointer-events-none disabled:opacity-50 cursor-pointer",
+      "inline-flex items-center justify-center font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FE7C58] disabled:pointer-events-none disabled:opacity-50 cursor-pointer",
       variants[variant] || variants.default,
       sizes[size] || sizes.md,
       className

@@ -49,11 +49,11 @@ export default function AdminLoginPage() {
           {/* Logo & Header */}
           <div className="text-center mb-8">
             <div className="mx-auto mb-4 size-16 overflow-hidden rounded-2xl shadow-sm">
-              <img src="/images/logoo.png" alt="TefLook" className="size-full object-cover" />
+              <img src="/images/Untitled Design.png" alt="TefLook" className="size-full object-cover" />
             </div>
             <h1 className="font-display text-2xl font-black tracking-tight text-foreground">
-              <span className="text-brand-forest">Tef</span>
-              <span className="text-brand-terracotta">Look</span>{" "}
+              <span className="text-[#4C9A9C]">Tef</span>
+              <span className="text-[#FE7C58]">Look</span>{" "}
               <span className="text-foreground/90">Admin</span>
             </h1>
             <p className="mt-1 text-xs text-muted-foreground">

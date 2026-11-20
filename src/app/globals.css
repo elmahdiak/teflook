@@ -1,66 +1,65 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-forest: #1A3C34;
-  --color-brand-forest-hover: #132E27;
-  --color-brand-forest-dark: #0F241F;
-  --color-brand-terracotta: #C85A32;
-  --color-brand-terracotta-hover: #B24E2A;
-  --color-brand-terracotta-deep: #9F4120;
-  --color-brand-amber: #E6A15C;
-  --color-brand-amber-hover: #D7924A;
-  --color-brand-cream: #F9F8F6;
-  --color-brand-sand: #F2EFEB;
-  --color-brand-mist: #EDF3F1;
-  --color-brand-warm-tint: #FBF1EC;
-
-  /* Backward compatible semantic aliases */
-  --color-brand-teal: #1A3C34;
-  --color-brand-teal-hover: #132E27;
-  --color-brand-orange: #C85A32;
-  --color-brand-orange-deep: #9F4120;
+  /* Exact color hierarchy extracted from new TefLook logo */
+  --color-brand-teal: #4C9A9C;
+  --color-brand-teal-hover: #3E8688;
+  --color-brand-teal-dark: #2C6466;
+  --color-brand-forest: #2C6466;
+  --color-brand-forest-hover: #214F50;
+  --color-brand-forest-dark: #193E3F;
+  
+  --color-brand-orange: #FE7C58;
+  --color-brand-orange-hover: #E96843;
+  --color-brand-orange-deep: #CF5632;
+  --color-brand-terracotta: #FE7C58;
+  
+  --color-brand-amber: #FEC748;
+  --color-brand-amber-hover: #EDB330;
+  
+  --color-brand-cream: #FBF9F5;
+  --color-brand-sand: #F3EFE9;
+  --color-brand-mist: #EBF5F5;
+  --color-brand-warm-tint: #FDF2EE;
 }
 
 :root {
-  --background: #F9F8F6;
-  --foreground: #1A2825;
+  --background: #FBF9F5;
+  --foreground: #1C2A2B;
   
-  --primary: #1A3C34;
-  --primary-hover: #132E27;
-  --primary-foreground: #F9F8F6;
+  --primary: #4C9A9C;
+  --primary-hover: #3E8688;
+  --primary-foreground: #FFFFFF;
   
-  --secondary: #F2EFEB;
-  --secondary-foreground: #1A2825;
+  --secondary: #F3EFE9;
+  --secondary-foreground: #1C2A2B;
   
   --card: #FFFFFF;
-  --card-foreground: #1A2825;
+  --card-foreground: #1C2A2B;
   
-  --muted: #EBE7E0;
-  --muted-foreground: #5E6D68;
+  --muted: #EDE8DF;
+  --muted-foreground: #5C6F70;
   
-  --border: #E5E1D8;
-  --input: #E5E1D8;
-  --ring: #1A3C34;
+  --border: #E6E1D8;
+  --input: #E6E1D8;
+  --ring: #4C9A9C;
   
   --destructive: #EF4444;
   --destructive-foreground: #FFFFFF;
   
   /* Brand specific colors matching new logo */
-  --brand-forest: #1A3C34;
-  --brand-forest-hover: #132E27;
-  --brand-terracotta: #C85A32;
-  --brand-terracotta-deep: #9F4120;
-  --brand-amber: #E6A15C;
-  --brand-cream: #F9F8F6;
-  --brand-sand: #F2EFEB;
-  --brand-mist: #EDF3F1;
-  --brand-warm-tint: #FBF1EC;
-
-  /* Backward compatible aliases */
-  --brand-teal: #1A3C34;
-  --brand-teal-hover: #132E27;
-  --brand-orange: #C85A32;
-  --brand-orange-deep: #9F4120;
+  --brand-teal: #4C9A9C;
+  --brand-teal-hover: #3E8688;
+  --brand-forest: #2C6466;
+  --brand-forest-hover: #214F50;
+  --brand-orange: #FE7C58;
+  --brand-orange-deep: #CF5632;
+  --brand-terracotta: #FE7C58;
+  --brand-amber: #FEC748;
+  --brand-cream: #FBF9F5;
+  --brand-sand: #F3EFE9;
+  --brand-mist: #EBF5F5;
+  --brand-warm-tint: #FDF2EE;
   --accent-foreground: #FFFFFF;
 }
 
@@ -85,6 +84,16 @@ body {
 }
 
 /* TefLook Brand utilities */
+.text-brand-teal {
+  color: var(--brand-teal);
+}
+.bg-brand-teal {
+  background-color: var(--brand-teal);
+}
+.border-brand-teal {
+  border-color: var(--brand-teal);
+}
+
 .text-brand-forest {
   color: var(--brand-forest);
 }
@@ -93,6 +102,16 @@ body {
 }
 .border-brand-forest {
   border-color: var(--brand-forest);
+}
+
+.text-brand-orange {
+  color: var(--brand-orange);
+}
+.bg-brand-orange {
+  background-color: var(--brand-orange);
+}
+.text-brand-orange-deep {
+  color: var(--brand-orange-deep);
 }
 
 .text-brand-terracotta {
@@ -126,27 +145,6 @@ body {
 }
 .bg-brand-warm-tint {
   background-color: var(--brand-warm-tint);
-}
-
-/* Backward-compatible utilities */
-.text-brand-teal {
-  color: var(--brand-teal);
-}
-.bg-brand-teal {
-  background-color: var(--brand-teal);
-}
-.border-brand-teal {
-  border-color: var(--brand-teal);
-}
-
-.text-brand-orange {
-  color: var(--brand-orange);
-}
-.bg-brand-orange {
-  background-color: var(--brand-orange);
-}
-.text-brand-orange-deep {
-  color: var(--brand-orange-deep);
 }
 
 .bg-primary {
@@ -207,8 +205,8 @@ body {
 
 /* Hero Section Banner */
 .hero-photo {
-  background-color: #F9F8F6;
-  background-image: linear-gradient(to right, #F9F8F6 48%, rgba(249, 248, 246, 0.45) 68%, transparent 100%), url('/images/hero-family.jpg');
+  background-color: #FBF9F5;
+  background-image: linear-gradient(to right, #FBF9F5 48%, rgba(251, 249, 245, 0.45) 68%, transparent 100%), url('/images/hero-family.jpg');
   background-position: right center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -217,13 +215,13 @@ body {
 }
 
 [dir="rtl"] .hero-photo {
-  background-image: linear-gradient(to left, #F9F8F6 48%, rgba(249, 248, 246, 0.45) 68%, transparent 100%), url('/images/hero-family.jpg');
+  background-image: linear-gradient(to left, #FBF9F5 48%, rgba(251, 249, 245, 0.45) 68%, transparent 100%), url('/images/hero-family.jpg');
   background-position: left center;
 }
 
 @media (max-width: 640px) {
   .hero-photo {
-    background-image: linear-gradient(to bottom, rgba(249, 248, 246, 0.94) 0%, rgba(249, 248, 246, 0.78) 100%), url('/images/hero-family.jpg');
+    background-image: linear-gradient(to bottom, rgba(251, 249, 245, 0.94) 0%, rgba(251, 249, 245, 0.78) 100%), url('/images/hero-family.jpg');
     background-position: center top;
   }
 }
@@ -275,12 +273,12 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #F9F8F6;
+  background: #FBF9F5;
 }
 ::-webkit-scrollbar-thumb {
   background: #D8D2C6;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #1A3C34;
+  background: #4C9A9C;
 }

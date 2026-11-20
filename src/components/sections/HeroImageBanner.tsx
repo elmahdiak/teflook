@@ -5,7 +5,7 @@ import Image from "next/image";
 
 export function HeroImageBanner() {
   return (
-    <div className="relative w-full h-[360px] sm:h-[480px] md:h-[580px] lg:h-[680px] xl:h-[760px] overflow-hidden bg-[#F9F8F6] select-none">
+    <div className="relative w-full h-[360px] sm:h-[480px] md:h-[580px] lg:h-[680px] xl:h-[760px] overflow-hidden bg-[#FBF9F5] select-none">
       {/* High-Resolution Lifestyle Photography: Mother, Father, and Child */}
       <Image
         src="https://images.unsplash.com/photo-1609234656388-0ff363383899?q=80&w=2400&auto=format&fit=crop"

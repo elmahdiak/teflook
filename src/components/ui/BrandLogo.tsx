@@ -36,7 +36,7 @@ export function BrandLogo({
     xl: "text-4xl sm:text-5xl",
   };
 
-  const logoSrc = variant === "dark" ? "/images/logoodark.png" : "/images/logoo.png";
+  const logoSrc = variant === "dark" ? "/images/Untitled design (1).png" : "/images/Untitled Design.png";
 
   const content = (
     <div className={cn("inline-flex items-center gap-2.5 sm:gap-3 group select-none", className)}>
@@ -57,7 +57,7 @@ export function BrandLogo({
         />
       </div>
 
-      {/* 2. Sharp Wordmark ('Tef' in Forest Green / Cream, 'Look' in Terracotta / Amber) */}
+      {/* 2. Sharp Wordmark ('Tef' in Teal / Cream, 'Look' in Warm Coral-Orange / Amber) */}
       {showText && (
         <div
           className={cn(
@@ -67,13 +67,13 @@ export function BrandLogo({
         >
           {variant === "dark" ? (
             <>
-              <span className="text-[#F9F8F6] tracking-tight">Tef</span>
-              <span className="text-[#E6A15C] tracking-tight">Look</span>
+              <span className="text-[#FBF9F5] tracking-tight">Tef</span>
+              <span className="text-[#FEC748] tracking-tight">Look</span>
             </>
           ) : (
             <>
-              <span className="text-[#1A3C34] tracking-tight">Tef</span>
-              <span className="text-[#C85A32] tracking-tight">Look</span>
+              <span className="text-[#4C9A9C] tracking-tight">Tef</span>
+              <span className="text-[#FE7C58] tracking-tight">Look</span>
             </>
           )}
         </div>
@@ -85,7 +85,7 @@ export function BrandLogo({
     return (
       <Link
         href={href}
-        className="inline-flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C85A32] rounded-xl"
+        className="inline-flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FE7C58] rounded-xl"
         aria-label="TefLook - Accueil"
       >
         {content}

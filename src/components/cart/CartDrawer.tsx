@@ -71,21 +71,21 @@ export function CartDrawer() {
       />
 
       {/* Drawer */}
-      <div className="relative w-full max-w-md bg-[#F9F8F6] text-[#1E293B] shadow-2xl flex flex-col h-full z-10 animate-in slide-in-from-right duration-300 border-l border-[#E8E5DF]">
+      <div className="relative w-full max-w-md bg-[#FBF9F5] text-[#1E293B] shadow-2xl flex flex-col h-full z-10 animate-in slide-in-from-right duration-300 border-l border-[#E8E5DF]">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-[#E8E5DF] bg-white">
           <div className="flex items-center gap-3">
-            <ShoppingBag className="w-5 h-5 text-[#C85A32]" />
+            <ShoppingBag className="w-5 h-5 text-[#FE7C58]" />
             <h3 className="font-serif-brand text-2xl font-bold tracking-tight text-[#1E293B]">
               Votre Panier
             </h3>
-            <span className="text-xs bg-[#EDF3F1] text-[#1A3C34] font-bold px-2.5 py-0.5 rounded-full border border-[#1A3C34]/30">
+            <span className="text-xs bg-[#EBF5F5] text-[#4C9A9C] font-bold px-2.5 py-0.5 rounded-full border border-[#4C9A9C]/30">
               {totalItems} {totalItems > 1 ? "articles" : "article"}
             </span>
           </div>
           <button
             onClick={() => setIsCartOpen(false)}
-            className="p-2 rounded-full hover:bg-[#F9F8F6] text-[#64748B] hover:text-[#1E293B] transition-colors"
+            className="p-2 rounded-full hover:bg-[#FBF9F5] text-[#64748B] hover:text-[#1E293B] transition-colors"
             aria-label="Fermer le panier"
           >
             <X className="w-5 h-5" />
@@ -93,14 +93,14 @@ export function CartDrawer() {
         </div>
 
         {/* Free Shipping Progress */}
-        <div className="px-6 py-3.5 bg-[#EDF3F1] border-b border-[#E8E5DF]">
+        <div className="px-6 py-3.5 bg-[#EBF5F5] border-b border-[#E8E5DF]">
           <div className="flex items-center justify-between text-xs font-medium text-[#1E293B] mb-1.5">
             <span className="flex items-center gap-1.5">
-              <Truck className="w-3.5 h-3.5 text-[#C85A32]" />
+              <Truck className="w-3.5 h-3.5 text-[#FE7C58]" />
               {remaining > 0 ? (
                 <>
                   Ajoutez{" "}
-                  <strong className="text-[#C85A32]">
+                  <strong className="text-[#FE7C58]">
                     {remaining.toFixed(0)} {currency}
                   </strong>{" "}
                   pour la livraison offerte !
@@ -111,11 +111,11 @@ export function CartDrawer() {
                 </span>
               )}
             </span>
-            <span className="text-[#1A3C34] font-bold">{progressPercent}%</span>
+            <span className="text-[#4C9A9C] font-bold">{progressPercent}%</span>
           </div>
           <div className="w-full bg-white h-1.5 rounded-full overflow-hidden border border-[#E8E5DF]">
             <div
-              className="bg-[#C85A32] h-full rounded-full transition-all duration-500"
+              className="bg-[#FE7C58] h-full rounded-full transition-all duration-500"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -125,7 +125,7 @@ export function CartDrawer() {
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
           {items.length === 0 ? (
             <div className="text-center py-16 space-y-4">
-              <div className="w-20 h-20 mx-auto rounded-full bg-[#EDF3F1] border border-[#1A3C34]/30 flex items-center justify-center text-[#1A3C34]">
+              <div className="w-20 h-20 mx-auto rounded-full bg-[#EBF5F5] border border-[#4C9A9C]/30 flex items-center justify-center text-[#4C9A9C]">
                 <ShoppingBag className="w-10 h-10" />
               </div>
               <p className="font-serif-brand text-xl text-[#1E293B]">Votre panier est vide</p>
@@ -149,7 +149,7 @@ export function CartDrawer() {
                   key={`${item.product.id}-${item.selectedSize || "default"}-${index}`}
                   className="flex gap-4 p-3.5 bg-white rounded-2xl border border-[#E8E5DF] shadow-xs"
                 >
-                  <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-[#F9F8F6] shrink-0 border border-[#E8E5DF]">
+                  <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-[#FBF9F5] shrink-0 border border-[#E8E5DF]">
                     <Image
                       src={item.product.images[0]}
                       alt={item.product.name}
@@ -177,13 +177,13 @@ export function CartDrawer() {
                           Pointure: <span className="font-semibold text-[#1E293B]">{item.selectedSize}</span>
                         </p>
                       )}
-                      <p className="text-xs font-bold text-[#1A3C34] mt-0.5">
+                      <p className="text-xs font-bold text-[#4C9A9C] mt-0.5">
                         {price} {currency}
                       </p>
                     </div>
 
                     <div className="flex items-center justify-between pt-2">
-                      <div className="flex items-center border border-[#E8E5DF] rounded-lg bg-[#F9F8F6]">
+                      <div className="flex items-center border border-[#E8E5DF] rounded-lg bg-[#FBF9F5]">
                         <button
                           onClick={() =>
                             updateQuantity(item.product.id, item.quantity - 1, item.selectedSize)
@@ -226,7 +226,7 @@ export function CartDrawer() {
                 placeholder="Code privilège (ex: TEFLOOK10)"
                 value={promoCode}
                 onChange={(e) => setPromoCode(e.target.value)}
-                className="flex-1 text-xs px-3.5 py-2.5 bg-[#F9F8F6] border border-[#E8E5DF] rounded-xl focus:outline-none focus:border-[#1A3C34] uppercase placeholder:normal-case"
+                className="flex-1 text-xs px-3.5 py-2.5 bg-[#FBF9F5] border border-[#E8E5DF] rounded-xl focus:outline-none focus:border-[#4C9A9C] uppercase placeholder:normal-case"
               />
               <Button type="submit" variant="secondary" size="sm" className="text-xs px-3.5 font-semibold">
                 Appliquer
@@ -266,7 +266,7 @@ export function CartDrawer() {
               </div>
               <div className="flex justify-between text-base font-bold text-[#1E293B] pt-2 border-t border-[#E8E5DF]">
                 <span>Total estimé</span>
-                <span className="text-[#C85A32]">
+                <span className="text-[#FE7C58]">
                   {finalTotal.toFixed(0)} {currency}
                 </span>
               </div>
@@ -298,7 +298,7 @@ export function CartDrawer() {
             {/* Guarantee badges */}
             <div className="pt-2 flex items-center justify-center gap-4 text-[11px] text-[#64748B]">
               <span className="flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#1A3C34]" />
+                <ShieldCheck className="w-3.5 h-3.5 text-[#4C9A9C]" />
                 Cuir 100% garanti
               </span>
               <span>•</span>

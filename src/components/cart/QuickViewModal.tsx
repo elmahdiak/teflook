@@ -46,7 +46,7 @@ export function QuickViewModal() {
 
         <div className="grid grid-cols-1 md:grid-cols-2">
           {/* Product Gallery */}
-          <div className="relative bg-[#F9F8F6] p-6 flex flex-col justify-between border-b md:border-b-0 md:border-r border-[#E8E5DF]">
+          <div className="relative bg-[#FBF9F5] p-6 flex flex-col justify-between border-b md:border-b-0 md:border-r border-[#E8E5DF]">
             <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-white shadow-xs border border-[#E8E5DF]">
               <Image
                 src={product.images[activeImageIdx] || product.images[0]}
@@ -70,7 +70,7 @@ export function QuickViewModal() {
                     key={i}
                     onClick={() => setActiveImageIdx(i)}
                     className={`relative w-14 h-14 rounded-xl overflow-hidden border-2 transition-all ${
-                      activeImageIdx === i ? "border-[#C85A32] scale-105" : "border-[#E8E5DF] opacity-70"
+                      activeImageIdx === i ? "border-[#FE7C58] scale-105" : "border-[#E8E5DF] opacity-70"
                     }`}
                   >
                     <Image src={img} alt="Aperçu" fill sizes="56px" className="object-cover" />
@@ -85,10 +85,10 @@ export function QuickViewModal() {
             <div className="space-y-4">
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center gap-2 mb-1">
-                  <span className="text-xs uppercase tracking-widest font-bold text-[#1A3C34]">
+                  <span className="text-xs uppercase tracking-widest font-bold text-[#4C9A9C]">
                     {product.categoryName}
                   </span>
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#C85A32]/15 text-[#C85A32] text-xs font-black">
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#FE7C58]/15 text-[#FE7C58] text-xs font-black">
                     Âge recommandé : {product.ageBracket}
                   </span>
                 </div>
@@ -96,20 +96,20 @@ export function QuickViewModal() {
                   {product.name}
                 </h3>
                 {product.nameAr && (
-                  <p className="font-arabic text-sm text-[#C85A32] font-bold">{product.nameAr}</p>
+                  <p className="font-arabic text-sm text-[#FE7C58] font-bold">{product.nameAr}</p>
                 )}
               </div>
 
               {/* Rating */}
               <div className="flex items-center gap-2">
-                <div className="flex text-[#E6A15C]">
+                <div className="flex text-[#FEC748]">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
                       className={`w-4 h-4 ${
                         i < Math.floor(product.rating)
-                          ? "fill-[#E6A15C]"
-                          : "fill-[#E6A15C]/20"
+                          ? "fill-[#FEC748]"
+                          : "fill-[#FEC748]/20"
                       }`}
                     />
                   ))}
@@ -120,7 +120,7 @@ export function QuickViewModal() {
 
               {/* Price */}
               <div className="flex items-baseline gap-3">
-                <span className="text-3xl font-bold text-[#C85A32]">
+                <span className="text-3xl font-bold text-[#FE7C58]">
                   {price} {currency}
                 </span>
                 <span className="text-xs text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full font-semibold border border-emerald-200">
@@ -133,15 +133,15 @@ export function QuickViewModal() {
               </p>
 
               {/* Leather Details */}
-              <div className="p-3 bg-[#EDF3F1] rounded-xl border border-[#1A3C34]/20 text-xs space-y-1.5">
+              <div className="p-3 bg-[#EBF5F5] rounded-xl border border-[#4C9A9C]/20 text-xs space-y-1.5">
                 <div className="flex items-center gap-2 text-[#1E293B] font-semibold">
-                  <ShieldCheck className="w-4 h-4 text-[#1A3C34]" />
+                  <ShieldCheck className="w-4 h-4 text-[#4C9A9C]" />
                   <span>{product.material}</span>
                 </div>
                 <div className="flex flex-wrap gap-2 pt-1 text-[#64748B]">
                   {product.features.map((feat, i) => (
                     <span key={i} className="inline-flex items-center gap-1 font-medium text-[#334155]">
-                      <Check className="w-3 h-3 text-[#C85A32]" /> {feat}
+                      <Check className="w-3 h-3 text-[#FE7C58]" /> {feat}
                     </span>
                   ))}
                 </div>
@@ -154,7 +154,7 @@ export function QuickViewModal() {
                     <span className="font-semibold text-[#1E293B]">
                       Pointure marocaine / européenne :
                     </span>
-                    <span className="text-[#1A3C34] font-medium hover:underline cursor-pointer">
+                    <span className="text-[#4C9A9C] font-medium hover:underline cursor-pointer">
                       Guide des tailles
                     </span>
                   </div>
@@ -165,8 +165,8 @@ export function QuickViewModal() {
                         onClick={() => setSelectedSize(sz)}
                         className={`w-10 h-10 rounded-xl text-xs font-bold border transition-all ${
                           selectedSize === sz
-                            ? "bg-[#1A3C34] text-white border-[#1A3C34] shadow-sm"
-                            : "bg-white text-[#1E293B] border-[#E8E5DF] hover:border-[#C85A32]"
+                            ? "bg-[#4C9A9C] text-white border-[#4C9A9C] shadow-sm"
+                            : "bg-white text-[#1E293B] border-[#E8E5DF] hover:border-[#FE7C58]"
                         }`}
                       >
                         {sz}
@@ -189,11 +189,11 @@ export function QuickViewModal() {
               </Button>
               <div className="grid grid-cols-2 gap-2 text-[11px] text-[#64748B] pt-1">
                 <div className="flex items-center gap-1.5">
-                  <Truck className="w-3.5 h-3.5 text-[#C85A32]" />
+                  <Truck className="w-3.5 h-3.5 text-[#FE7C58]" />
                   <span>Livraison partout au Maroc</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <RotateCcw className="w-3.5 h-3.5 text-[#1A3C34]" />
+                  <RotateCcw className="w-3.5 h-3.5 text-[#4C9A9C]" />
                   <span>Échange gratuit garanti</span>
                 </div>
               </div>
