@@ -7,11 +7,8 @@ import {
 } from "@/lib/shopify-storefront";
 import { ProductDetailView } from "@/components/product/ProductDetailView";
 
-export function generateStaticParams() {
-  return MOCK_SHOPIFY_PRODUCTS.map((product) => ({
-    handle: product.handle,
-  }));
-}
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function generateMetadata({
   params,

@@ -1,4 +1,4 @@
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, type ErrorComponentProps } from "@tanstack/react-router";
 import {
   ArrowDown,
@@ -86,7 +86,7 @@ const formatPrice = (price: { amount: string; currencyCode: string }, locale: "f
 const productsQueryOptions = queryOptions({
   queryKey: ["teflook-shopify-products"],
   queryFn: fetchProducts,
-  staleTime: 60_000,
+  staleTime: 0,
 });
 
 interface CategoryPillarTheme {
@@ -152,6 +152,7 @@ const categoryIcons: Record<ChildStoreCategory, LucideIcon> = {
 };
 
 function TefLookStorefront() {
+  const queryClient = useQueryClient();
   const { data: products } = useSuspenseQuery(productsQueryOptions);
   const { direction, locale, t } = useTefLookLanguage();
   const [activeCategory, setActiveCategory] = useState<ChildStoreCategory | "all">("all");
@@ -164,7 +165,26 @@ function TefLookStorefront() {
 
   useEffect(() => {
     void useCartStore.persist.rehydrate();
-  }, []);
+
+    const handleSync = () => {
+      queryClient.invalidateQueries({ queryKey: ["teflook-shopify-products"] });
+      queryClient.refetchQueries({ queryKey: ["teflook-shopify-products"] });
+    };
+
+    window.addEventListener("teflook:products-updated", handleSync);
+    window.addEventListener("storage", handleSync);
+
+    const channel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("teflook_sync") : null;
+    if (channel) {
+      channel.onmessage = handleSync;
+    }
+
+    return () => {
+      window.removeEventListener("teflook:products-updated", handleSync);
+      window.removeEventListener("storage", handleSync);
+      channel?.close();
+    };
+  }, [queryClient]);
 
   const filteredProducts = useMemo(() => {
     const normalizedQuery = searchTerm.trim().toLocaleLowerCase("fr");

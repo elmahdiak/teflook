@@ -224,6 +224,19 @@ export function deleteStoreProduct(productId: string): boolean {
   return true;
 }
 
+export function clearStoreProducts(): boolean {
+  ensureDirectoryExists();
+  fs.writeFileSync(PRODUCTS_FILE, JSON.stringify([], null, 2), "utf-8");
+  return true;
+}
+
+export function resetStoreProductsToDefault(): AdminProduct[] {
+  ensureDirectoryExists();
+  const initial = getInitialProducts();
+  fs.writeFileSync(PRODUCTS_FILE, JSON.stringify(initial, null, 2), "utf-8");
+  return initial;
+}
+
 /* ========================================================================= */
 /* CATEGORIES STORE                                                          */
 /* ========================================================================= */

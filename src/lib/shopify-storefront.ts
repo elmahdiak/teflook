@@ -97,50 +97,58 @@ const productCustomImages: Record<string, string[]> = {
   ],
 };
 
-export const MOCK_SHOPIFY_PRODUCTS: ShopifyProduct[] = PRODUCTS.map((item: ProductItem) => {
+export function mapItemToShopifyProduct(item: any): ShopifyProduct {
   const category = slugToCategoryMap[item.categorySlug] || "discipline";
   const overrideImages = productCustomImages[item.id];
-  const rawImages = overrideImages && overrideImages.length > 0
-    ? overrideImages
-    : (item.images && item.images.length > 0 ? item.images : ["https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=800&auto=format&fit=crop"]);
+  const rawImages =
+    overrideImages && overrideImages.length > 0
+      ? overrideImages
+      : item.images && item.images.length > 0
+      ? item.images
+      : ["https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=800&auto=format&fit=crop"];
 
-  // Ensure at least 2 gallery images for rich PDP preview
-  const finalImages = rawImages.length === 1
-    ? [rawImages[0], "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=800&auto=format&fit=crop"]
-    : rawImages;
+  const finalImages =
+    rawImages.length === 1
+      ? [rawImages[0], "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=800&auto=format&fit=crop"]
+      : rawImages;
 
-  const compareAtAmount = item.oldPriceMad ? item.oldPriceMad.toFixed(2) : undefined;
+  const compareAtAmount = item.oldPriceMad ? Number(item.oldPriceMad).toFixed(2) : undefined;
   const trAr = PRODUCT_TRANSLATIONS_AR[item.id];
+  const priceMadNum = Number(item.priceMad || 0);
+  const priceFormatted = priceMadNum.toFixed(2);
+
+  const title = item.title || item.name || "Produit TefLook";
+  const description = item.description || "";
 
   return {
     id: item.id,
-    title: item.name,
-    title_fr: item.name,
-    title_ar: trAr?.title || item.name,
-    handle: item.id,
-    description: item.description,
-    description_fr: item.description,
-    description_ar: trAr?.description || item.description,
-    vendor: item.brand || "TefLook",
-    vendor_ar: "تيفلوك",
-    productType: item.categoryName,
-    productType_ar: trAr?.categoryName || item.categoryName,
-    categoryNameAr: trAr?.categoryName || item.categoryName,
+    title,
+    title_fr: item.title_fr || title,
+    title_ar: item.title_ar || trAr?.title || title,
+    handle: item.handle || item.id,
+    description,
+    description_fr: item.description_fr || description,
+    description_ar: item.description_ar || trAr?.description || description,
+    vendor: item.brand || item.vendor || "TefLook",
+    vendor_ar: item.vendor_ar || "تيفلوك",
+    productType: item.categoryName || item.productType || "Éveil & Développement",
+    productType_ar: item.categoryName_ar || trAr?.categoryName || item.categoryName || "النمو والتطوير",
+    categoryNameAr: item.categoryName_ar || trAr?.categoryName || item.categoryName || "النمو والتطوير",
     category,
     material: item.material,
-    material_ar: trAr?.material || item.material,
+    material_ar: item.material_ar || trAr?.material || item.material,
     origin: item.origin,
-    origin_ar: trAr?.origin || item.origin,
+    origin_ar: item.origin_ar || trAr?.origin || item.origin,
     rating: item.rating || 4.9,
     reviewsCount: item.reviewsCount || 48,
     features: item.features || [],
-    features_ar: trAr?.features || item.features || [],
+    features_ar: item.features_ar || trAr?.features || item.features || [],
     tags: [category, item.categorySlug, item.ageBracket, ...(item.features || [])],
     images: {
-      edges: finalImages.map((url) => ({
+      edges: finalImages.map((url: string) => ({
         node: {
           url,
-          altText: item.name,
+          altText: title,
         },
       })),
     },
@@ -150,9 +158,9 @@ export const MOCK_SHOPIFY_PRODUCTS: ShopifyProduct[] = PRODUCTS.map((item: Produ
           node: {
             id: `var-${item.id}`,
             title: item.ageBracket || "Standard",
-            availableForSale: item.inStock,
+            availableForSale: item.inStock !== false,
             price: {
-              amount: item.priceMad.toFixed(2),
+              amount: priceFormatted,
               currencyCode: "MAD",
             },
             compareAtPrice: compareAtAmount
@@ -173,7 +181,7 @@ export const MOCK_SHOPIFY_PRODUCTS: ShopifyProduct[] = PRODUCTS.map((item: Produ
     },
     priceRange: {
       minVariantPrice: {
-        amount: item.priceMad.toFixed(2),
+        amount: priceFormatted,
         currencyCode: "MAD",
       },
     },
@@ -186,15 +194,59 @@ export const MOCK_SHOPIFY_PRODUCTS: ShopifyProduct[] = PRODUCTS.map((item: Produ
         }
       : undefined,
   };
-});
+}
+
+export const MOCK_SHOPIFY_PRODUCTS: ShopifyProduct[] = PRODUCTS.map((item: ProductItem) =>
+  mapItemToShopifyProduct(item)
+);
 
 export async function fetchProducts(): Promise<ShopifyProduct[]> {
+  // 1. Client-Side (Browser): Fetch live products from /api/products
+  if (typeof window !== "undefined") {
+    try {
+      const res = await fetch("/api/products", { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          // Sync localStorage cache
+          try {
+            localStorage.setItem("teflook_admin_products_v2", JSON.stringify(data));
+          } catch {}
+          return data.map(mapItemToShopifyProduct);
+        }
+      }
+    } catch (e) {
+      console.warn("Client fetch /api/products failed, trying localStorage:", e);
+    }
+
+    // Fallback to localStorage if API unreachable
+    try {
+      const local = localStorage.getItem("teflook_admin_products_v2");
+      if (local) {
+        const parsed = JSON.parse(local);
+        if (Array.isArray(parsed)) {
+          return parsed.map(mapItemToShopifyProduct);
+        }
+      }
+    } catch {}
+  } else {
+    // 2. Server-Side (Node.js runtime / SSR / SSG): Read directly from persistent server store
+    try {
+      const { getStoreProducts } = await import("./server-store");
+      const serverProducts = getStoreProducts();
+      return serverProducts.map(mapItemToShopifyProduct);
+    } catch (e) {
+      console.warn("Server store fetch failed, falling back to initial data:", e);
+    }
+  }
+
   return MOCK_SHOPIFY_PRODUCTS;
 }
 
 export async function fetchProductByHandle(handle: string): Promise<ShopifyProduct | null> {
   const normalized = handle.trim().toLowerCase();
-  const product = MOCK_SHOPIFY_PRODUCTS.find(
+  const products = await fetchProducts();
+  const product = products.find(
     (p) => p.handle.toLowerCase() === normalized || p.id.toLowerCase() === normalized
   );
   return product || null;
@@ -205,7 +257,8 @@ export async function fetchRelatedProducts(
   currentId?: string,
   limit = 4
 ): Promise<ShopifyProduct[]> {
-  const pool = MOCK_SHOPIFY_PRODUCTS.filter((p) => p.id !== currentId);
+  const products = await fetchProducts();
+  const pool = products.filter((p) => p.id !== currentId);
   const sameCategory = pool.filter((p) => p.category === category);
   if (sameCategory.length >= limit) {
     return sameCategory.slice(0, limit);

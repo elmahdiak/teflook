@@ -262,6 +262,21 @@ export function getAdminProducts(): AdminProduct[] {
   }
 }
 
+function notifyProductSync() {
+  if (typeof window !== "undefined") {
+    try {
+      window.dispatchEvent(new CustomEvent("teflook:products-updated"));
+      if (typeof BroadcastChannel !== "undefined") {
+        const channel = new BroadcastChannel("teflook_sync");
+        channel.postMessage({ type: "products_updated", timestamp: Date.now() });
+        channel.close();
+      }
+    } catch (e) {
+      console.warn("notifyProductSync error:", e);
+    }
+  }
+}
+
 export function saveAdminProduct(product: Omit<AdminProduct, "id" | "handle"> & { id?: string }): AdminProduct {
   const current = getAdminProducts();
   const id = product.id || `prod-custom-${Date.now()}`;
@@ -284,6 +299,14 @@ export function saveAdminProduct(product: Omit<AdminProduct, "id" | "handle"> & 
 
   if (typeof window !== "undefined") {
     localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(updated));
+    // Asynchronously sync with Next.js backend store
+    fetch("/api/products", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newProduct),
+    }).catch((err) => console.warn("API product sync failed:", err));
+
+    notifyProductSync();
   }
   return newProduct;
 }
@@ -295,8 +318,37 @@ export function deleteAdminProduct(productId: string): boolean {
 
   if (typeof window !== "undefined") {
     localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(filtered));
+    fetch(`/api/products?id=${encodeURIComponent(productId)}`, {
+      method: "DELETE",
+    }).catch((err) => console.warn("API product delete sync failed:", err));
+
+    notifyProductSync();
   }
   return true;
+}
+
+export function clearAllAdminProducts(): boolean {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify([]));
+    fetch("/api/products?all=true", {
+      method: "DELETE",
+    }).catch((err) => console.warn("API clear all sync failed:", err));
+
+    notifyProductSync();
+  }
+  return true;
+}
+
+export function resetAllAdminProducts(): AdminProduct[] {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(SEEDED_PRODUCTS));
+    fetch("/api/products?reset=true", {
+      method: "DELETE",
+    }).catch((err) => console.warn("API reset sync failed:", err));
+
+    notifyProductSync();
+  }
+  return SEEDED_PRODUCTS;
 }
 
 /* ========================================================================= */

@@ -28,7 +28,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { BrandLogo } from "@/components/ui/BrandLogo";
@@ -126,7 +126,8 @@ const formatPrice = (
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 60_000,
+      staleTime: 0,
+      refetchOnWindowFocus: true,
     },
   },
 });
@@ -140,6 +141,7 @@ export default function Page() {
 }
 
 function TefLookStorefront() {
+  const queryClient = useQueryClient();
   const { data: products = [] } = useQuery({
     queryKey: ["teflook-shopify-products"],
     queryFn: fetchProducts,
@@ -155,7 +157,27 @@ function TefLookStorefront() {
 
   useEffect(() => {
     void useCartStore.persist.rehydrate();
-  }, []);
+
+    // Instant real-time synchronization with admin CRUD actions
+    const handleSync = () => {
+      queryClient.invalidateQueries({ queryKey: ["teflook-shopify-products"] });
+      queryClient.refetchQueries({ queryKey: ["teflook-shopify-products"] });
+    };
+
+    window.addEventListener("teflook:products-updated", handleSync);
+    window.addEventListener("storage", handleSync);
+
+    const channel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("teflook_sync") : null;
+    if (channel) {
+      channel.onmessage = handleSync;
+    }
+
+    return () => {
+      window.removeEventListener("teflook:products-updated", handleSync);
+      window.removeEventListener("storage", handleSync);
+      channel?.close();
+    };
+  }, [queryClient]);
 
   const filteredProducts = useMemo(() => {
     const normalizedQuery = searchTerm.trim().toLocaleLowerCase("fr");
