@@ -343,7 +343,7 @@ function TefLookStorefront() {
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-6 sm:gap-4 lg:gap-5">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:grid-cols-6 lg:gap-5">
           {categories.map((category) => {
             const isSelected = activeCategory === category.value;
             const theme = CATEGORY_THEMES[category.value];
@@ -360,36 +360,37 @@ function TefLookStorefront() {
                   );
                   document.getElementById("boutique")?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className={`group relative flex min-h-[205px] sm:min-h-[225px] flex-col items-center justify-between rounded-3xl p-4 sm:p-5 text-center transition-all duration-300 cursor-pointer ${
+                className={`group relative flex min-h-[140px] sm:min-h-[225px] flex-col items-center justify-between rounded-2xl sm:rounded-3xl p-2 sm:p-5 text-center transition-all duration-300 cursor-pointer ${
                   isSelected
-                    ? "border-2 border-[#4b9797] bg-[#F4F9F9] shadow-md ring-4 ring-[#4b9797]/15 scale-[1.02]"
+                    ? "border-2 border-[#4b9797] bg-[#F4F9F9] shadow-md ring-2 sm:ring-4 ring-[#4b9797]/15 scale-[1.02]"
                     : "border border-[#EAE7DF] bg-white text-card-foreground shadow-xs hover:border-[#4b9797]/50 hover:bg-[#FAF9F6] hover:shadow-md hover:-translate-y-1"
                 }`}
               >
                 {/* 2D Vector Graphic Icon in Soft Rounded Container */}
-                <div className="relative mb-3 flex items-center justify-center">
+                <div className="relative mb-1.5 sm:mb-3 flex items-center justify-center">
                   <div
-                    className={`size-14 sm:size-16 rounded-2xl flex items-center justify-center transition-all duration-300 ${theme.bgTint} ${
+                    className={`size-10 sm:size-16 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all duration-300 ${theme.bgTint} ${
                       isSelected ? "scale-105 shadow-xs" : "group-hover:scale-110"
                     }`}
                   >
-                    <Icon className={`size-7 sm:size-8 ${theme.iconColor} stroke-[2.2] transition-transform duration-300`} />
+                    <Icon className={`size-5 sm:size-8 ${theme.iconColor} stroke-[2.2] transition-transform duration-300`} />
                   </div>
                   {isSelected && (
-                    <span className="absolute -top-1 -right-1 grid size-5 place-items-center rounded-full bg-[#4b9797] text-white shadow-xs">
-                      <Check size={11} strokeWidth={3} />
+                    <span className="absolute -top-1 -right-1 grid size-4 sm:size-5 place-items-center rounded-full bg-[#4b9797] text-white shadow-xs">
+                      <Check size={9} strokeWidth={3} className="sm:hidden" />
+                      <Check size={11} strokeWidth={3} className="hidden sm:block" />
                     </span>
                   )}
                 </div>
 
                 {/* Typography Hierarchy: Subtitle Badge + Bold Title */}
-                <div className="flex flex-1 flex-col justify-center items-center gap-1.5 w-full">
+                <div className="flex flex-1 flex-col justify-center items-center gap-1 sm:gap-1.5 w-full">
                   <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider ${theme.badgeBg} ${theme.badgeText}`}
+                    className={`inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-full text-[9px] sm:text-[11px] font-extrabold uppercase tracking-wider ${theme.badgeBg} ${theme.badgeText}`}
                   >
                     {category.subtitle}
                   </span>
-                  <span className="text-[13px] sm:text-[14px] font-bold text-[#1E293B] group-hover:text-[#4b9797] transition-colors leading-snug line-clamp-2 max-w-[17ch]">
+                  <span className="text-[11px] sm:text-[14px] font-bold text-[#1E293B] group-hover:text-[#4b9797] transition-colors leading-[1.25] sm:leading-snug line-clamp-2 max-w-[17ch]">
                     {category.label}
                   </span>
                 </div>
