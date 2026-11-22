@@ -19,7 +19,9 @@ import {
   Search,
   ShoppingBag,
   Sparkles,
+  Sprout,
   Star,
+  Target,
   Trash2,
   Truck,
   UsersRound,
@@ -87,10 +89,63 @@ const productsQueryOptions = queryOptions({
   staleTime: 60_000,
 });
 
+interface CategoryPillarTheme {
+  icon: LucideIcon;
+  bgTint: string;
+  iconColor: string;
+  badgeBg: string;
+  badgeText: string;
+}
+
+const CATEGORY_THEMES: Record<ChildStoreCategory, CategoryPillarTheme> = {
+  discipline: {
+    icon: Target,
+    bgTint: "bg-[#4b9797]/10 group-hover:bg-[#4b9797]/20",
+    iconColor: "text-[#4b9797]",
+    badgeBg: "bg-[#4b9797]/10",
+    badgeText: "text-[#4b9797]",
+  },
+  emotionalIntelligence: {
+    icon: Heart,
+    bgTint: "bg-[#ff3500]/10 group-hover:bg-[#ff3500]/20",
+    iconColor: "text-[#ff3500]",
+    badgeBg: "bg-[#ff3500]/10",
+    badgeText: "text-[#ff3500]",
+  },
+  independence: {
+    icon: Sprout,
+    bgTint: "bg-[#2B6E73]/10 group-hover:bg-[#2B6E73]/20",
+    iconColor: "text-[#2B6E73]",
+    badgeBg: "bg-[#2B6E73]/10",
+    badgeText: "text-[#2B6E73]",
+  },
+  confidence: {
+    icon: UsersRound,
+    bgTint: "bg-[#ff3500]/10 group-hover:bg-[#ff3500]/20",
+    iconColor: "text-[#ff3500]",
+    badgeBg: "bg-[#ff3500]/10",
+    badgeText: "text-[#ff3500]",
+  },
+  creativity: {
+    icon: Palette,
+    bgTint: "bg-[#ffbf00]/15 group-hover:bg-[#ffbf00]/25",
+    iconColor: "text-[#d99000]",
+    badgeBg: "bg-[#ffbf00]/15",
+    badgeText: "text-[#b47b00]",
+  },
+  criticalThinking: {
+    icon: Puzzle,
+    bgTint: "bg-[#4b9797]/10 group-hover:bg-[#4b9797]/20",
+    iconColor: "text-[#4b9797]",
+    badgeBg: "bg-[#4b9797]/10",
+    badgeText: "text-[#4b9797]",
+  },
+};
+
 const categoryIcons: Record<ChildStoreCategory, LucideIcon> = {
-  discipline: Brain,
+  discipline: Target,
   emotionalIntelligence: Heart,
-  independence: Footprints,
+  independence: Sprout,
   confidence: UsersRound,
   creativity: Palette,
   criticalThinking: Puzzle,
@@ -266,20 +321,34 @@ function TefLookStorefront() {
         </div>
       </section>
 
-      <section className="store-shell pb-10 pt-8 sm:pt-10" aria-label={t("category.heading")}>
-        <div className="mb-6 flex items-end justify-between gap-4">
+      {/* 4. Developmental Categories (The 6 Pillars) */}
+      <section className="store-shell pb-12 pt-10 sm:pt-14" aria-label={t("category.heading")}>
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-brand-orange">
+            <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#ff3500]">
               {t("category.eyebrow")}
             </p>
-            <h2 className="mt-2 font-display text-[26px] font-semibold sm:text-3xl">
+            <h2 className="mt-2 font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#1A2D2A] tracking-tight">
               {t("category.heading")}
             </h2>
           </div>
+          {activeCategory !== "all" && (
+            <button
+              type="button"
+              onClick={() => setActiveCategory("all")}
+              className="self-start sm:self-auto text-xs font-bold text-[#4b9797] hover:text-[#ff3500] transition-colors underline cursor-pointer"
+            >
+              Afficher tous les univers
+            </button>
+          )}
         </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 sm:gap-4 lg:gap-5">
+
+        <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-6 sm:gap-4 lg:gap-5">
           {categories.map((category) => {
             const isSelected = activeCategory === category.value;
+            const theme = CATEGORY_THEMES[category.value];
+            const Icon = theme.icon;
+
             return (
               <button
                 type="button"
@@ -291,42 +360,37 @@ function TefLookStorefront() {
                   );
                   document.getElementById("boutique")?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className={`group flex min-h-[190px] sm:min-h-[210px] flex-col items-center justify-between rounded-2xl border p-4 sm:p-5 text-center transition-all duration-300 cursor-pointer ${
+                className={`group relative flex min-h-[205px] sm:min-h-[225px] flex-col items-center justify-between rounded-3xl p-4 sm:p-5 text-center transition-all duration-300 cursor-pointer ${
                   isSelected
-                    ? "border-brand-teal bg-[#EBF4F5]/70 shadow-sm ring-2 ring-brand-teal/30 scale-[1.02]"
-                    : "border-border bg-card text-card-foreground hover:border-brand-teal/50 hover:bg-[#F9F8F6] hover:shadow-md hover:-translate-y-0.5"
+                    ? "border-2 border-[#4b9797] bg-[#F4F9F9] shadow-md ring-4 ring-[#4b9797]/15 scale-[1.02]"
+                    : "border border-[#EAE7DF] bg-white text-card-foreground shadow-xs hover:border-[#4b9797]/50 hover:bg-[#FAF9F6] hover:shadow-md hover:-translate-y-1"
                 }`}
               >
-                {/* Circular image / avatar */}
-                <div className="relative mb-3.5 size-18 sm:size-20 shrink-0">
+                {/* 2D Vector Graphic Icon in Soft Rounded Container */}
+                <div className="relative mb-3 flex items-center justify-center">
                   <div
-                    className={`size-full overflow-hidden rounded-full border-2 transition-all duration-300 ${
-                      isSelected
-                        ? "border-brand-teal ring-4 ring-brand-teal/20"
-                        : "border-white shadow-xs ring-1 ring-border group-hover:ring-brand-teal/50 group-hover:scale-105"
+                    className={`size-14 sm:size-16 rounded-2xl flex items-center justify-center transition-all duration-300 ${theme.bgTint} ${
+                      isSelected ? "scale-105 shadow-xs" : "group-hover:scale-110"
                     }`}
                   >
-                    <img
-                      src={category.imageUrl}
-                      alt={category.label}
-                      className="size-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      loading="lazy"
-                    />
+                    <Icon className={`size-7 sm:size-8 ${theme.iconColor} stroke-[2.2] transition-transform duration-300`} />
                   </div>
                   {isSelected && (
-                    <span className="absolute -bottom-1 -right-1 grid size-5 place-items-center rounded-full bg-brand-teal text-white shadow-xs">
+                    <span className="absolute -top-1 -right-1 grid size-5 place-items-center rounded-full bg-[#4b9797] text-white shadow-xs">
                       <Check size={11} strokeWidth={3} />
                     </span>
                   )}
                 </div>
 
-                {/* Two-line text structure */}
-                <div className="flex flex-1 flex-col justify-center items-center">
-                  <span className="text-[13px] sm:text-[14px] font-bold text-foreground leading-[1.3] group-hover:text-brand-teal transition-colors max-w-[16ch]">
-                    {category.label}
-                  </span>
-                  <span className="mt-1 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-brand-orange">
+                {/* Typography Hierarchy: Subtitle Badge + Bold Title */}
+                <div className="flex flex-1 flex-col justify-center items-center gap-1.5 w-full">
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider ${theme.badgeBg} ${theme.badgeText}`}
+                  >
                     {category.subtitle}
+                  </span>
+                  <span className="text-[13px] sm:text-[14px] font-bold text-[#1E293B] group-hover:text-[#4b9797] transition-colors leading-snug line-clamp-2 max-w-[17ch]">
+                    {category.label}
                   </span>
                 </div>
               </button>
