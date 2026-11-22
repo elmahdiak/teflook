@@ -527,12 +527,12 @@ function TefLookStorefront() {
         <div className="store-shell grid gap-9 py-10 sm:grid-cols-[1.5fr_1fr_1fr] sm:py-12">
           <div>
             <div className="mb-3.5 flex items-center gap-2.5 sm:gap-3 group select-none">
-              <div className="relative shrink-0 overflow-hidden bg-white border border-[#E6E1D8]/80 shadow-xs sm:shadow-sm size-9 rounded-xl p-1 flex items-center justify-center">
-                <img src="/images/Untitled design (1).png" alt="TefLook" className="size-full object-contain" />
+              <div className="relative shrink-0 overflow-hidden bg-white border border-white/30 shadow-xs shadow-black/10 size-10 sm:size-11 rounded-xl sm:rounded-2xl p-1 sm:p-1.5 flex items-center justify-center transition-all duration-300 group-hover:scale-105">
+                <img src="/images/Untitled Design.png" alt="TefLook" className="size-full object-contain" />
               </div>
-              <span className="font-brand-logo text-2xl font-bold tracking-tight leading-none text-white">
-                <span className="text-white">Tef</span>
-                <span className="text-[#FEC748]">Look</span>
+              <span className="font-brand-logo text-[22px] sm:text-2xl font-bold tracking-tight leading-none flex items-center">
+                <span className="text-white tracking-tight">Tef</span>
+                <span className="text-[#ffbf00] tracking-tight">Look</span>
               </span>
             </div>
             <p className="font-display text-xl font-semibold">{t("footer.tagline")}</p>

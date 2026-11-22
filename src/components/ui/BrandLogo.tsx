@@ -37,15 +37,18 @@ export function BrandLogo({
     xl: "text-4xl sm:text-5xl",
   };
 
-  // Light variant uses the full-color mark on a crisp white card; dark variant uses the inverted/white mark
-  const logoSrc = variant === "dark" ? "/images/Untitled design (1).png" : "/images/Untitled Design.png";
+  // The icon container is a clean white rounded card. Using Untitled Design.png guarantees seamless integration with zero background bleeding.
+  const logoSrc = "/images/Untitled Design.png";
 
   const content = (
     <div className={cn("inline-flex items-center gap-2.5 sm:gap-3 group select-none", className)}>
-      {/* 1. Icon Container: Rounded white card with subtle padding, modern border & soft shadow */}
+      {/* 1. Icon Container: Rounded white card with clean padding, subtle border & soft shadow */}
       <div
         className={cn(
-          "relative shrink-0 overflow-hidden bg-white border border-[#E6E1D8]/80 shadow-xs sm:shadow-sm flex items-center justify-center transition-all duration-300 group-hover:scale-105 group-hover:shadow-sm",
+          "relative shrink-0 overflow-hidden bg-white flex items-center justify-center transition-all duration-300 group-hover:scale-105",
+          variant === "dark"
+            ? "border border-white/30 shadow-xs shadow-black/10"
+            : "border border-[#E6E1D8]/80 shadow-xs sm:shadow-sm",
           markSizes[size]
         )}
       >
@@ -62,14 +65,14 @@ export function BrandLogo({
         <div className="flex flex-col justify-center leading-none select-none font-brand-logo">
           <div
             className={cn(
-              "font-bold tracking-tight flex items-baseline leading-none transition-colors",
+              "font-bold tracking-tight flex items-center leading-none transition-colors",
               textSizes[size]
             )}
           >
             {variant === "dark" ? (
               <>
-                <span className="text-[#FFFFFF] tracking-tight">Tef</span>
-                <span className="text-[#FEC748] tracking-tight">Look</span>
+                <span className="text-white tracking-tight">Tef</span>
+                <span className="text-[#ffbf00] tracking-tight">Look</span>
               </>
             ) : (
               <>
@@ -82,7 +85,7 @@ export function BrandLogo({
             <span
               className={cn(
                 "block text-[10px] font-bold uppercase tracking-widest mt-1",
-                variant === "dark" ? "text-[#FEC748]" : "text-[#2B6E73]"
+                variant === "dark" ? "text-[#ffbf00]" : "text-[#2B6E73]"
               )}
             >
               {subtitle}
