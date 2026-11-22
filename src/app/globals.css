@@ -208,27 +208,10 @@ body {
   }
 }
 
-/* Hero Section Banner */
+/* Hero Section Banner - Full Width Edge-to-Edge */
 .hero-photo {
   background-color: #FBF9F5;
-  background-image: linear-gradient(to right, #FBF9F5 48%, rgba(251, 249, 245, 0.45) 68%, transparent 100%), url('/images/hero-family.jpg');
-  background-position: right center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  border-radius: 6px;
-  border: 1px solid var(--border);
-}
-
-[dir="rtl"] .hero-photo {
-  background-image: linear-gradient(to left, #FBF9F5 48%, rgba(251, 249, 245, 0.45) 68%, transparent 100%), url('/images/hero-family.jpg');
-  background-position: left center;
-}
-
-@media (max-width: 640px) {
-  .hero-photo {
-    background-image: linear-gradient(to bottom, rgba(251, 249, 245, 0.94) 0%, rgba(251, 249, 245, 0.78) 100%), url('/images/hero-family.jpg');
-    background-position: center top;
-  }
+  width: 100%;
 }
 
 /* Product card image */

@@ -254,37 +254,54 @@ function TefLookStorefront() {
         )}
       </header>
 
-      <section className="store-shell pt-5" aria-label={t("category.heading")}>
-        <div className="hero-photo relative isolate flex min-h-[420px] items-center overflow-hidden sm:min-h-[485px] lg:min-h-[520px]">
-          <div className="hero-copy max-w-[590px] px-5 py-12 sm:px-12 lg:px-16">
-            <p className="mb-5 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-brand-teal">
-              <Sparkles size={14} aria-hidden="true" />
-              {t("hero.eyebrow")}
-            </p>
-            <h1 className="font-display max-w-[540px] text-4xl font-semibold leading-[1.07] text-foreground sm:text-5xl lg:text-[58px]">
-              {t("hero.title")}
-            </h1>
-            <p className="mt-5 max-w-[390px] text-[15px] leading-7 text-foreground/80">
-              {t("hero.description")}
-            </p>
-            <Button
-              asChild
-              className="mt-8 h-12 gap-4 rounded-[3px] bg-brand-orange px-6 font-semibold text-accent-foreground hover:bg-brand-orange/90"
-            >
-              <a href="#boutique">
-                {t("hero.explore")} <ArrowDown size={17} aria-hidden="true" />
-              </a>
-            </Button>
-            <div className="mt-11 flex flex-wrap items-center gap-x-7 gap-y-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-foreground/80">
-              <span className="inline-flex items-center gap-2">
-                <Heart size={16} className="text-brand-teal" /> {t("hero.family")}
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <Sparkles size={15} className="text-brand-teal" /> {t("hero.play")}
-              </span>
+      {/* 3. Hero Section with Animated GIF Banner - Full-Width Edge-to-Edge */}
+      <section className="relative w-full overflow-hidden bg-[#FBF9F5] border-b border-border/50" aria-label={t("category.heading")}>
+        <div className="hero-photo relative isolate flex w-full min-h-[520px] md:min-h-[620px] lg:min-h-[680px] items-center overflow-hidden">
+          {/* Animated GIF Background Layer - Full Bleed */}
+          <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
+            <img
+              src="/Gemini_Generated_Gif_frnpcwfrnpcwfrnp.gif"
+              alt="TefLook Parent-Enfant"
+              className="h-full w-full object-cover object-[center_right] rtl:object-[center_left] max-sm:object-[top_center]"
+              loading="eager"
+            />
+            {/* Directional Soft Gradient Overlay for Pristine Readability (LTR & RTL) */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#FBF9F5]/98 via-[#FBF9F5]/85 to-transparent rtl:bg-gradient-to-l rtl:from-[#FBF9F5]/98 rtl:via-[#FBF9F5]/85 max-sm:bg-gradient-to-b max-sm:from-[#FBF9F5]/95 max-sm:via-[#FBF9F5]/85 max-sm:to-[#FBF9F5]/50" />
+          </div>
+
+          {/* Centered Inner Content Container */}
+          <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 py-16 md:py-20 flex items-center">
+            <div className="hero-copy max-w-[620px]">
+              <p className="mb-5 inline-flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.16em] text-brand-teal">
+                <Sparkles size={15} aria-hidden="true" />
+                {t("hero.eyebrow")}
+              </p>
+              <h1 className="font-display max-w-[560px] text-4xl font-semibold leading-[1.07] text-foreground sm:text-5xl lg:text-[62px]">
+                {t("hero.title")}
+              </h1>
+              <p className="mt-5 max-w-[420px] text-[15px] sm:text-base leading-7 text-foreground/85">
+                {t("hero.description")}
+              </p>
+              <Button
+                asChild
+                className="mt-8 h-12 gap-4 rounded-xl bg-brand-orange px-7 font-bold text-white shadow-lg shadow-brand-orange/25 hover:bg-brand-orange/90 hover:shadow-xl transition-all cursor-pointer"
+              >
+                <a href="#boutique">
+                  {t("hero.explore")} <ArrowDown size={17} aria-hidden="true" />
+                </a>
+              </Button>
+              <div className="mt-11 flex flex-wrap items-center gap-x-8 gap-y-3 text-[12px] font-semibold uppercase tracking-[0.08em] text-foreground/80">
+                <span className="inline-flex items-center gap-2">
+                  <Heart size={16} className="text-brand-teal" /> {t("hero.family")}
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <Sparkles size={15} className="text-brand-teal" /> {t("hero.play")}
+                </span>
+              </div>
             </div>
           </div>
-          <div className="absolute bottom-5 right-5 hidden h-14 w-14 place-items-center rounded-full border border-background/70 text-xs text-background/90 sm:grid">
+
+          <div className="absolute bottom-8 right-8 hidden h-14 w-14 place-items-center rounded-full border border-foreground/20 text-xs text-foreground/70 sm:grid z-10">
             <ArrowDown size={17} aria-hidden="true" />
           </div>
         </div>
