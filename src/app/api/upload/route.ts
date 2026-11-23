@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
@@ -32,30 +34,41 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Ensure uploads directory exists
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
-    }
-
-    // Generate safe filename
     const ext = path.extname(file.name) || `.${file.type.split("/")[1] || "png"}`;
     const cleanBaseName = path
       .basename(file.name, ext)
       .replace(/[^a-zA-Z0-9_-]/g, "_")
       .slice(0, 30);
     const uniqueFileName = `prod-${Date.now()}-${cleanBaseName}${ext}`;
-    const filePath = path.join(uploadsDir, uniqueFileName);
 
-    fs.writeFileSync(filePath, buffer);
+    // Try saving locally (works in local dev, Docker, VPS)
+    try {
+      const uploadsDir = path.join(process.cwd(), "public", "uploads");
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      const filePath = path.join(uploadsDir, uniqueFileName);
+      fs.writeFileSync(filePath, buffer);
 
-    const publicUrl = `/uploads/${uniqueFileName}`;
-    return NextResponse.json({
-      success: true,
-      url: publicUrl,
-      fileName: uniqueFileName,
-      size: file.size,
-    });
+      return NextResponse.json({
+        success: true,
+        url: `/uploads/${uniqueFileName}`,
+        fileName: uniqueFileName,
+        size: file.size,
+      });
+    } catch (fsError) {
+      // On Vercel / serverless read-only filesystems, fallback gracefully to Base64 Data URL
+      console.warn("Local filesystem write failed (serverless environment), returning data URL:", fsError);
+      const base64 = buffer.toString("base64");
+      const dataUrl = `data:${file.type};base64,${base64}`;
+
+      return NextResponse.json({
+        success: true,
+        url: dataUrl,
+        fileName: uniqueFileName,
+        size: file.size,
+      });
+    }
   } catch (error) {
     console.error("Upload error:", error);
     return NextResponse.json(

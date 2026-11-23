@@ -181,11 +181,16 @@ export default function AdminProductsPage() {
     );
   }
 
-  function handleDelete(id: string, title: string) {
+  async function handleDelete(id: string, title: string) {
     if (window.confirm(`Supprimer définitivement "${title}" ?`)) {
       deleteAdminProduct(id);
-      setProducts(getAdminProducts());
+      setProducts((prev) => prev.filter((p) => p.id !== id));
       showToast(`Produit "${title}" supprimé avec succès.`);
+      try {
+        await fetch(`/api/products?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      } catch (e) {
+        console.warn("Delete API error:", e);
+      }
     }
   }
 

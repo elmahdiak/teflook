@@ -230,13 +230,39 @@ export async function fetchProducts(): Promise<ShopifyProduct[]> {
       }
     } catch {}
   } else {
-    // 2. Server-Side (Node.js runtime / SSR / SSG): Read directly from persistent server store
+    // 2. Server-Side (Node.js runtime / SSR / SSG): Read directly from Supabase
     try {
-      const { getStoreProducts } = await import("./server-store");
-      const serverProducts = getStoreProducts();
-      return serverProducts.map(mapItemToShopifyProduct);
+      const supabaseUrl =
+        process.env.NEXT_PUBLIC_SUPABASE_URL || "https://zvqcsxwwkgypvqfewbtn.supabase.co";
+      const supabaseAnonKey =
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "sb_publishable_IkjoHS4mwYG9qEXkBWy8Xg_jw3TI_AF";
+      const { createClient } = await import("@supabase/supabase-js");
+      const supabase = createClient(supabaseUrl, supabaseAnonKey);
+      const { data, error } = await supabase.from("products").select("*");
+      if (!error && data && data.length > 0) {
+        return data.map((row: any) =>
+          mapItemToShopifyProduct({
+            id: String(row.id),
+            title: row.title || row.name || "Produit TefLook",
+            handle: row.handle || String(row.id),
+            categorySlug: row.category_slug || row.category || "discipline-maitrise-de-soi",
+            categoryName: row.category_name || row.category || "Discipline & Gestion de soi",
+            priceMad: Number(row.price_mad ?? row.price ?? 0),
+            oldPriceMad: row.old_price_mad != null ? Number(row.old_price_mad) : row.old_price != null ? Number(row.old_price) : undefined,
+            inStock: row.in_stock ?? true,
+            ageBracket: row.age_bracket || "7 - 10 ans",
+            images: Array.isArray(row.images) && row.images.length > 0 ? row.images : row.image ? [row.image] : [],
+            description: row.description || "",
+            material: row.material,
+            origin: row.origin,
+            features: Array.isArray(row.features) ? row.features : [],
+            rating: Number(row.rating || 4.9),
+            reviewsCount: Number(row.reviews_count || 48),
+          })
+        );
+      }
     } catch (e) {
-      console.warn("Server store fetch failed, falling back to initial data:", e);
+      console.warn("Server Supabase fetch failed, falling back to initial data:", e);
     }
   }
 

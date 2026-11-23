@@ -1,5 +1,33 @@
 [
   {
+    "id": "prod-disc-1",
+    "title": "Horloge Minuteur Visuel 'Focus & Rituels' Silencieux",
+    "handle": "prod-disc-1",
+    "categorySlug": "discipline-maitrise-de-soi",
+    "categoryName": "Discipline et maîtrise de soi",
+    "priceMad": 199,
+    "oldPriceMad": 260,
+    "inStock": true,
+    "ageBracket": "5 - 6 ans",
+    "images": [
+      "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=1000&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=1000&auto=format&fit=crop"
+    ],
+    "description": "Minuteur à disque coloré régressif qui permet à l'enfant de matérialiser le temps restant sans stress. Idéal pour structurer les devoirs, les temps d'écran et le coucher.",
+    "material": "Coque ABS antichoc & mécanisme à quartz silencieux",
+    "origin": "Conception certifiée psychopédagogie",
+    "title_ar": "مؤقت بصري صامت 'التركيز والروتين اليومي'",
+    "description_ar": "مؤقت بقرص ملون تنازلي يساعد الطفل على إدراك الوقت المتبقي دون قلق أو ضغط. مثالي لتنظيم أوقات الواجبات المدرسية، والشاشات، وموعد النوم.",
+    "categoryName_ar": "الانضباط وإدارة الذات",
+    "features": [
+      "Disque visuel à dégradé progressif",
+      "Sonnerie douce ou mode discret sans tic-tac",
+      "Autonomie sur pile longue durée"
+    ],
+    "rating": 4.9,
+    "reviewsCount": 114
+  },
+  {
     "id": "prod-disc-2",
     "title": "Tour de Concentration & Équilibre Zen en Bois Massif",
     "handle": "prod-disc-2",
@@ -79,6 +107,33 @@
     ],
     "rating": 4.7,
     "reviewsCount": 65
+  },
+  {
+    "id": "prod-emo-1",
+    "title": "La Météo des Émotions : Roue & Cartes d'Apaisement",
+    "handle": "prod-emo-1",
+    "categorySlug": "intelligence-emotionnelle",
+    "categoryName": "Intelligence émotionnelle",
+    "priceMad": 189,
+    "oldPriceMad": 249,
+    "inStock": true,
+    "ageBracket": "5 - 6 ans",
+    "images": [
+      "https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=1000&auto=format&fit=crop"
+    ],
+    "description": "Guide visuel interactif pour aider le jeune enfant à mettre des mots sur la colère, la tristesse, la peur ou la joie débordante sans faire de crise.",
+    "material": "Cartes rigides douces au toucher & roue tournante en bois",
+    "origin": "Méthode validée par des pédopsychologues",
+    "title_ar": "طقس المشاعر : عجلة وبطاقات التهدئة والتعبير العاطفي",
+    "description_ar": "أداة تربوية بصرية تساعد الطفل على التعرف على مشاعره (الفرح، الغضب، الخوف، الحزن) والتعبير عنها واختيار الاستجابة المناسبة لهدوئه.",
+    "categoryName_ar": "الذكاء العاطفي",
+    "features": [
+      "32 cartes d'exercices de respiration",
+      "Roue magnétique facile à manipuler",
+      "Livret explicatif parents-enfants"
+    ],
+    "rating": 4.9,
+    "reviewsCount": 162
   },
   {
     "id": "prod-emo-2",

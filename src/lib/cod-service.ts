@@ -39,6 +39,12 @@ export interface AdminProduct {
   description: string;
   material?: string;
   origin?: string;
+  rating?: number;
+  reviewsCount?: number;
+  features?: string[];
+  title_ar?: string;
+  description_ar?: string;
+  categoryName_ar?: string;
 }
 
 export interface AdminCategory {
@@ -314,7 +320,6 @@ export function saveAdminProduct(product: Omit<AdminProduct, "id" | "handle"> & 
 export function deleteAdminProduct(productId: string): boolean {
   const current = getAdminProducts();
   const filtered = current.filter((p) => p.id !== productId);
-  if (filtered.length === current.length) return false;
 
   if (typeof window !== "undefined") {
     localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(filtered));
