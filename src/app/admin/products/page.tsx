@@ -195,23 +195,33 @@ export default function AdminProductsPage() {
   }
 
   // Clear all products (Fresh database start)
-  function handleConfirmClearAll() {
+  async function handleConfirmClearAll() {
     clearAllAdminProducts();
     setProducts([]);
     setConfirmClearOpen(false);
     showToast("Base de données vidée : tous les produits ont été supprimés.", "success");
+    try {
+      await fetch("/api/products?all=true", { method: "DELETE" });
+    } catch (e) {
+      console.warn("Clear all API error:", e);
+    }
   }
 
   // Restore 24 seeded products
-  function handleResetToDefaults() {
+  async function handleResetToDefaults() {
     if (
       window.confirm(
-        "Voulez-vous restaurer les 24 produits officiels de démonstration ? Cela rechargera le catalogue complet."
+        "Voulez-vous restaurer les 24 produits officiels de démonstration ? Cela rechargera le catalogue complet dans Supabase."
       )
     ) {
       const restored = resetAllAdminProducts();
       setProducts(restored);
       showToast("Catalogue restauré avec les 24 produits de base.");
+      try {
+        await fetch("/api/products?reset=true", { method: "DELETE" });
+      } catch (e) {
+        console.warn("Reset API error:", e);
+      }
     }
   }
 

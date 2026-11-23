@@ -208,7 +208,7 @@ export async function fetchProducts(): Promise<ShopifyProduct[]> {
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
-          // Sync localStorage cache
+          // Sync localStorage cache strictly with server data (even if [])
           try {
             localStorage.setItem("teflook_admin_products_v2", JSON.stringify(data));
           } catch {}
@@ -229,6 +229,8 @@ export async function fetchProducts(): Promise<ShopifyProduct[]> {
         }
       }
     } catch {}
+
+    return [];
   } else {
     // 2. Server-Side (Node.js runtime / SSR / SSG): Read directly from Supabase
     try {
@@ -238,8 +240,12 @@ export async function fetchProducts(): Promise<ShopifyProduct[]> {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "sb_publishable_IkjoHS4mwYG9qEXkBWy8Xg_jw3TI_AF";
       const { createClient } = await import("@supabase/supabase-js");
       const supabase = createClient(supabaseUrl, supabaseAnonKey);
-      const { data, error } = await supabase.from("products").select("*");
-      if (!error && data && data.length > 0) {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (!error && data) {
         return data.map((row: any) =>
           mapItemToShopifyProduct({
             id: String(row.id),
@@ -248,10 +254,20 @@ export async function fetchProducts(): Promise<ShopifyProduct[]> {
             categorySlug: row.category_slug || row.category || "discipline-maitrise-de-soi",
             categoryName: row.category_name || row.category || "Discipline & Gestion de soi",
             priceMad: Number(row.price_mad ?? row.price ?? 0),
-            oldPriceMad: row.old_price_mad != null ? Number(row.old_price_mad) : row.old_price != null ? Number(row.old_price) : undefined,
+            oldPriceMad:
+              row.old_price_mad != null
+                ? Number(row.old_price_mad)
+                : row.old_price != null
+                ? Number(row.old_price)
+                : undefined,
             inStock: row.in_stock ?? true,
             ageBracket: row.age_bracket || "7 - 10 ans",
-            images: Array.isArray(row.images) && row.images.length > 0 ? row.images : row.image ? [row.image] : [],
+            images:
+              Array.isArray(row.images) && row.images.length > 0
+                ? row.images
+                : row.image
+                ? [row.image]
+                : [],
             description: row.description || "",
             material: row.material,
             origin: row.origin,
@@ -262,11 +278,11 @@ export async function fetchProducts(): Promise<ShopifyProduct[]> {
         );
       }
     } catch (e) {
-      console.warn("Server Supabase fetch failed, falling back to initial data:", e);
+      console.warn("Server Supabase fetch failed:", e);
     }
   }
 
-  return MOCK_SHOPIFY_PRODUCTS;
+  return [];
 }
 
 export async function fetchProductByHandle(handle: string): Promise<ShopifyProduct | null> {

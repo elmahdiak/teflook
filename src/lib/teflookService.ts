@@ -44,38 +44,32 @@ export async function getProducts(categorySlug?: string): Promise<ProductItem[]>
 
     const { data, error } = await query;
     if (error || !data || data.length === 0) {
-      if (categorySlug && categorySlug !== "all") {
-        return PRODUCTS.filter((p) => p.categorySlug === categorySlug);
-      }
-      return PRODUCTS;
+      return [];
     }
 
     return (data as any[]).map((p) => ({
       id: p.id,
-      name: p.name,
+      name: p.name || p.title || "Produit TefLook",
       nameAr: p.name_ar,
-      categorySlug: p.category_slug,
-      categoryName: p.category_slug.replace("-", " "),
+      categorySlug: p.category_slug || p.category || "discipline-maitrise-de-soi",
+      categoryName: (p.category_name || p.category_slug || p.category || "discipline").replace("-", " "),
       ageBracket: (p.age_bracket || "7 - 10 ans") as any,
-      priceMad: Number(p.price_mad),
-      priceEur: Number(p.price_eur),
-      description: p.description,
+      priceMad: Number(p.price_mad ?? p.price ?? 0),
+      priceEur: Number(p.price_eur || 0),
+      description: p.description || "",
       material: p.material,
       origin: p.origin || "Fès & Marrakech, Maroc",
-      images: p.images,
+      images: Array.isArray(p.images) ? p.images : p.image ? [p.image] : [],
       rating: Number(p.rating || 5.0),
       reviewsCount: p.reviews_count || 0,
       sizes: p.sizes || [39, 40, 41, 42, 43, 44],
       inStock: p.in_stock ?? true,
       isFeatured: p.is_featured ?? false,
       badge: p.badge || undefined,
-      features: [p.material, "Fait main au Maroc", "Cuir véritable pleine fleur"],
+      features: Array.isArray(p.features) ? p.features : [p.material, "Fait main au Maroc"],
     }));
   } catch {
-    if (categorySlug && categorySlug !== "all") {
-      return PRODUCTS.filter((p) => p.categorySlug === categorySlug);
-    }
-    return PRODUCTS;
+    return [];
   }
 }
 

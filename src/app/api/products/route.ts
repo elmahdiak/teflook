@@ -16,8 +16,8 @@ const supabaseAnonKey =
 
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Initial fallback seeded products
-function getSeededProducts(): AdminProduct[] {
+// Seeded products generator - ONLY used when explicitly restoring demo products
+function getDemoProducts(): AdminProduct[] {
   return PRODUCTS.map((p: ProductItem) => {
     const trAr = PRODUCT_TRANSLATIONS_AR[p.id];
     return {
@@ -48,13 +48,14 @@ function getSeededProducts(): AdminProduct[] {
 }
 
 function mapRowToAdminProduct(row: any): AdminProduct {
-  const images = Array.isArray(row.images) && row.images.length > 0
-    ? row.images
-    : row.image
-    ? [row.image]
-    : typeof row.images === "string" && row.images.trim().length > 0
-    ? [row.images]
-    : ["https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=800&auto=format&fit=crop"];
+  const images =
+    Array.isArray(row.images) && row.images.length > 0
+      ? row.images
+      : row.image
+      ? [row.image]
+      : typeof row.images === "string" && row.images.trim().length > 0
+      ? [row.images]
+      : ["https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=800&auto=format&fit=crop"];
 
   const id = String(row.id);
   const title = row.title || row.name || "Produit TefLook";
@@ -103,19 +104,25 @@ export async function GET(req: NextRequest) {
     const id = searchParams.get("id");
     const category = searchParams.get("category");
 
-    // Fetch from Supabase
+    // Strictly fetch from Supabase
     let products: AdminProduct[] = [];
     try {
-      const { data, error } = await supabase.from("products").select("*").order("created_at", { ascending: false });
-      if (!error && data && data.length > 0) {
-        products = data.map(mapRowToAdminProduct);
-      } else {
-        // Fallback to seeded products if table is empty or error
-        products = getSeededProducts();
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.warn("Supabase GET error:", error.message);
+        // Do NOT auto-seed! Return empty array if error
+        return NextResponse.json([]);
       }
+
+      // If data is null or empty array, products is strictly []
+      products = (data || []).map(mapRowToAdminProduct);
     } catch (dbErr) {
-      console.warn("Supabase GET error, fallback to seeded products:", dbErr);
-      products = getSeededProducts();
+      console.warn("Supabase GET caught exception:", dbErr);
+      return NextResponse.json([]);
     }
 
     if (handle) {
@@ -148,8 +155,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(products);
   } catch (error) {
     console.error("GET /api/products error:", error);
-    // Never crash: return seeded products as ultimate resilience
-    return NextResponse.json(getSeededProducts());
+    // Never auto-seed: return empty array
+    return NextResponse.json([]);
   }
 }
 
@@ -195,7 +202,7 @@ export async function POST(req: NextRequest) {
 
     let upsertResult = await supabase.from("products").upsert(fullPayload);
 
-    // If schema lacks some columns (e.g. before user executes ALTER TABLE), retry with minimal baseline columns
+    // If schema lacks some columns, retry with minimal baseline columns
     if (upsertResult.error) {
       console.warn("Full payload upsert failed, retrying with baseline columns:", upsertResult.error.message);
       const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(productId);
@@ -266,12 +273,46 @@ export async function DELETE(req: NextRequest) {
     const clearAll = searchParams.get("all") === "true";
     const reset = searchParams.get("reset") === "true";
 
-    // 1. Reset catalogue to standard demo products
+    // 1. Explicit user request to restore the 24 demo products
     if (reset) {
       try {
-        await supabase.from("products").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+        await supabase.from("products").delete().not("id", "is", null);
       } catch (e) {
         console.warn("Supabase clear on reset error:", e);
+      }
+
+      const demoList = getDemoProducts();
+      try {
+        const rowsToInsert = demoList.map((p) => ({
+          title: p.title,
+          name: p.title,
+          price: p.priceMad,
+          price_mad: p.priceMad,
+          old_price: p.oldPriceMad || null,
+          old_price_mad: p.oldPriceMad || null,
+          category: p.categorySlug,
+          category_slug: p.categorySlug,
+          category_name: p.categoryName,
+          image: p.images[0] || "",
+          images: p.images,
+          description: p.description,
+          in_stock: p.inStock,
+          age_bracket: p.ageBracket,
+        }));
+        const insertRes = await supabase.from("products").insert(rowsToInsert);
+        if (insertRes.error) {
+          // If schema is minimal, insert baseline columns
+          const baselineRows = demoList.map((p) => ({
+            title: p.title,
+            price: p.priceMad,
+            category: p.categorySlug,
+            image: p.images[0] || "",
+            description: p.description,
+          }));
+          await supabase.from("products").insert(baselineRows);
+        }
+      } catch (insertErr) {
+        console.warn("Error inserting demo products during reset:", insertErr);
       }
 
       try {
@@ -282,16 +323,16 @@ export async function DELETE(req: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: "Catalogue réinitialisé avec les produits de base.",
-        count: PRODUCTS.length,
+        message: "Catalogue réinitialisé avec les produits de démonstration.",
+        count: demoList.length,
       });
     }
 
-    // 2. Clear entire database
+    // 2. Clear entire database (0 products)
     if (clearAll) {
       try {
         // Delete all rows in Supabase
-        await supabase.from("products").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+        await supabase.from("products").delete().not("id", "is", null);
       } catch (e) {
         console.warn("Supabase clearAll delete error:", e);
       }
@@ -315,11 +356,8 @@ export async function DELETE(req: NextRequest) {
     }
 
     try {
-      // Execute delete in Supabase
       const { error: dbError } = await supabase.from("products").delete().eq("id", id);
       if (dbError) {
-        // If Postgres reports 22P02 (invalid UUID input syntax because id is string like 'prod-disc-1'),
-        // it confirms the row was either not a UUID or not in Postgres. Return graceful 200 success.
         console.warn(`Supabase delete note for id ${id}:`, dbError.message);
       }
     } catch (dbErr) {

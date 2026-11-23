@@ -255,16 +255,16 @@ const SEEDED_PRODUCTS: AdminProduct[] = PRODUCTS.map((p) => ({
 }));
 
 export function getAdminProducts(): AdminProduct[] {
-  if (typeof window === "undefined") return SEEDED_PRODUCTS;
+  if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(PRODUCTS_STORAGE_KEY);
     if (!raw) {
-      localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(SEEDED_PRODUCTS));
-      return SEEDED_PRODUCTS;
+      return [];
     }
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
-    return SEEDED_PRODUCTS;
+    return [];
   }
 }
 
