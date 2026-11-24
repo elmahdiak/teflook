@@ -110,7 +110,7 @@ export const translations: Record<Locale, Record<string, string>> = {
     "reviews.title": "Avis des parents & clients",
     "reviews.subtitle": "Avis vérifiés de familles et d'éducateurs",
     "reviews.write": "Écrire un avis",
-    "reviews.verified": "Acheteur vérifié",
+    "reviews.verified": "Achat vérifié",
     "reviews.empty": "Soyez le premier à donner votre avis sur ce produit !",
     "reviews.emptySub": "Partagez votre expérience pour aider d'autres parents dans l'éveil de leurs enfants.",
     "reviews.recommended": "Recommandé par les familles",
