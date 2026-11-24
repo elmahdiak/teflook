@@ -27,11 +27,26 @@ import {
   type CODOrder,
 } from "@/lib/cod-service";
 
+const INITIAL_STATS: ReturnType<typeof getDashboardStats> = {
+  totalRevenue: 0,
+  totalOrdersCount: 0,
+  pendingOrders: 0,
+  confirmedOrders: 0,
+  shippedOrders: 0,
+  deliveredOrders: 0,
+  confirmationRate: 100,
+  productsCount: 0,
+  reviewsCount: 0,
+  recentOrders: [],
+};
+
 export default function AdminDashboardPage() {
-  const [stats, setStats] = useState(() => getDashboardStats());
+  const [stats, setStats] = useState(INITIAL_STATS);
   const [recentOrders, setRecentOrders] = useState<CODOrder[]>([]);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     const updatedStats = getDashboardStats();
     setStats(updatedStats);
     setRecentOrders(getCODOrders().slice(0, 5));

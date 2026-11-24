@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { ChildStoreCategory } from "./teflook-categories";
@@ -247,12 +248,23 @@ export const useLanguageStore = create<LanguageStore>()(
     }),
     {
       name: "teflook-locale",
+      skipHydration: true,
     }
   )
 );
 
 export function useTefLookLanguage() {
-  const { locale, setLocale } = useLanguageStore();
+  const [mounted, setMounted] = useState(false);
+  const storeLocale = useLanguageStore((s) => s.locale);
+  const setLocale = useLanguageStore((s) => s.setLocale);
+
+  useEffect(() => {
+    void useLanguageStore.persist.rehydrate();
+    setMounted(true);
+  }, []);
+
+  // During SSR and initial client hydration pass, lock to "fr" (the SSR default)
+  const locale: Locale = mounted ? storeLocale : "fr";
   const direction: "ltr" | "rtl" = locale === "ar" ? "rtl" : "ltr";
 
   const t = (key: string): string => {
@@ -264,5 +276,6 @@ export function useTefLookLanguage() {
     direction,
     setLocale,
     t,
+    isMounted: mounted,
   };
 }

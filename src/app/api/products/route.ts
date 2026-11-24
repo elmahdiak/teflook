@@ -41,8 +41,8 @@ function getDemoProducts(): AdminProduct[] {
       description_ar: trAr?.description,
       categoryName_ar: trAr?.categoryName,
       features: p.features,
-      rating: p.rating || 4.9,
-      reviewsCount: p.reviewsCount || 48,
+      rating: 0,
+      reviewsCount: 0,
     };
   });
 }
@@ -92,8 +92,8 @@ function mapRowToAdminProduct(row: any): AdminProduct {
     description_ar: row.description_ar,
     categoryName_ar: row.category_name_ar,
     features: Array.isArray(row.features) ? row.features : [],
-    rating: Number(row.rating || 4.9),
-    reviewsCount: Number(row.reviews_count ?? row.reviewsCount ?? 48),
+    rating: row.rating != null ? Number(row.rating) : 0,
+    reviewsCount: row.reviews_count != null ? Number(row.reviews_count) : row.reviewsCount != null ? Number(row.reviewsCount) : 0,
   };
 }
 
@@ -107,19 +107,59 @@ export async function GET(req: NextRequest) {
     // Strictly fetch from Supabase
     let products: AdminProduct[] = [];
     try {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .order("created_at", { ascending: false });
+      const [productsRes, reviewsRes] = await Promise.all([
+        supabase
+          .from("products")
+          .select("*")
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("product_reviews")
+          .select("product_id, product_handle, rating"),
+      ]);
 
-      if (error) {
-        console.warn("Supabase GET error:", error.message);
+      if (productsRes.error) {
+        console.warn("Supabase GET error:", productsRes.error.message);
         // Do NOT auto-seed! Return empty array if error
         return NextResponse.json([]);
       }
 
-      // If data is null or empty array, products is strictly []
-      products = (data || []).map(mapRowToAdminProduct);
+      // Aggregate live review stats per product
+      const allReviews: any[] = (!reviewsRes.error && Array.isArray(reviewsRes.data)) ? reviewsRes.data : [];
+      const reviewStatsMap = new Map<string, { count: number; sum: number }>();
+
+      for (const r of allReviews) {
+        const ratingVal = Number(r.rating) || 5;
+        if (r.product_id) {
+          const key = String(r.product_id).trim().toLowerCase();
+          const curr = reviewStatsMap.get(key) || { count: 0, sum: 0 };
+          reviewStatsMap.set(key, { count: curr.count + 1, sum: curr.sum + ratingVal });
+        }
+        if (r.product_handle) {
+          const key = String(r.product_handle).trim().toLowerCase();
+          if (key !== String(r.product_id || "").trim().toLowerCase()) {
+            const curr = reviewStatsMap.get(key) || { count: 0, sum: 0 };
+            reviewStatsMap.set(key, { count: curr.count + 1, sum: curr.sum + ratingVal });
+          }
+        }
+      }
+
+      // Map rows with live computed review stats
+      products = (productsRes.data || []).map((row: any) => {
+        const prod = mapRowToAdminProduct(row);
+        const idKey = prod.id.trim().toLowerCase();
+        const handleKey = (prod.handle || "").trim().toLowerCase();
+        const stats = reviewStatsMap.get(idKey) || (handleKey ? reviewStatsMap.get(handleKey) : undefined);
+
+        if (stats && stats.count > 0) {
+          prod.reviewsCount = stats.count;
+          prod.rating = Number((stats.sum / stats.count).toFixed(1));
+        } else {
+          prod.reviewsCount = 0;
+          prod.rating = 0;
+        }
+
+        return prod;
+      });
     } catch (dbErr) {
       console.warn("Supabase GET caught exception:", dbErr);
       return NextResponse.json([]);
@@ -241,8 +281,8 @@ export async function POST(req: NextRequest) {
       description_ar: body.description_ar,
       categoryName_ar: body.categoryName_ar,
       features: body.features || [],
-      rating: body.rating || 4.9,
-      reviewsCount: body.reviewsCount || 48,
+      rating: body.rating != null ? Number(body.rating) : 0,
+      reviewsCount: body.reviewsCount != null ? Number(body.reviewsCount) : 0,
     };
 
     // Instant Next.js Cache Invalidation

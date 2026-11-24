@@ -113,8 +113,8 @@ export function mapItemToShopifyProduct(item: any): ShopifyProduct {
     material_ar: item.material_ar || trAr?.material || item.material,
     origin: item.origin,
     origin_ar: item.origin_ar || trAr?.origin || item.origin,
-    rating: item.rating || 4.9,
-    reviewsCount: item.reviewsCount || 48,
+    rating: item.rating != null ? Number(item.rating) : 0,
+    reviewsCount: item.reviewsCount != null ? Number(item.reviewsCount) : 0,
     features: item.features || [],
     features_ar: item.features_ar || trAr?.features || item.features || [],
     tags: [category, item.categorySlug, item.ageBracket, ...(item.features || [])],
@@ -214,17 +214,50 @@ export async function fetchProducts(): Promise<ShopifyProduct[]> {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "sb_publishable_IkjoHS4mwYG9qEXkBWy8Xg_jw3TI_AF";
       const { createClient } = await import("@supabase/supabase-js");
       const supabase = createClient(supabaseUrl, supabaseAnonKey);
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .order("created_at", { ascending: false });
+      const [productsRes, reviewsRes] = await Promise.all([
+        supabase
+          .from("products")
+          .select("*")
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("product_reviews")
+          .select("product_id, product_handle, rating"),
+      ]);
 
-      if (!error && data) {
-        return data.map((row: any) =>
-          mapItemToShopifyProduct({
-            id: String(row.id),
+      if (!productsRes.error && productsRes.data) {
+        const allReviews: any[] = (!reviewsRes.error && Array.isArray(reviewsRes.data)) ? reviewsRes.data : [];
+        const reviewStatsMap = new Map<string, { count: number; sum: number }>();
+
+        for (const r of allReviews) {
+          const ratingVal = Number(r.rating) || 5;
+          if (r.product_id) {
+            const key = String(r.product_id).trim().toLowerCase();
+            const curr = reviewStatsMap.get(key) || { count: 0, sum: 0 };
+            reviewStatsMap.set(key, { count: curr.count + 1, sum: curr.sum + ratingVal });
+          }
+          if (r.product_handle) {
+            const key = String(r.product_handle).trim().toLowerCase();
+            if (key !== String(r.product_id || "").trim().toLowerCase()) {
+              const curr = reviewStatsMap.get(key) || { count: 0, sum: 0 };
+              reviewStatsMap.set(key, { count: curr.count + 1, sum: curr.sum + ratingVal });
+            }
+          }
+        }
+
+        return productsRes.data.map((row: any) => {
+          const rowId = String(row.id);
+          const rowHandle = row.handle || rowId;
+          const stats =
+            reviewStatsMap.get(rowId.trim().toLowerCase()) ||
+            (rowHandle ? reviewStatsMap.get(rowHandle.trim().toLowerCase()) : undefined);
+
+          const realCount = stats ? stats.count : 0;
+          const realRating = stats && stats.count > 0 ? Number((stats.sum / stats.count).toFixed(1)) : 0;
+
+          return mapItemToShopifyProduct({
+            id: rowId,
             title: row.title || row.name || "Produit TefLook",
-            handle: row.handle || String(row.id),
+            handle: rowHandle,
             categorySlug: row.category_slug || row.category || "discipline-maitrise-de-soi",
             categoryName: row.category_name || row.category || "Discipline & Gestion de soi",
             priceMad: Number(row.price_mad ?? row.price ?? 0),
@@ -246,10 +279,10 @@ export async function fetchProducts(): Promise<ShopifyProduct[]> {
             material: row.material,
             origin: row.origin,
             features: Array.isArray(row.features) ? row.features : [],
-            rating: Number(row.rating || 4.9),
-            reviewsCount: Number(row.reviews_count || 48),
-          })
-        );
+            rating: realRating,
+            reviewsCount: realCount,
+          });
+        });
       }
     } catch (e) {
       console.warn("Server Supabase fetch failed:", e);

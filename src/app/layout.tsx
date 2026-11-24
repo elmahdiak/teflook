@@ -45,7 +45,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className="h-full scroll-smooth">
+    <html lang="fr" className="h-full scroll-smooth" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/images/Untitled Design.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />

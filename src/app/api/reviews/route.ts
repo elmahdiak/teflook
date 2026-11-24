@@ -96,7 +96,9 @@ export async function POST(req: NextRequest) {
         revalidatePath(`/product/${productHandle}`);
       }
       revalidatePath("/admin/reviews");
+      revalidatePath("/admin/products");
       revalidatePath("/");
+      revalidatePath("/", "layout");
     } catch (e) {
       console.warn("revalidatePath warning:", e);
     }
@@ -133,7 +135,9 @@ export async function DELETE(req: NextRequest) {
     try {
       revalidatePath("/product/[handle]", "page");
       revalidatePath("/admin/reviews");
+      revalidatePath("/admin/products");
       revalidatePath("/");
+      revalidatePath("/", "layout");
     } catch {}
 
     return NextResponse.json({ success: true, id });

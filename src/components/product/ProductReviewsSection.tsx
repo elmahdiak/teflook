@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   ProductReview,
+  ProductRatingSummary,
   calculateRatingSummary,
   fetchReviewsByProduct,
   submitProductReview,
@@ -28,6 +29,7 @@ interface ProductReviewsSectionProps {
   productHandle?: string;
   productTitle: string;
   className?: string;
+  onSummaryCalculated?: (summary: ProductRatingSummary) => void;
 }
 
 export function ProductReviewsSection({
@@ -35,6 +37,7 @@ export function ProductReviewsSection({
   productHandle,
   productTitle,
   className,
+  onSummaryCalculated,
 }: ProductReviewsSectionProps) {
   const { locale, direction, t } = useTefLookLanguage();
   const [reviews, setReviews] = useState<ProductReview[]>([]);
@@ -69,6 +72,12 @@ export function ProductReviewsSection({
   }, [productId, productHandle]);
 
   const summary = calculateRatingSummary(reviews);
+
+  useEffect(() => {
+    if (!isLoading && onSummaryCalculated) {
+      onSummaryCalculated(summary);
+    }
+  }, [reviews, isLoading, onSummaryCalculated]);
 
   async function handleSubmitReview(e: React.FormEvent) {
     e.preventDefault();

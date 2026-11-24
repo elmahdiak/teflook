@@ -50,6 +50,7 @@ import {
 } from "@/lib/teflook-categories";
 import { CHILD_STORE_CATEGORY_MESSAGE_KEYS, useTefLookLanguage } from "@/lib/teflook-language";
 import { getLocalizedProduct } from "@/lib/product-localization";
+import { cn } from "@/lib/utils";
 
 interface CategoryPillarTheme {
   icon: LucideIcon;
@@ -153,9 +154,11 @@ function TefLookStorefront() {
   const [isCODModalOpen, setIsCODModalOpen] = useState(false);
   const [notice, setNotice] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const { items, hasHydrated, error: cartError } = useCartStore();
 
   useEffect(() => {
+    setIsMounted(true);
     void useCartStore.persist.rehydrate();
 
     // Instant real-time synchronization with admin CRUD actions
@@ -193,7 +196,7 @@ function TefLookStorefront() {
     });
   }, [products, activeCategory, searchTerm]);
 
-  const count = hasHydrated ? items.reduce((total, item) => total + item.quantity, 0) : 0;
+  const count = isMounted && hasHydrated ? items.reduce((total, item) => total + item.quantity, 0) : 0;
   const categories = CHILD_STORE_CATEGORIES.map((category) => ({
     ...category,
     label: t(CHILD_STORE_CATEGORY_MESSAGE_KEYS[category.value]),
@@ -579,7 +582,7 @@ function TefLookStorefront() {
         </div>
         <div className="border-t border-primary-foreground/15">
           <div className="store-shell flex flex-wrap justify-between gap-2 py-4 pr-32 sm:pr-40 text-[11px] text-primary-foreground/65">
-            <span>© {new Date().getFullYear()} TefLook</span>
+            <span>© {isMounted ? new Date().getFullYear() : 2026} TefLook</span>
             <span>{t("footer.note")}</span>
           </div>
         </div>
@@ -653,26 +656,29 @@ function ProductCard({
   onAdded: () => void;
   onNotice: (message: string) => void;
 }) {
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   const { locale, direction, t } = useTefLookLanguage();
   const [adding, setAdding] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const variant = product.variants.edges.find((edge) => edge.node.availableForSale)?.node;
   const image = product.images.edges[0]?.node;
 
-  const localized = getLocalizedProduct(product, locale);
+  const currentLocale = isMounted ? locale : "fr";
+  const localized = getLocalizedProduct(product, currentLocale);
   const categoryLabel = localized.categoryBadge;
 
-  // Formatting price to match exact "279,00 MAD" specification
+  // Pure deterministic price formatting (no ICU whitespace differences between Node and browser)
   const priceAmount = Number(product.priceRange.minVariantPrice.amount);
   const currencyCode = product.priceRange.minVariantPrice.currencyCode || "MAD";
-  const formattedPrice = `${new Intl.NumberFormat("fr-MA", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(priceAmount)} ${currencyCode}`;
+  const formattedPrice = `${priceAmount.toFixed(2).replace(".", ",")} ${currencyCode}`;
 
-  // Deterministic star rating for visual polish
-  const rating = 4.8 + ((product.title.length % 3) * 0.1);
-  const reviewsCount = 12 + (product.title.length % 23);
+  // Real rating and reviews count from Supabase
+  const rating = typeof product.rating === "number" ? product.rating : 0;
+  const reviewsCount = typeof product.reviewsCount === "number" ? product.reviewsCount : 0;
 
   async function handleAdd() {
     if (!variant || adding) {
@@ -761,22 +767,43 @@ function ProductCard({
             {localized.title}
           </Link>
 
-          {/* Subtle Star Ratings in #ffbf00 */}
-          <div className="flex items-center gap-1 sm:gap-1.5 mt-1.5 mb-0.5">
-            <div className="flex items-center text-[#ffbf00]">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className="size-3 fill-[#ffbf00] text-[#ffbf00]"
-                />
-              ))}
-            </div>
-            <span className="text-[10px] sm:text-[11px] font-bold text-[#1E293B]">
-              {rating.toFixed(1)}
-            </span>
-            <span className="text-[9px] sm:text-[10px] text-muted-foreground">
-              ({reviewsCount})
-            </span>
+          {/* Real Star Ratings & Count */}
+          <div className="flex items-center gap-1 sm:gap-1.5 mt-1.5 mb-0.5 min-h-[1.25rem]">
+            {isMounted && reviewsCount > 0 ? (
+              <>
+                <div className="flex items-center text-[#ffbf00]">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={cn(
+                        "size-3",
+                        i < Math.round(rating)
+                          ? "fill-[#ffbf00] text-[#ffbf00]"
+                          : "text-muted-foreground/30 fill-none"
+                      )}
+                    />
+                  ))}
+                </div>
+                <span className="text-[10px] sm:text-[11px] font-bold text-[#1E293B]">
+                  {rating.toFixed(1)}
+                </span>
+                <span className="text-[9px] sm:text-[10px] text-muted-foreground">
+                  ({reviewsCount})
+                </span>
+              </>
+            ) : isMounted ? (
+              <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-medium text-muted-foreground/75">
+                <Star className="size-3 text-muted-foreground/35 fill-none" />
+                <span>
+                  {currentLocale === "ar" ? "جديد • لا توجد تقييمات" : "Nouveau • Aucun avis"}
+                </span>
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-medium text-muted-foreground/75">
+                <Star className="size-3 text-muted-foreground/35 fill-none" />
+                <span>Nouveau • Aucun avis</span>
+              </span>
+            )}
           </div>
         </div>
       </div>

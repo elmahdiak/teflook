@@ -110,6 +110,7 @@ export const useCartStore = create<CartStoreState>()(
     }),
     {
       name: "teflook-shopify-cart",
+      skipHydration: true,
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },

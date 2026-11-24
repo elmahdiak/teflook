@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -47,6 +47,12 @@ interface ProductDetailViewProps {
 }
 
 export function ProductDetailView({ product, relatedProducts }: ProductDetailViewProps) {
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => {
+    setIsMounted(true);
+    void useCartStore.persist.rehydrate();
+  }, []);
+
   const { direction, locale, t } = useTefLookLanguage();
   const images = product.images.edges.map((e) => e.node);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -57,9 +63,16 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
   const [adding, setAdding] = useState(false);
   const [addedRelatedId, setAddedRelatedId] = useState<string | null>(null);
   const [openAccordion, setOpenAccordion] = useState<string>("description");
+  const [liveRatingSummary, setLiveRatingSummary] = useState<{
+    rating: number;
+    reviewsCount: number;
+  }>({
+    rating: typeof product.rating === "number" ? product.rating : 0,
+    reviewsCount: typeof product.reviewsCount === "number" ? product.reviewsCount : 0,
+  });
 
   const { items, hasHydrated, error: cartError } = useCartStore();
-  const count = hasHydrated ? items.reduce((total, item) => total + item.quantity, 0) : 0;
+  const count = isMounted && hasHydrated ? items.reduce((total, item) => total + item.quantity, 0) : 0;
 
   const currentVariant =
     product.variants.edges.find((e) => e.node.availableForSale)?.node ||
@@ -229,14 +242,45 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
               </h1>
 
               {/* Star rating */}
-              <div className="mt-3 flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                <div className="flex items-center text-amber-500">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={15} fill="currentColor" />
-                  ))}
-                </div>
-                <span className="font-bold text-foreground">{product.rating}</span>
-                <span>({product.reviewsCount} avis certifiés)</span>
+              <div className="mt-3 flex items-center gap-2 text-xs font-medium text-muted-foreground min-h-[1.5rem]">
+                {isMounted && liveRatingSummary.reviewsCount > 0 ? (
+                  <>
+                    <div className="flex items-center text-amber-500">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          size={15}
+                          className={cn(
+                            i < Math.round(liveRatingSummary.rating)
+                              ? "fill-amber-500 text-amber-500"
+                              : "text-muted-foreground/30 fill-none"
+                          )}
+                        />
+                      ))}
+                    </div>
+                    <span className="font-bold text-foreground">
+                      {liveRatingSummary.rating.toFixed(1)}
+                    </span>
+                    <span>
+                      ({liveRatingSummary.reviewsCount}{" "}
+                      {locale === "ar"
+                        ? "تقييم معتمد"
+                        : liveRatingSummary.reviewsCount > 1
+                        ? "avis certifiés"
+                        : "avis certifié"}
+                      )
+                    </span>
+                  </>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 px-2.5 py-0.5 text-xs text-muted-foreground">
+                    <Star size={13} className="text-muted-foreground/50 fill-none" />
+                    <span>
+                      {isMounted && locale === "ar"
+                        ? "منتج جديد • كن أول من يقيّم"
+                        : "Nouveau produit • Soyez le premier à donner votre avis"}
+                    </span>
+                  </span>
+                )}
               </div>
             </div>
 
@@ -522,6 +566,12 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
           productId={product.id}
           productHandle={product.handle}
           productTitle={localized.title}
+          onSummaryCalculated={(s) => {
+            setLiveRatingSummary({
+              rating: s.averageRating,
+              reviewsCount: s.totalReviews,
+            });
+          }}
         />
 
         {/* 5. Related Products Section ("Vous aimerez aussi") */}
@@ -551,9 +601,9 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                 const isItemAdded = addedRelatedId === rel.id;
                 const relLocalized = getLocalizedProduct(rel, locale);
 
-                // Deterministic rating based on title
-                const rating = 4.8 + ((rel.title.length % 3) * 0.1);
-                const reviewsCount = 12 + (rel.title.length % 23);
+                // Real rating and reviews count from Supabase
+                const relRating = typeof rel.rating === "number" ? rel.rating : 0;
+                const relReviewsCount = typeof rel.reviewsCount === "number" ? rel.reviewsCount : 0;
 
                 return (
                   <article
@@ -605,22 +655,36 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                           {relLocalized.title}
                         </Link>
 
-                        {/* Subtle Star Ratings in #ffbf00 */}
-                        <div className="flex items-center gap-1 sm:gap-1.5 mt-1.5 mb-0.5">
-                          <div className="flex items-center text-[#ffbf00]">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className="size-3 fill-[#ffbf00] text-[#ffbf00]"
-                              />
-                            ))}
-                          </div>
-                          <span className="text-[10px] sm:text-[11px] font-bold text-[#1E293B]">
-                            {rating.toFixed(1)}
-                          </span>
-                          <span className="text-[9px] sm:text-[10px] text-muted-foreground">
-                            ({reviewsCount})
-                          </span>
+                        {/* Real Star Ratings in #ffbf00 */}
+                        <div className="flex items-center gap-1 sm:gap-1.5 mt-1.5 mb-0.5 min-h-[1.25rem]">
+                          {isMounted && relReviewsCount > 0 ? (
+                            <>
+                              <div className="flex items-center text-[#ffbf00]">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={cn(
+                                      "size-3",
+                                      i < Math.round(relRating)
+                                        ? "fill-[#ffbf00] text-[#ffbf00]"
+                                        : "text-muted-foreground/30 fill-none"
+                                    )}
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-[10px] sm:text-[11px] font-bold text-[#1E293B]">
+                                {relRating.toFixed(1)}
+                              </span>
+                              <span className="text-[9px] sm:text-[10px] text-muted-foreground">
+                                ({relReviewsCount})
+                              </span>
+                            </>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-medium text-muted-foreground/75">
+                              <Star className="size-3 text-muted-foreground/35 fill-none" />
+                              <span>{isMounted && locale === "ar" ? "جديد • لا توجد تقييمات" : "Nouveau • Aucun avis"}</span>
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -713,7 +777,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
         </div>
         <div className="border-t border-primary-foreground/15">
           <div className="store-shell flex flex-wrap justify-between gap-2 py-4 pr-32 sm:pr-40 text-[11px] text-primary-foreground/65">
-            <span>© {new Date().getFullYear()} TefLook. Tous droits réservés.</span>
+            <span>© {isMounted ? new Date().getFullYear() : 2026} TefLook. Tous droits réservés.</span>
             <span>Accompagner chaque petit pas.</span>
           </div>
         </div>
