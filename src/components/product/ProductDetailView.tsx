@@ -38,6 +38,7 @@ import type { ShopifyProduct } from "@/lib/shopify-storefront";
 import { CHILD_STORE_CATEGORIES, getChildStoreCategory } from "@/lib/teflook-categories";
 import { CHILD_STORE_CATEGORY_MESSAGE_KEYS, useTefLookLanguage } from "@/lib/teflook-language";
 import { getLocalizedProduct, getLocalizedCategoryBadge } from "@/lib/product-localization";
+import { ProductReviewsSection } from "@/components/product/ProductReviewsSection";
 import { cn } from "@/lib/utils";
 
 interface ProductDetailViewProps {
@@ -516,7 +517,14 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
           </div>
         </div>
 
-        {/* 4. Related Products Section ("Vous aimerez aussi") */}
+        {/* 4. Customer & Parent Reviews Section */}
+        <ProductReviewsSection
+          productId={product.id}
+          productHandle={product.handle}
+          productTitle={localized.title}
+        />
+
+        {/* 5. Related Products Section ("Vous aimerez aussi") */}
         {relatedProducts.length > 0 && (
           <section className="mt-16 sm:mt-24 border-t border-border pt-12 sm:pt-16">
             <div className="mb-8 flex items-end justify-between">

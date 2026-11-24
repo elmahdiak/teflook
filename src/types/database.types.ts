@@ -135,6 +135,41 @@ export interface Database {
           created_at?: string;
         };
       };
+      product_reviews: {
+        Row: {
+          id: string;
+          product_id: string;
+          product_handle?: string;
+          author_name: string;
+          author_role?: string;
+          rating: number;
+          comment: string;
+          is_verified: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          product_id: string;
+          product_handle?: string;
+          author_name: string;
+          author_role?: string;
+          rating: number;
+          comment: string;
+          is_verified?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          product_id?: string;
+          product_handle?: string;
+          author_name?: string;
+          author_role?: string;
+          rating?: number;
+          comment?: string;
+          is_verified?: boolean;
+          created_at?: string;
+        };
+      };
       newsletter_subscribers: {
         Row: {
           id: string;
