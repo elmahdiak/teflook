@@ -237,7 +237,11 @@ function TefLookStorefront() {
                   setActiveCategory(category.value);
                   document.getElementById("boutique")?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className="text-[13px] font-medium text-foreground/80 transition-colors hover:text-brand-teal"
+                className={`text-[13px] font-bold tracking-tight transition-all relative py-1 cursor-pointer ${
+                  activeCategory === category.value
+                    ? "text-[#2B6E73] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-[#2B6E73] after:rounded-full"
+                    : "text-[#2B6E73] hover:text-[#193E3F] hover:underline underline-offset-4 decoration-[#2B6E73]/40"
+                }`}
               >
                 {category.label}
               </button>
@@ -311,9 +315,16 @@ function TefLookStorefront() {
                   setMobileMenuOpen(false);
                   document.getElementById("boutique")?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className="block w-full border-b border-border py-3 text-start text-sm font-medium last:border-0"
+                className={`flex items-center justify-between w-full border-b border-border py-3 text-start text-sm font-bold transition-colors last:border-0 ${
+                  activeCategory === category.value
+                    ? "text-[#2B6E73] bg-[#2B6E73]/5 px-2.5 rounded-lg"
+                    : "text-[#2B6E73] hover:text-[#193E3F]"
+                }`}
               >
-                {category.label}
+                <span>{category.label}</span>
+                {activeCategory === category.value && (
+                  <span className="w-2 h-2 rounded-full bg-[#2B6E73]" />
+                )}
               </button>
             ))}
           </nav>
