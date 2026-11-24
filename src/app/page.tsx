@@ -358,7 +358,7 @@ function TefLookStorefront() {
       </header>
 
       {/* 3. Hero Section - Pure Full-Width Unobstructed Visual Display */}
-      <section className="relative w-full overflow-hidden bg-[#FBF9F5] border-b border-border/50" aria-label="Bannière principale">
+      <section className="relative w-full overflow-hidden bg-[#FBF9F5]" aria-label="Bannière principale">
         <div className="relative w-full h-[420px] sm:h-[520px] md:h-[620px] lg:h-[680px] overflow-hidden">
           <img
             src="/Gemini_Generated_Gif_frnpcwfrnpcwfrnp.gif"
