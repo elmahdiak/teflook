@@ -50,12 +50,12 @@ function getDemoProducts(): AdminProduct[] {
 function mapRowToAdminProduct(row: any): AdminProduct {
   const images =
     Array.isArray(row.images) && row.images.length > 0
-      ? row.images
-      : row.image
-      ? [row.image]
+      ? row.images.filter((img: any) => typeof img === "string" && img.trim().length > 0)
+      : row.image && typeof row.image === "string" && row.image.trim().length > 0
+      ? [row.image.trim()]
       : typeof row.images === "string" && row.images.trim().length > 0
-      ? [row.images]
-      : ["https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=800&auto=format&fit=crop"];
+      ? [row.images.trim()]
+      : [];
 
   const id = String(row.id);
   const title = row.title || row.name || "Produit TefLook";
@@ -175,11 +175,15 @@ export async function POST(req: NextRequest) {
     const priceMadNum = Number(body.priceMad || 0);
     const oldPriceMadNum = body.oldPriceMad ? Number(body.oldPriceMad) : null;
     const categorySlug = body.categorySlug || "discipline-maitrise-de-soi";
-    const primaryImage =
+    const imagesList =
       Array.isArray(body.images) && body.images.length > 0
-        ? body.images[0]
-        : body.imageUrl || "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=800&auto=format&fit=crop";
-    const imagesList = Array.isArray(body.images) && body.images.length > 0 ? body.images : [primaryImage];
+        ? body.images.filter((img: any) => typeof img === "string" && img.trim().length > 0)
+        : body.imageUrl && typeof body.imageUrl === "string" && body.imageUrl.trim().length > 0
+        ? [body.imageUrl.trim()]
+        : body.image && typeof body.image === "string" && body.image.trim().length > 0
+        ? [body.image.trim()]
+        : [];
+    const primaryImage = imagesList[0] || "";
 
     // Attempt upsert with all standard columns
     const fullPayload: Record<string, any> = {

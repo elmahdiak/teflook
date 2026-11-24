@@ -164,10 +164,7 @@ export default function AdminProductsPage() {
       priceMad: Number(formData.priceMad),
       oldPriceMad: formData.oldPriceMad ? Number(formData.oldPriceMad) : undefined,
       ageBracket: formData.ageBracket,
-      images: [
-        formData.imageUrl.trim() ||
-          "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=800&auto=format&fit=crop",
-      ],
+      images: formData.imageUrl.trim() ? [formData.imageUrl.trim()] : [],
       description: formData.description.trim(),
       inStock: formData.inStock,
     });

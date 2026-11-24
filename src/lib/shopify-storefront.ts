@@ -73,44 +73,18 @@ const slugToCategoryMap: Record<string, ChildStoreCategory> = {
   "esprit-critique-resolution-problemes": "criticalThinking",
 };
 
-// Custom image overrides for exact aesthetic consistency
-const productCustomImages: Record<string, string[]> = {
-  "prod-disc-4": [
-    "https://images.unsplash.com/photo-1600080972464-8e5f35f63d08?q=80&w=800&auto=format&fit=crop", // Video game controller
-    "https://images.unsplash.com/photo-1592840496694-26d035b52b48?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=800&auto=format&fit=crop",
-  ],
-  "prod-disc-3": [
-    "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?q=80&w=800&auto=format&fit=crop", // Folders & daily routine organizer
-    "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=800&auto=format&fit=crop",
-  ],
-  "prod-disc-2": [
-    "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=800&auto=format&fit=crop", // Wooden balance & concentration toys
-    "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1587654780291-39c9404d746b?q=80&w=800&auto=format&fit=crop",
-  ],
-  "prod-auto-1": [
-    "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=800&auto=format&fit=crop", // Bathroom wash & autonomy scene
-    "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=800&auto=format&fit=crop",
-  ],
-};
-
 export function mapItemToShopifyProduct(item: any): ShopifyProduct {
   const category = slugToCategoryMap[item.categorySlug] || "discipline";
-  const overrideImages = productCustomImages[item.id];
-  const rawImages =
-    overrideImages && overrideImages.length > 0
-      ? overrideImages
-      : item.images && item.images.length > 0
-      ? item.images
-      : ["https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=800&auto=format&fit=crop"];
 
-  const finalImages =
-    rawImages.length === 1
-      ? [rawImages[0], "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=800&auto=format&fit=crop"]
-      : rawImages;
+  const rawImages: string[] =
+    Array.isArray(item.images) && item.images.length > 0
+      ? item.images.filter((url: any) => typeof url === "string" && url.trim().length > 0)
+      : item.image && typeof item.image === "string" && item.image.trim().length > 0
+      ? [item.image.trim()]
+      : [];
+
+  const finalImages: string[] =
+    rawImages.length > 0 ? rawImages : ["/images/Untitled Design.png"];
 
   const compareAtAmount = item.oldPriceMad ? Number(item.oldPriceMad).toFixed(2) : undefined;
   const trAr = PRODUCT_TRANSLATIONS_AR[item.id];
