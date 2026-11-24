@@ -18,6 +18,11 @@ import {
   TrendingUp,
   Truck,
   Users,
+  MessageCircle,
+  Phone,
+  Save,
+  LoaderCircle,
+  ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +31,13 @@ import {
   getDashboardStats,
   type CODOrder,
 } from "@/lib/cod-service";
+import {
+  fetchSiteSettings,
+  saveSiteSettings,
+  cleanWhatsAppNumber,
+  DEFAULT_SITE_SETTINGS,
+  type SiteSettings,
+} from "@/lib/site-settings";
 
 const INITIAL_STATS: ReturnType<typeof getDashboardStats> = {
   totalRevenue: 0,
@@ -45,12 +57,38 @@ export default function AdminDashboardPage() {
   const [recentOrders, setRecentOrders] = useState<CODOrder[]>([]);
   const [isMounted, setIsMounted] = useState(false);
 
+  // WhatsApp Support Settings state
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [settingsToast, setSettingsToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
   useEffect(() => {
     setIsMounted(true);
     const updatedStats = getDashboardStats();
     setStats(updatedStats);
     setRecentOrders(getCODOrders().slice(0, 5));
+
+    fetchSiteSettings().then((s) => {
+      if (s) setSiteSettings(s);
+    });
   }, []);
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingSettings(true);
+    const res = await saveSiteSettings(siteSettings);
+    setIsSavingSettings(false);
+
+    if (res.success) {
+      setSettingsToast({ message: "Numéro WhatsApp mis à jour avec succès !", type: "success" });
+    } else {
+      setSettingsToast({ message: res.error || "Erreur de sauvegarde", type: "error" });
+    }
+
+    setTimeout(() => {
+      setSettingsToast(null);
+    }, 4500);
+  };
 
   const statusBadges: Record<
     string,
@@ -85,6 +123,18 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-8">
+      {/* Settings Toast Notification */}
+      {settingsToast && (
+        <div
+          className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl text-xs sm:text-sm font-bold text-white animate-in fade-in slide-in-from-top-4 ${
+            settingsToast.type === "error" ? "bg-rose-600" : "bg-emerald-700"
+          }`}
+        >
+          <CheckCircle2 size={18} />
+          <span>{settingsToast.message}</span>
+        </div>
+      )}
+
       {/* 1. Header Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
         <div>
@@ -296,7 +346,116 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* 4. Delivery Pipeline & Moroccan Coverage */}
+      {/* 4. Configuration Support WhatsApp */}
+      <div className="rounded-2xl border border-border bg-card p-6 shadow-xs">
+        <form onSubmit={handleSaveSettings} className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border">
+            <div className="flex items-center gap-3">
+              <div className="grid size-10 place-items-center rounded-xl bg-[#25D366]/15 text-[#25D366]">
+                <MessageCircle size={22} />
+              </div>
+              <div>
+                <h3 className="font-display text-base font-bold text-foreground">
+                  Support Client WhatsApp
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Configurez le numéro WhatsApp pour le bouton flottant de support et les commandes directes
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
+                  siteSettings.whatsapp_enabled
+                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                    : "bg-muted text-muted-foreground border border-border"
+                }`}
+              >
+                <span
+                  className={`size-2 rounded-full ${
+                    siteSettings.whatsapp_enabled ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground"
+                  }`}
+                />
+                {siteSettings.whatsapp_enabled ? "Bouton Actif sur le site" : "Désactivé"}
+              </span>
+
+              <label className="relative inline-flex items-center cursor-pointer ml-2">
+                <input
+                  type="checkbox"
+                  checked={siteSettings.whatsapp_enabled}
+                  onChange={(e) =>
+                    setSiteSettings({ ...siteSettings, whatsapp_enabled: e.target.checked })
+                  }
+                  className="sr-only peer"
+                />
+                <div className="w-10 h-5.5 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-[#25D366]" />
+              </label>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 items-end">
+            <div className="sm:col-span-6 space-y-1">
+              <label className="block text-xs font-bold text-foreground">
+                Numéro WhatsApp / WhatsApp Phone *
+              </label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5 pointer-events-none">
+                  <span className="text-sm">🇲🇦</span>
+                  <Phone size={13} className="text-muted-foreground" />
+                </div>
+                <input
+                  type="text"
+                  required
+                  value={siteSettings.whatsapp_phone}
+                  onChange={(e) =>
+                    setSiteSettings({ ...siteSettings, whatsapp_phone: e.target.value })
+                  }
+                  placeholder="+212600000000 ou 0661234567"
+                  className="w-full h-10 pl-14 pr-3 rounded-xl border border-border bg-background text-xs sm:text-sm font-semibold outline-none focus:border-[#25D366]"
+                />
+              </div>
+              <p className="text-[10px] text-muted-foreground">
+                Format marocain local ou international supporté.
+              </p>
+            </div>
+
+            <div className="sm:col-span-3 flex items-center">
+              <a
+                href={`https://wa.me/${cleanWhatsAppNumber(siteSettings.whatsapp_phone)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full h-10 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl border border-border hover:border-[#25D366] hover:text-[#25D366] text-xs font-bold text-foreground bg-secondary/50 transition-colors"
+              >
+                <ExternalLink size={13} />
+                <span>Tester le lien</span>
+              </a>
+            </div>
+
+            <div className="sm:col-span-3 flex items-center">
+              <Button
+                type="submit"
+                disabled={isSavingSettings}
+                className="w-full h-10 bg-brand-orange text-white hover:bg-brand-orange/90 font-bold text-xs sm:text-sm cursor-pointer"
+              >
+                {isSavingSettings ? (
+                  <>
+                    <LoaderCircle size={14} className="animate-spin mr-1.5" />
+                    Enregistrement...
+                  </>
+                ) : (
+                  <>
+                    <Save size={14} className="mr-1.5" />
+                    Enregistrer
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      {/* 5. Delivery Pipeline & Moroccan Coverage */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Column 1 & 2: Process Steps */}
         <div className="lg:col-span-2 rounded-2xl border border-border bg-card p-6 shadow-xs">
@@ -401,6 +560,17 @@ export default function AdminDashboardPage() {
                 <div className="flex items-center gap-2.5">
                   <CheckCircle2 size={16} className="text-emerald-600" />
                   <span>Modérer les avis & Acheteurs vérifiés</span>
+                </div>
+                <ArrowRight size={14} className="text-muted-foreground" />
+              </Link>
+
+              <Link
+                href="/admin/settings"
+                className="flex items-center justify-between rounded-xl border border-border p-3 hover:border-brand-teal hover:bg-brand-mist/30 transition-all text-xs font-bold text-foreground"
+              >
+                <div className="flex items-center gap-2.5">
+                  <MessageCircle size={16} className="text-[#25D366]" />
+                  <span>Support & Numéro WhatsApp</span>
                 </div>
                 <ArrowRight size={14} className="text-muted-foreground" />
               </Link>

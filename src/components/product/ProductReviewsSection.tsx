@@ -167,138 +167,151 @@ export function ProductReviewsSection({
         </button>
       </div>
 
-      {/* 2. INTERACTIVE "WRITE A REVIEW" FORM MODAL / COLLAPSIBLE */}
+      {/* 2. INTERACTIVE "WRITE A REVIEW" FLOATING MODAL */}
       {isFormOpen && (
-        <div className="mb-10 rounded-2xl sm:rounded-3xl border-2 border-[#4b9797]/30 bg-white p-5 sm:p-7 shadow-lg animate-in fade-in slide-in-from-top-4 duration-300">
-          <div className="flex items-start justify-between gap-3 pb-4 border-b border-border/70">
-            <div>
-              <h3 className="font-display text-lg sm:text-xl font-bold text-[#1A2D2A]">
-                {t("reviews.modalTitle")}
-              </h3>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {t("reviews.modalSubtitle")} : <strong className="text-foreground">{productTitle}</strong>
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsFormOpen(false)}
-              className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground cursor-pointer"
-            >
-              <X size={16} />
-            </button>
-          </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop blur overlay */}
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
+            onClick={() => setIsFormOpen(false)}
+          />
 
-          <form onSubmit={handleSubmitReview} className="mt-5 space-y-4">
-            {formError && (
-              <div className="rounded-xl bg-rose-50 border border-rose-200 px-4 py-2.5 text-xs font-semibold text-rose-700">
-                {formError}
-              </div>
-            )}
-
-            {/* Interactive 5-Star Rating Selector */}
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                {t("reviews.ratingLabel")} *
-              </label>
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                {[1, 2, 3, 4, 5].map((starValue) => {
-                  const isActive = (hoverRating || rating) >= starValue;
-                  return (
-                    <button
-                      type="button"
-                      key={starValue}
-                      onMouseEnter={() => setHoverRating(starValue)}
-                      onMouseLeave={() => setHoverRating(0)}
-                      onClick={() => setRating(starValue)}
-                      aria-label={`${starValue} étoiles`}
-                      className="p-1 rounded-lg hover:scale-110 transition-transform cursor-pointer"
-                    >
-                      <Star
-                        size={28}
-                        className={cn(
-                          "transition-colors",
-                          isActive ? "text-[#ffbf00] fill-[#ffbf00]" : "text-border fill-transparent"
-                        )}
-                      />
-                    </button>
-                  );
-                })}
-                <span className="ml-2 text-xs font-bold text-brand-teal">
-                  {ratingDescriptions[hoverRating || rating]?.[locale] || ""}
-                </span>
-              </div>
-            </div>
-
-            {/* Name & Role Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Modal Card */}
+          <div
+            className="relative z-10 w-full max-w-lg rounded-2xl sm:rounded-3xl border border-border bg-white p-5 sm:p-7 shadow-2xl animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto"
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="flex items-start justify-between gap-3 pb-4 border-b border-border/70">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
-                  {t("reviews.nameLabel")} *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder={locale === "ar" ? "مثال: مريم العلمي" : "Ex: Meriem Benani"}
-                  value={authorName}
-                  onChange={(e) => setAuthorName(e.target.value)}
-                  className="w-full h-10 px-3.5 text-xs sm:text-sm rounded-xl border border-border bg-[#FBF9F5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4b9797]/40"
-                />
+                <h3 className="font-display text-lg sm:text-xl font-bold text-[#1A2D2A]">
+                  {t("reviews.modalTitle")}
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {t("reviews.modalSubtitle")} : <strong className="text-foreground">{productTitle}</strong>
+                </p>
               </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
-                  {t("reviews.roleLabel")}
-                </label>
-                <input
-                  type="text"
-                  placeholder={locale === "ar" ? "مثال: أم لطفلين (5 و 8 سنوات)" : "Ex: Maman de 2 enfants (5 et 8 ans)"}
-                  value={authorRole}
-                  onChange={(e) => setAuthorRole(e.target.value)}
-                  className="w-full h-10 px-3.5 text-xs sm:text-sm rounded-xl border border-border bg-[#FBF9F5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4b9797]/40"
-                />
-              </div>
-            </div>
-
-            {/* Detailed Comment */}
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
-                {t("reviews.commentLabel")} *
-              </label>
-              <textarea
-                required
-                rows={3}
-                placeholder={t("reviews.commentPlaceholder")}
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                className="w-full p-3.5 text-xs sm:text-sm rounded-xl border border-border bg-[#FBF9F5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4b9797]/40 resize-y"
-              />
-            </div>
-
-            {/* Submit & Cancel Buttons */}
-            <div className="flex items-center justify-end gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setIsFormOpen(false)}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-muted-foreground hover:bg-secondary cursor-pointer"
+                className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground cursor-pointer"
               >
-                {t("reviews.cancel")}
+                <X size={16} />
               </button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="px-5 py-2.5 rounded-xl bg-[#ff3500] hover:bg-[#e03000] text-white text-xs sm:text-sm font-bold shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50"
-              >
-                {isSubmitting ? (
-                  <>
-                    <LoaderCircle size={15} className="animate-spin mr-2" />
-                    <span>{t("reviews.submitting")}</span>
-                  </>
-                ) : (
-                  <span>{t("reviews.submit")}</span>
-                )}
-              </Button>
             </div>
-          </form>
+
+            <form onSubmit={handleSubmitReview} className="mt-5 space-y-4">
+              {formError && (
+                <div className="rounded-xl bg-rose-50 border border-rose-200 px-4 py-2.5 text-xs font-semibold text-rose-700">
+                  {formError}
+                </div>
+              )}
+
+              {/* Interactive 5-Star Rating Selector */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
+                  {t("reviews.ratingLabel")} *
+                </label>
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  {[1, 2, 3, 4, 5].map((starValue) => {
+                    const isActive = (hoverRating || rating) >= starValue;
+                    return (
+                      <button
+                        type="button"
+                        key={starValue}
+                        onMouseEnter={() => setHoverRating(starValue)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        onClick={() => setRating(starValue)}
+                        aria-label={`${starValue} étoiles`}
+                        className="p-1 rounded-lg hover:scale-110 transition-transform cursor-pointer"
+                      >
+                        <Star
+                          size={28}
+                          className={cn(
+                            "transition-colors",
+                            isActive ? "text-[#ffbf00] fill-[#ffbf00]" : "text-border fill-transparent"
+                          )}
+                        />
+                      </button>
+                    );
+                  })}
+                  <span className="ml-2 text-xs font-bold text-brand-teal">
+                    {ratingDescriptions[hoverRating || rating]?.[locale] || ""}
+                  </span>
+                </div>
+              </div>
+
+              {/* Name & Role Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                    {t("reviews.nameLabel")} *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder={locale === "ar" ? "مثال: مريم العلمي" : "Ex: Meriem Benani"}
+                    value={authorName}
+                    onChange={(e) => setAuthorName(e.target.value)}
+                    className="w-full h-10 px-3.5 text-xs sm:text-sm rounded-xl border border-border bg-[#FBF9F5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4b9797]/40"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                    {t("reviews.roleLabel")}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={locale === "ar" ? "مثال: أم لطفلين (5 و 8 سنوات)" : "Ex: Maman de 2 enfants (5 et 8 ans)"}
+                    value={authorRole}
+                    onChange={(e) => setAuthorRole(e.target.value)}
+                    className="w-full h-10 px-3.5 text-xs sm:text-sm rounded-xl border border-border bg-[#FBF9F5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4b9797]/40"
+                  />
+                </div>
+              </div>
+
+              {/* Detailed Comment */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                  {t("reviews.commentLabel")} *
+                </label>
+                <textarea
+                  required
+                  rows={4}
+                  placeholder={t("reviews.commentPlaceholder")}
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  className="w-full p-3.5 text-xs sm:text-sm rounded-xl border border-border bg-[#FBF9F5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#4b9797]/40 resize-y"
+                />
+              </div>
+
+              {/* Submit & Cancel Buttons */}
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-border/70">
+                <button
+                  type="button"
+                  onClick={() => setIsFormOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-muted-foreground hover:bg-secondary cursor-pointer"
+                >
+                  {t("reviews.cancel")}
+                </button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-5 py-2.5 rounded-xl bg-[#ff3500] hover:bg-[#e03000] text-white text-xs sm:text-sm font-bold shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <LoaderCircle size={15} className="animate-spin mr-2" />
+                      <span>{t("reviews.submitting")}</span>
+                    </>
+                  ) : (
+                    <span>{t("reviews.submit")}</span>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 

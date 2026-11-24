@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  MessageCircle,
   MessageSquare,
   Package,
   ShoppingBag,
@@ -79,6 +80,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       href: "/admin/reviews",
       icon: MessageSquare,
       badge: "Vérifiés",
+    },
+    {
+      label: "Support WhatsApp",
+      href: "/admin/settings",
+      icon: MessageCircle,
+      badge: "Direct",
     },
   ];
 

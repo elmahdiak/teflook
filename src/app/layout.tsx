@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
+import { WhatsAppButton } from "@/components/whatsapp/WhatsAppButton";
 import { CookieConsentProvider } from "@/lib/cookies";
 import { ConsentScriptLoader } from "@/components/cookies/ConsentScriptLoader";
 

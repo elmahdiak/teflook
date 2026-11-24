@@ -41,6 +41,7 @@ import { getLocalizedProduct, getLocalizedCategoryBadge } from "@/lib/product-lo
 import { ProductReviewsSection } from "@/components/product/ProductReviewsSection";
 import { ProductInfoTabs } from "@/components/product/ProductInfoTabs";
 import { useCookieConsent } from "@/lib/cookies";
+import { cleanWhatsAppNumber, fetchSiteSettings } from "@/lib/site-settings";
 import { cn } from "@/lib/utils";
 
 interface ProductDetailViewProps {
@@ -50,9 +51,16 @@ interface ProductDetailViewProps {
 
 export function ProductDetailView({ product, relatedProducts }: ProductDetailViewProps) {
   const [isMounted, setIsMounted] = useState(false);
+  const [whatsappPhone, setWhatsappPhone] = useState("212600000000");
+
   useEffect(() => {
     setIsMounted(true);
     void useCartStore.persist.rehydrate();
+    fetchSiteSettings().then((s) => {
+      if (s?.whatsapp_phone) {
+        setWhatsappPhone(cleanWhatsAppNumber(s.whatsapp_phone));
+      }
+    });
   }, []);
 
   const { direction, locale, t } = useTefLookLanguage();
@@ -120,7 +128,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
     }
   }
 
-  const whatsappOrderUrl = `https://wa.me/212600000000?text=${encodeURIComponent(
+  const whatsappOrderUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(
     locale === "ar"
       ? `مرحباً تيفلوك، أود طلب المنتج : ${localized.title} (${currentPrice} درهم) بالكمية ${quantity}.`
       : `Bonjour TefLook, je souhaite commander : ${localized.title} (${currentPrice} MAD) en quantité ${quantity}.`
