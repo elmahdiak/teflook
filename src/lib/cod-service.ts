@@ -35,6 +35,10 @@ export interface AdminProduct {
   oldPriceMad?: number;
   inStock: boolean;
   ageBracket: string;
+  ageRange?: string;
+  skills?: string[];
+  sku?: string;
+  reference?: string;
   images: string[];
   description: string;
   material?: string;

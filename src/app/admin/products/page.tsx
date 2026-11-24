@@ -50,6 +50,9 @@ export default function AdminProductsPage() {
     oldPriceMad: "",
     categorySlug: "discipline-maitrise-de-soi",
     ageBracket: "7 - 10 ans",
+    ageRange: "6 à 9 ans",
+    skills: "",
+    sku: "",
     imageUrl: "",
     description: "",
     inStock: true,
@@ -93,6 +96,9 @@ export default function AdminProductsPage() {
       oldPriceMad: "",
       categorySlug: categories[0]?.slug || "discipline-maitrise-de-soi",
       ageBracket: "7 - 10 ans",
+      ageRange: "6 à 9 ans",
+      skills: "",
+      sku: "",
       imageUrl: "",
       description: "",
       inStock: true,
@@ -110,6 +116,9 @@ export default function AdminProductsPage() {
       oldPriceMad: prod.oldPriceMad ? String(prod.oldPriceMad) : "",
       categorySlug: prod.categorySlug,
       ageBracket: prod.ageBracket || "7 - 10 ans",
+      ageRange: prod.ageRange || prod.ageBracket || "6 à 9 ans",
+      skills: Array.isArray(prod.skills) ? prod.skills.join(", ") : "",
+      sku: prod.sku || prod.reference || "",
       imageUrl: existingImage,
       description: prod.description || "",
       inStock: prod.inStock,
@@ -156,6 +165,13 @@ export default function AdminProductsPage() {
 
     const catObj = categories.find((c) => c.slug === formData.categorySlug);
 
+    const skillsArray = formData.skills
+      ? formData.skills
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
+
     const saved = saveAdminProduct({
       id: editingProduct?.id,
       title: formData.title.trim(),
@@ -164,6 +180,10 @@ export default function AdminProductsPage() {
       priceMad: Number(formData.priceMad),
       oldPriceMad: formData.oldPriceMad ? Number(formData.oldPriceMad) : undefined,
       ageBracket: formData.ageBracket,
+      ageRange: formData.ageRange.trim() || formData.ageBracket,
+      skills: skillsArray,
+      sku: formData.sku.trim() || undefined,
+      reference: formData.sku.trim() ? `Référence ${formData.sku.trim()}` : undefined,
       images: formData.imageUrl.trim() ? [formData.imageUrl.trim()] : [],
       description: formData.description.trim(),
       inStock: formData.inStock,
@@ -529,7 +549,7 @@ export default function AdminProductsPage() {
                 </div>
 
                 <div>
-                  <label className="block font-bold text-foreground mb-1">Tranche d'âge</label>
+                  <label className="block font-bold text-foreground mb-1">Tranche d'âge principale</label>
                   <select
                     value={formData.ageBracket}
                     onChange={(e) => setFormData({ ...formData, ageBracket: e.target.value })}
@@ -541,6 +561,51 @@ export default function AdminProductsPage() {
                     <option value="13 - 15 ans">13 - 15 ans</option>
                     <option value="Tous âges">Tous âges</option>
                   </select>
+                </div>
+              </div>
+
+              {/* Extended Specifications (Âge recommandé, Compétences développées, SKU) */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 rounded-xl border border-border/80 bg-muted/15">
+                <div>
+                  <label className="block font-bold text-foreground mb-1">
+                    Âge recommandé
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.ageRange}
+                    onChange={(e) => setFormData({ ...formData, ageRange: e.target.value })}
+                    placeholder="Ex: 6 à 9 ans, 9 ans et +"
+                    className="w-full h-9 px-3 rounded-lg border border-border bg-background text-xs outline-none focus:border-brand-teal"
+                  />
+                  <span className="text-[10px] text-muted-foreground mt-0.5 block">Affiché sur l'onglet Détails</span>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-foreground mb-1">
+                    Compétence développée
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.skills}
+                    onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
+                    placeholder="Concentration, Créativité..."
+                    className="w-full h-9 px-3 rounded-lg border border-border bg-background text-xs outline-none focus:border-brand-teal"
+                  />
+                  <span className="text-[10px] text-muted-foreground mt-0.5 block">Séparées par une virgule</span>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-foreground mb-1">
+                    Référence / SKU
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.sku}
+                    onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                    placeholder="Ex: 67907 ou REF-67907"
+                    className="w-full h-9 px-3 rounded-lg border border-border bg-background text-xs outline-none focus:border-brand-teal"
+                  />
+                  <span className="text-[10px] text-muted-foreground mt-0.5 block">Code référence produit</span>
                 </div>
               </div>
 
@@ -660,13 +725,16 @@ export default function AdminProductsPage() {
               </div>
 
               <div>
-                <label className="block font-bold text-foreground mb-1">Description détaillée</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block font-bold text-foreground">Description détaillée & sections</label>
+                  <span className="text-[10px] text-muted-foreground">Supporte sous-titres (C'est quoi ?, etc.) et puces</span>
+                </div>
                 <textarea
-                  rows={3}
+                  rows={5}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Description du produit et de ses bienfaits pédagogiques..."
-                  className="w-full p-3 rounded-xl border border-border bg-background text-xs outline-none focus:border-brand-teal resize-none"
+                  placeholder={`C'est quoi ?\nUn outil visuel pédagogique pour apaiser les transitions du quotidien...\n\nCe que votre enfant y gagne :\n• Autonomie dans ses routines\n• Meilleure gestion du temps sans stress`}
+                  className="w-full p-3 rounded-xl border border-border bg-background text-xs outline-none focus:border-brand-teal resize-y leading-relaxed font-sans"
                 />
               </div>
 

@@ -39,6 +39,7 @@ import { CHILD_STORE_CATEGORIES, getChildStoreCategory } from "@/lib/teflook-cat
 import { CHILD_STORE_CATEGORY_MESSAGE_KEYS, useTefLookLanguage } from "@/lib/teflook-language";
 import { getLocalizedProduct, getLocalizedCategoryBadge } from "@/lib/product-localization";
 import { ProductReviewsSection } from "@/components/product/ProductReviewsSection";
+import { ProductInfoTabs } from "@/components/product/ProductInfoTabs";
 import { useCookieConsent } from "@/lib/cookies";
 import { cn } from "@/lib/utils";
 
@@ -64,7 +65,6 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
   const [notice, setNotice] = useState("");
   const [adding, setAdding] = useState(false);
   const [addedRelatedId, setAddedRelatedId] = useState<string | null>(null);
-  const [openAccordion, setOpenAccordion] = useState<string>("description");
   const [liveRatingSummary, setLiveRatingSummary] = useState<{
     rating: number;
     reviewsCount: number;
@@ -431,135 +431,8 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
               </div>
             </div>
 
-            {/* Accordion / Details Section */}
-            <div className="divide-y divide-border/80 border-y border-border/80">
-              {/* 1. Description */}
-              <div className="py-3.5">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setOpenAccordion((cur) => (cur === "description" ? "" : "description"))
-                  }
-                  className="flex w-full items-center justify-between text-left text-sm font-bold text-foreground"
-                >
-                  <span>{locale === "ar" ? "وصف المنتج" : "Description du produit"}</span>
-                  <ChevronDown
-                    size={16}
-                    className={`transition-transform duration-200 ${
-                      openAccordion === "description" ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-                {openAccordion === "description" && (
-                  <div
-                    dir={direction}
-                    className={cn(
-                      "pt-3 text-xs sm:text-sm text-foreground/80 leading-relaxed",
-                      locale === "ar" ? "text-right font-sans" : "text-left"
-                    )}
-                  >
-                    <p>{localized.description}</p>
-                    {localized.features && localized.features.length > 0 && (
-                      <ul
-                        className={cn(
-                          "mt-3 space-y-1.5 list-disc list-inside text-foreground/85",
-                          locale === "ar" && "font-sans"
-                        )}
-                      >
-                        {localized.features.map((feat, i) => (
-                          <li key={i}>{feat}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* 2. Materials & Origin */}
-              <div className="py-3.5">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setOpenAccordion((cur) => (cur === "materials" ? "" : "materials"))
-                  }
-                  className="flex w-full items-center justify-between text-left text-sm font-bold text-foreground"
-                >
-                  <span>{locale === "ar" ? "المواد والمصدر" : "Matériaux & Origine"}</span>
-                  <ChevronDown
-                    size={16}
-                    className={`transition-transform duration-200 ${
-                      openAccordion === "materials" ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-                {openAccordion === "materials" && (
-                  <div
-                    dir={direction}
-                    className={cn(
-                      "pt-3 text-xs sm:text-sm text-foreground/80 space-y-2",
-                      locale === "ar" ? "text-right font-sans" : "text-left"
-                    )}
-                  >
-                    <p>
-                      <strong>{locale === "ar" ? "المكونات :" : "Composition :"}</strong>{" "}
-                      {localized.material ||
-                        (locale === "ar"
-                          ? "خشب طبيعي معتمد ودهانات غير سامة"
-                          : "Bois naturel certifié FSC et pigments non toxiques")}
-                    </p>
-                    <p>
-                      <strong>{locale === "ar" ? "التصنيع :" : "Conception :"}</strong>{" "}
-                      {localized.origin ||
-                        (locale === "ar"
-                          ? "صُنع بعناية فائقة وفق معايير الأمان الدولية"
-                          : "Fabriqué avec passion selon les normes de sécurité internationales")}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* 3. Delivery & Returns */}
-              <div className="py-3.5">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setOpenAccordion((cur) => (cur === "shipping" ? "" : "shipping"))
-                  }
-                  className="flex w-full items-center justify-between text-left text-sm font-bold text-foreground"
-                >
-                  <span>{locale === "ar" ? "التوصيل والدفع" : "Livraison & Modalités"}</span>
-                  <ChevronDown
-                    size={16}
-                    className={`transition-transform duration-200 ${
-                      openAccordion === "shipping" ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-                {openAccordion === "shipping" && (
-                  <div
-                    dir={direction}
-                    className={cn(
-                      "pt-3 text-xs sm:text-sm text-foreground/80 space-y-1.5 leading-relaxed",
-                      locale === "ar" ? "text-right font-sans" : "text-left"
-                    )}
-                  >
-                    {locale === "ar" ? (
-                      <>
-                        <p>• الشحن خلال 24 ساعة من مستودعاتنا في المغرب.</p>
-                        <p>• توصيل سريع إلى باب المنزل : الدار البيضاء (24 ساعة)، الرباط، مراكش، طنجة، فاس وكافة المدن (48 ساعة).</p>
-                        <p>• الدفع نقداً عند الاستلام بعد معاينة طلبيتك.</p>
-                      </>
-                    ) : (
-                      <>
-                        <p>• Expédition sous 24h ouvrées depuis nos entrepôts au Maroc.</p>
-                        <p>• Livraison à domicile : Casablanca (24h), Rabat, Marrakech, Tanger, Fès et toutes villes (48h).</p>
-                        <p>• Règlement en espèces lors de la réception du colis.</p>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
+            {/* Two-Tab Information Section: Description & Détails du produit */}
+            <ProductInfoTabs product={product} />
           </div>
         </div>
 

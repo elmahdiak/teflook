@@ -42,6 +42,11 @@ export interface ShopifyProduct {
   categoryNameAr?: string;
   tags?: string[];
   category?: ChildStoreCategory;
+  ageBracket?: string;
+  ageRange?: string;
+  skills?: string[];
+  sku?: string;
+  reference?: string;
   material?: string;
   material_ar?: string;
   origin?: string;
@@ -93,6 +98,15 @@ export function mapItemToShopifyProduct(item: any): ShopifyProduct {
 
   const title = item.title || item.name || "Produit TefLook";
   const description = item.description || "";
+  const ageRange = item.ageRange || item.age_range || item.ageBracket || "Tous âges";
+  const skills = Array.isArray(item.skills)
+    ? item.skills
+    : typeof item.skills === "string" && item.skills.trim().length > 0
+    ? item.skills.split(",").map((s: string) => s.trim()).filter(Boolean)
+    : undefined;
+  const sku = item.sku || item.reference || item.id;
+  const reference =
+    item.reference || item.sku || `Référence ${String(item.id).replace(/[^0-9]/g, "").slice(-5) || "67907"}`;
 
   return {
     id: item.id,
@@ -109,6 +123,11 @@ export function mapItemToShopifyProduct(item: any): ShopifyProduct {
     productType_ar: item.categoryName_ar || trAr?.categoryName || item.categoryName || "النمو والتطوير",
     categoryNameAr: item.categoryName_ar || trAr?.categoryName || item.categoryName || "النمو والتطوير",
     category,
+    ageBracket: item.ageBracket,
+    ageRange,
+    skills,
+    sku,
+    reference,
     material: item.material,
     material_ar: item.material_ar || trAr?.material || item.material,
     origin: item.origin,
@@ -269,6 +288,10 @@ export async function fetchProducts(): Promise<ShopifyProduct[]> {
                 : undefined,
             inStock: row.in_stock ?? true,
             ageBracket: row.age_bracket || "7 - 10 ans",
+            ageRange: row.age_range || row.ageRange || row.age_bracket || "7 - 10 ans",
+            skills: Array.isArray(row.skills) ? row.skills : typeof row.skills === "string" ? row.skills.split(",").map((s: string) => s.trim()).filter(Boolean) : undefined,
+            sku: row.sku || row.reference || rowId,
+            reference: row.reference || row.sku,
             images:
               Array.isArray(row.images) && row.images.length > 0
                 ? row.images

@@ -84,6 +84,14 @@ function mapRowToAdminProduct(row: any): AdminProduct {
     oldPriceMad,
     inStock: row.in_stock ?? row.inStock ?? true,
     ageBracket: row.age_bracket || row.ageBracket || "7 - 10 ans",
+    ageRange: row.age_range || row.ageRange || row.age_bracket || row.ageBracket || "7 - 10 ans",
+    skills: Array.isArray(row.skills)
+      ? row.skills
+      : typeof row.skills === "string" && row.skills.trim().length > 0
+      ? row.skills.split(",").map((s: string) => s.trim()).filter(Boolean)
+      : [],
+    sku: row.sku || row.reference || id,
+    reference: row.reference || row.sku || `Référence ${id.replace(/[^0-9]/g, "").slice(-5) || "67907"}`,
     images,
     description: row.description || "",
     material: row.material,
@@ -242,6 +250,14 @@ export async function POST(req: NextRequest) {
       description: body.description || "",
       in_stock: body.inStock ?? true,
       age_bracket: body.ageBracket || "7 - 10 ans",
+      age_range: body.ageRange || body.ageBracket || "7 - 10 ans",
+      skills: Array.isArray(body.skills)
+        ? body.skills
+        : typeof body.skills === "string" && body.skills.trim().length > 0
+        ? body.skills.split(",").map((s: string) => s.trim()).filter(Boolean)
+        : [],
+      sku: body.sku || body.reference || productId,
+      reference: body.reference || body.sku || `Référence ${productId.replace(/[^0-9]/g, "").slice(-5) || "67907"}`,
     };
 
     let upsertResult = await supabase.from("products").upsert(fullPayload);
