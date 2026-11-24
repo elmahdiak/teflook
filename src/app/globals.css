@@ -225,26 +225,28 @@ body {
 /* Announcement Ticker Marquee */
 @keyframes marquee {
   0% {
-    transform: translateX(0%);
+    transform: translate3d(0%, 0, 0);
   }
   100% {
-    transform: translateX(-50%);
+    transform: translate3d(-50%, 0, 0);
   }
 }
 
 @keyframes marquee-rtl {
   0% {
-    transform: translateX(0%);
+    transform: translate3d(0%, 0, 0);
   }
   100% {
-    transform: translateX(50%);
+    transform: translate3d(50%, 0, 0);
   }
 }
 
 .announcement-track {
   display: flex;
+  flex-direction: row;
   width: max-content;
-  animation: marquee 25s linear infinite;
+  will-change: transform;
+  animation: marquee 28s linear infinite;
 }
 
 .announcement-track:hover {

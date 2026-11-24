@@ -210,19 +210,34 @@ function TefLookStorefront() {
     <main lang={locale} dir={direction} className="min-h-screen bg-background text-foreground">
       {/* 1. Announcement Marquee Ticker */}
       <div
+        dir={direction}
         className="overflow-hidden bg-primary py-2 text-primary-foreground"
         aria-label={t("a11y.promises")}
       >
         <div
           lang={locale}
-          className="announcement-track flex gap-12 text-[11px] font-semibold uppercase tracking-[0.13em]"
+          dir={direction}
+          className={cn(
+            "announcement-track flex font-semibold",
+            locale === "ar"
+              ? "text-xs tracking-normal font-sans"
+              : "text-[11px] uppercase tracking-[0.13em]"
+          )}
         >
           {[0, 1].map((copy) => (
-            <div key={copy} aria-hidden={copy === 1} className="flex gap-12">
+            <div
+              key={copy}
+              aria-hidden={copy === 1}
+              className="flex shrink-0 min-w-full items-center justify-around gap-8 sm:gap-12 px-4 sm:px-6 whitespace-nowrap"
+            >
               <span>{t("announcement.one")}</span>
+              <span aria-hidden="true" className="opacity-50">•</span>
               <span>{t("announcement.two")}</span>
+              <span aria-hidden="true" className="opacity-50">•</span>
               <span>{t("announcement.three")}</span>
+              <span aria-hidden="true" className="opacity-50">•</span>
               <span>{t("announcement.four")}</span>
+              <span aria-hidden="true" className="opacity-50">•</span>
             </div>
           ))}
         </div>
@@ -230,10 +245,10 @@ function TefLookStorefront() {
 
       {/* 2. Header & Navigation */}
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-md">
-        <div className="store-shell flex h-[82px] items-center justify-between gap-3 sm:gap-5">
+        <div className="store-shell flex h-[82px] items-center justify-between gap-2.5 sm:gap-4 xl:gap-5">
           <BrandLogo size="md" />
 
-          <nav aria-label={t("a11y.categories")} className="hidden items-center gap-7 xl:flex">
+          <nav aria-label={t("a11y.categories")} className="hidden items-center gap-4 2xl:gap-7 xl:flex min-w-0">
             {categories.slice(0, 4).map((category) => (
               <button
                 key={category.value}
@@ -242,27 +257,33 @@ function TefLookStorefront() {
                   setActiveCategory(category.value);
                   document.getElementById("boutique")?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className={`text-[13px] font-bold tracking-tight transition-all relative py-1 cursor-pointer ${
+                className={cn(
+                  "text-[13px] font-bold transition-all relative py-1 cursor-pointer whitespace-nowrap shrink-0",
+                  locale === "ar" ? "tracking-normal font-sans" : "tracking-tight",
                   activeCategory === category.value
-                    ? "text-[#2B6E73] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-[#2B6E73] after:rounded-full"
+                    ? "text-[#2B6E73] after:absolute after:bottom-0 after:inset-x-0 after:h-[2px] after:bg-[#2B6E73] after:rounded-full"
                     : "text-[#2B6E73] hover:text-[#193E3F] hover:underline underline-offset-4 decoration-[#2B6E73]/40"
-                }`}
+                )}
               >
                 {category.label}
               </button>
             ))}
           </nav>
 
-          <div className="flex min-w-0 flex-1 justify-center xl:max-w-[290px]">
+          <div className="flex min-w-0 flex-1 justify-center xl:max-w-[230px] 2xl:max-w-[290px]">
             <label className="shop-search flex h-10 w-full max-w-[290px] items-center gap-1.5 border-b border-border px-1 text-muted-foreground sm:gap-2 sm:px-2">
-              <Search size={17} aria-hidden="true" />
+              <Search size={17} className="shrink-0" aria-hidden="true" />
               <input
                 aria-label={t("a11y.search")}
                 type="search"
+                dir={direction}
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 placeholder={t("search.placeholder")}
-                className="min-w-0 flex-1 bg-transparent text-[13px] text-foreground outline-none placeholder:text-muted-foreground"
+                className={cn(
+                  "min-w-0 flex-1 bg-transparent text-[13px] text-foreground outline-none placeholder:text-muted-foreground text-start placeholder:text-start",
+                  locale === "ar" && "font-sans"
+                )}
               />
               {searchTerm && (
                 <button
@@ -284,7 +305,7 @@ function TefLookStorefront() {
               size="icon"
               aria-label={t("a11y.openMenu")}
               aria-expanded={mobileMenuOpen}
-              className="xl:hidden"
+              className="xl:hidden shrink-0"
               onClick={() => setMobileMenuOpen((open) => !open)}
             >
               {mobileMenuOpen ? <X /> : <Menu />}
@@ -294,11 +315,11 @@ function TefLookStorefront() {
               size="icon"
               aria-label={`${t("a11y.cart")}, ${count}`}
               onClick={() => setIsCartOpen(true)}
-              className="relative"
+              className="relative shrink-0"
             >
               <ShoppingBag strokeWidth={1.7} />
               {count > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 grid size-[17px] place-items-center rounded-full bg-brand-orange text-[10px] font-bold text-accent-foreground">
+                <span className="absolute -end-0.5 -top-0.5 grid size-[17px] place-items-center rounded-full bg-brand-orange text-[10px] font-bold text-accent-foreground">
                   {count > 9 ? "9+" : count}
                 </span>
               )}
@@ -582,7 +603,7 @@ function TefLookStorefront() {
               <button
                 type="button"
                 onClick={openSettingsModal}
-                className="text-left text-primary-foreground/75 hover:text-white transition-colors cursor-pointer"
+                className="text-start text-primary-foreground/75 hover:text-white transition-colors cursor-pointer"
               >
                 {t("cookies.manageLink")}
               </button>
@@ -889,7 +910,7 @@ function CartSheet({
   onOpenChange: (value: boolean) => void;
   onOpenCODCheckout?: () => void;
 }) {
-  const { locale, t } = useTefLookLanguage();
+  const { locale, direction, t } = useTefLookLanguage();
   const { items, isLoading, isSyncing, error } = useCartStore();
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
@@ -912,10 +933,11 @@ function CartSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
-        side="right"
-        className="flex w-[min(100vw,440px)] flex-col gap-0 border-l border-border p-0 sm:max-w-[440px]"
+        side={direction === "rtl" ? "left" : "right"}
+        dir={direction}
+        className="flex w-[min(100vw,440px)] flex-col gap-0 border-s border-border p-0 sm:max-w-[440px]"
       >
-        <SheetHeader className="border-b border-border px-6 py-5 pr-14 text-left">
+        <SheetHeader className="border-b border-border px-6 py-5 pe-14 text-start">
           <div className="flex items-center gap-2">
             <ShoppingBag size={19} className="text-primary" />
             <SheetTitle className="font-display text-xl">{t("cart.title")}</SheetTitle>

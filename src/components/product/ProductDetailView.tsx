@@ -138,32 +138,32 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
     <div lang={locale} dir={direction} className="min-h-screen bg-background text-foreground flex flex-col">
       {/* 1. Header Navigation */}
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-md">
-        <div className="store-shell flex h-[76px] items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+        <div className="store-shell flex h-[76px] items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-brand-teal hover:text-foreground"
+              className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-brand-teal hover:text-foreground"
             >
-              <ArrowLeft size={15} className={cn(locale === "ar" && "rotate-180")} />
-              <span className="hidden sm:inline">
+              <ArrowLeft size={15} className={cn("shrink-0", locale === "ar" && "rotate-180")} />
+              <span className="hidden sm:inline whitespace-nowrap">
                 {locale === "ar" ? "العودة إلى المتجر" : "Retour à la boutique"}
               </span>
             </Link>
             <BrandLogo size="md" />
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             <TefLookLanguageSwitcher compact />
             <Button
               variant="ghost"
               size="icon"
               aria-label={`${t("a11y.cart")}, ${count}`}
               onClick={() => setIsCartOpen(true)}
-              className="relative"
+              className="relative shrink-0"
             >
               <ShoppingBag strokeWidth={1.8} size={20} />
               {count > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 grid size-[17px] place-items-center rounded-full bg-brand-orange text-[10px] font-bold text-white">
+                <span className="absolute -end-0.5 -top-0.5 grid size-[17px] place-items-center rounded-full bg-brand-orange text-[10px] font-bold text-white">
                   {count > 9 ? "9+" : count}
                 </span>
               )}
@@ -648,17 +648,17 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
               <span>Service client Maroc</span>
               <span>contact@teflook.com</span>
               <a
-                href="https://wa.me/212600000000"
+                href={`https://wa.me/${whatsappPhone}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-emerald-400 hover:underline"
               >
-                Assistance WhatsApp
+                {locale === "ar" ? "الدعم عبر واتساب" : "Assistance WhatsApp"}
               </a>
               <button
                 type="button"
                 onClick={openSettingsModal}
-                className="text-left text-primary-foreground/75 hover:text-white transition-colors cursor-pointer"
+                className="text-start text-primary-foreground/75 hover:text-white transition-colors cursor-pointer"
               >
                 {t("cookies.manageLink")}
               </button>
@@ -734,7 +734,7 @@ function CartSheet({
   onOpenChange: (value: boolean) => void;
   onOpenCODCheckout?: () => void;
 }) {
-  const { locale, t } = useTefLookLanguage();
+  const { locale, direction, t } = useTefLookLanguage();
   const { items, isLoading, isSyncing, error } = useCartStore();
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
@@ -757,10 +757,11 @@ function CartSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
-        side="right"
-        className="flex w-[min(100vw,440px)] flex-col gap-0 border-l border-border p-0 sm:max-w-[440px]"
+        side={direction === "rtl" ? "left" : "right"}
+        dir={direction}
+        className="flex w-[min(100vw,440px)] flex-col gap-0 border-s border-border p-0 sm:max-w-[440px]"
       >
-        <SheetHeader className="border-b border-border px-6 py-5 pr-14 text-left">
+        <SheetHeader className="border-b border-border px-6 py-5 pe-14 text-start">
           <div className="flex items-center gap-2">
             <ShoppingBag size={19} className="text-primary" />
             <SheetTitle className="font-display text-xl">{t("cart.title")}</SheetTitle>

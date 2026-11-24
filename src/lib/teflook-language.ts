@@ -335,6 +335,13 @@ export function useTefLookLanguage() {
   const locale: Locale = mounted ? storeLocale : "fr";
   const direction: "ltr" | "rtl" = locale === "ar" ? "rtl" : "ltr";
 
+  useEffect(() => {
+    if (mounted && typeof document !== "undefined") {
+      document.documentElement.lang = locale;
+      document.documentElement.dir = direction;
+    }
+  }, [mounted, locale, direction]);
+
   const t = (key: string): string => {
     return translations[locale]?.[key] ?? translations.fr[key] ?? key;
   };

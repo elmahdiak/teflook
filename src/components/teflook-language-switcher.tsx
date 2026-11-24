@@ -16,7 +16,8 @@ export function TefLookLanguageSwitcher({
 
   return (
     <div
-      className={`inline-flex items-center rounded-full border border-border bg-card/60 p-0.5 text-xs font-semibold ${className}`}
+      dir="ltr"
+      className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-border bg-card/60 p-0.5 text-xs font-semibold ${className}`}
       role="group"
       aria-label="Sélectionner la langue"
     >

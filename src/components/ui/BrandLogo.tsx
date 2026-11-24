@@ -41,7 +41,14 @@ export function BrandLogo({
   const logoSrc = "/images/Untitled Design.png";
 
   const content = (
-    <div className={cn("inline-flex items-center gap-2.5 sm:gap-3 group select-none", className)}>
+    <div
+      dir="ltr"
+      style={{ unicodeBidi: "isolate" }}
+      className={cn(
+        "inline-flex flex-row items-center gap-2.5 sm:gap-3 group select-none shrink-0",
+        className
+      )}
+    >
       {/* 1. Icon Container: Rounded white card with clean padding, subtle border & soft shadow */}
       <div
         className={cn(
@@ -60,12 +67,18 @@ export function BrandLogo({
         />
       </div>
 
-      {/* 2. Wordmark: Modern rounded geometric sans typography with exact dual-color split */}
+      {/* 2. Wordmark: Modern rounded geometric sans typography with exact dual-color split (Always LTR) */}
       {showText && (
-        <div className="flex flex-col justify-center leading-none select-none font-brand-logo">
+        <div
+          dir="ltr"
+          style={{ unicodeBidi: "isolate" }}
+          className="flex flex-col justify-center leading-none select-none font-brand-logo shrink-0"
+        >
           <div
+            dir="ltr"
+            style={{ unicodeBidi: "isolate" }}
             className={cn(
-              "font-bold tracking-tight flex items-center leading-none transition-colors",
+              "font-bold tracking-tight inline-flex flex-row items-center leading-none transition-colors whitespace-nowrap",
               textSizes[size]
             )}
           >
@@ -84,7 +97,7 @@ export function BrandLogo({
           {subtitle && (
             <span
               className={cn(
-                "block text-[10px] font-bold uppercase tracking-widest mt-1",
+                "block text-[10px] font-bold uppercase tracking-widest mt-1 text-left whitespace-nowrap",
                 variant === "dark" ? "text-[#ffbf00]" : "text-[#2B6E73]"
               )}
             >
@@ -100,7 +113,8 @@ export function BrandLogo({
     return (
       <Link
         href={href}
-        className="inline-flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E06D53] rounded-xl"
+        dir="ltr"
+        className="inline-flex items-center shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#E06D53] rounded-xl"
         aria-label="TefLook - Accueil"
       >
         {content}
