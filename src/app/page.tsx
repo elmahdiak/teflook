@@ -51,6 +51,7 @@ import {
 import { CHILD_STORE_CATEGORY_MESSAGE_KEYS, useTefLookLanguage } from "@/lib/teflook-language";
 import { getLocalizedProduct } from "@/lib/product-localization";
 import { cn } from "@/lib/utils";
+import { useCookieConsent } from "@/lib/cookies";
 
 interface CategoryPillarTheme {
   icon: LucideIcon;
@@ -148,6 +149,7 @@ function TefLookStorefront() {
     queryFn: fetchProducts,
   });
   const { direction, locale, t } = useTefLookLanguage();
+  const { openSettingsModal } = useCookieConsent();
   const [activeCategory, setActiveCategory] = useState<ChildStoreCategory | "all">("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -577,12 +579,29 @@ function TefLookStorefront() {
               <span>{t("footer.children")}</span>
               <span>{t("footer.families")}</span>
               <span>{t("footer.help")}</span>
+              <button
+                type="button"
+                onClick={openSettingsModal}
+                className="text-left text-primary-foreground/75 hover:text-white transition-colors cursor-pointer"
+              >
+                {t("cookies.manageLink")}
+              </button>
             </div>
           </div>
         </div>
         <div className="border-t border-primary-foreground/15">
           <div className="store-shell flex flex-wrap justify-between gap-2 py-4 pr-32 sm:pr-40 text-[11px] text-primary-foreground/65">
-            <span>© {isMounted ? new Date().getFullYear() : 2026} TefLook</span>
+            <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
+              <span>© {isMounted ? new Date().getFullYear() : 2026} TefLook</span>
+              <span>•</span>
+              <button
+                type="button"
+                onClick={openSettingsModal}
+                className="hover:text-white underline underline-offset-2 transition-colors cursor-pointer"
+              >
+                {t("cookies.manageLink")}
+              </button>
+            </div>
             <span>{t("footer.note")}</span>
           </div>
         </div>

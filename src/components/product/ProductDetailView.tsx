@@ -39,6 +39,7 @@ import { CHILD_STORE_CATEGORIES, getChildStoreCategory } from "@/lib/teflook-cat
 import { CHILD_STORE_CATEGORY_MESSAGE_KEYS, useTefLookLanguage } from "@/lib/teflook-language";
 import { getLocalizedProduct, getLocalizedCategoryBadge } from "@/lib/product-localization";
 import { ProductReviewsSection } from "@/components/product/ProductReviewsSection";
+import { useCookieConsent } from "@/lib/cookies";
 import { cn } from "@/lib/utils";
 
 interface ProductDetailViewProps {
@@ -54,6 +55,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
   }, []);
 
   const { direction, locale, t } = useTefLookLanguage();
+  const { openSettingsModal } = useCookieConsent();
   const images = product.images.edges.map((e) => e.node);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -772,12 +774,29 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
               >
                 Assistance WhatsApp
               </a>
+              <button
+                type="button"
+                onClick={openSettingsModal}
+                className="text-left text-primary-foreground/75 hover:text-white transition-colors cursor-pointer"
+              >
+                {t("cookies.manageLink")}
+              </button>
             </div>
           </div>
         </div>
         <div className="border-t border-primary-foreground/15">
           <div className="store-shell flex flex-wrap justify-between gap-2 py-4 pr-32 sm:pr-40 text-[11px] text-primary-foreground/65">
-            <span>© {isMounted ? new Date().getFullYear() : 2026} TefLook. Tous droits réservés.</span>
+            <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
+              <span>© {isMounted ? new Date().getFullYear() : 2026} TefLook. Tous droits réservés.</span>
+              <span>•</span>
+              <button
+                type="button"
+                onClick={openSettingsModal}
+                className="hover:text-white underline underline-offset-2 transition-colors cursor-pointer"
+              >
+                {t("cookies.manageLink")}
+              </button>
+            </div>
             <span>Accompagner chaque petit pas.</span>
           </div>
         </div>

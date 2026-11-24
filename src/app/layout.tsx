@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
+import { CookieConsentProvider } from "@/lib/cookies";
+import { ConsentScriptLoader } from "@/components/cookies/ConsentScriptLoader";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://teflook.com"),
@@ -56,9 +58,13 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-[#FBF9F5] text-[#1C2A2B] antialiased selection:bg-[#FE7C58] selection:text-white">
-        {children}
-        {/* Floating WhatsApp Contact Button (Active across all pages) */}
-        <WhatsAppButton />
+        <CookieConsentProvider>
+          {children}
+          {/* Floating WhatsApp Contact Button (Active across all pages) */}
+          <WhatsAppButton />
+          {/* Production-Ready Cookie Consent Banner & Preferences Modal */}
+          <ConsentScriptLoader />
+        </CookieConsentProvider>
       </body>
     </html>
   );
