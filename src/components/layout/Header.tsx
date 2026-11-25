@@ -4,12 +4,60 @@ import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Menu, Search, ShoppingBag, X } from "lucide-react";
 import { TefLookLanguageSwitcher } from "@/components/teflook-language-switcher";
 import { useCartStore } from "@/lib/shopify-cart";
 import { CHILD_STORE_CATEGORIES, type ChildStoreCategory } from "@/lib/teflook-categories";
 import { CHILD_STORE_CATEGORY_MESSAGE_KEYS, useTefLookLanguage } from "@/lib/teflook-language";
 import { cn } from "@/lib/utils";
+
+const HEADER_SVG_PROPS = {
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 2,
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
+  className: "w-5 h-5",
+  "aria-hidden": true as const,
+};
+
+function HeaderMenuIcon() {
+  return (
+    <svg {...HEADER_SVG_PROPS}>
+      <line x1="4" y1="6" x2="20" y2="6" />
+      <line x1="4" y1="12" x2="20" y2="12" />
+      <line x1="4" y1="18" x2="20" y2="18" />
+    </svg>
+  );
+}
+
+function HeaderCloseIcon() {
+  return (
+    <svg {...HEADER_SVG_PROPS}>
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </svg>
+  );
+}
+
+function HeaderSearchIcon() {
+  return (
+    <svg {...HEADER_SVG_PROPS}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-4.35-4.35" />
+    </svg>
+  );
+}
+
+function HeaderBagIcon() {
+  return (
+    <svg {...HEADER_SVG_PROPS}>
+      <path d="M5.5 8h13l1 12H4.5L5.5 8Z" />
+      <path d="M9 8V6a3 3 0 0 1 6 0v2" />
+      <path d="M9 11a3 3 0 0 0 6 0" />
+    </svg>
+  );
+}
 
 export interface HeaderProps {
   activeCategory?: ChildStoreCategory | "all";
@@ -167,11 +215,7 @@ export function Header({
                   : "border border-transparent hover:bg-white hover:border-[#E8E2D9] hover:text-[#4b9797]"
               )}
             >
-              {menuOpen ? (
-                <X className="w-5 h-5" strokeWidth={2} aria-hidden="true" />
-              ) : (
-                <Menu className="w-5 h-5" strokeWidth={2} aria-hidden="true" />
-              )}
+              {menuOpen ? <HeaderCloseIcon /> : <HeaderMenuIcon />}
               <span
                 className={cn(
                   "hidden sm:inline font-brand-logo text-[13px] font-semibold",
@@ -219,7 +263,7 @@ export function Header({
                   : "border border-transparent hover:bg-white hover:border-[#E8E2D9] hover:text-[#4b9797]"
               )}
             >
-              <Search className="w-5 h-5" strokeWidth={2} aria-hidden="true" />
+              <HeaderSearchIcon />
             </button>
 
             {/* Shopping Bag Button with Coral Count Badge */}
@@ -229,7 +273,7 @@ export function Header({
               aria-label={`${t("a11y.cart")}, ${count}`}
               className="relative w-10 h-10 rounded-xl flex items-center justify-center text-[#1A4D4B] hover:bg-white hover:text-[#E86F51] border border-transparent hover:border-[#E8E2D9] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797] cursor-pointer"
             >
-              <ShoppingBag className="w-5 h-5" strokeWidth={2} aria-hidden="true" />
+              <HeaderBagIcon />
               {count > 0 && (
                 <span className="absolute top-1 end-1 min-w-[16px] h-4 px-1 rounded-full bg-[#E86F51] text-white font-brand-logo text-[10px] font-bold flex items-center justify-center ring-2 ring-[#FAF8F5]">
                   {count > 9 ? "9+" : count}
@@ -312,7 +356,7 @@ export function Header({
                 aria-label={t("a11y.search")}
                 className="w-9 h-9 rounded-xl text-[#4b9797] hover:text-[#1A4D4B] hover:bg-[#FAF8F5] flex items-center justify-center shrink-0 transition-colors cursor-pointer"
               >
-                <Search className="w-5 h-5" strokeWidth={2} aria-hidden="true" />
+                <HeaderSearchIcon />
               </button>
 
               {/* Horizontal Search Input */}
@@ -358,7 +402,7 @@ export function Header({
                 title={isAr ? "إغلاق" : "Fermer"}
                 className="w-9 h-9 rounded-xl bg-[#FAF8F5] hover:bg-[#E86F51]/15 text-[#1A4D4B] hover:text-[#E86F51] border border-transparent hover:border-[#E8E2D9] flex items-center justify-center transition-colors duration-200 shrink-0 cursor-pointer"
               >
-                <X className="w-5 h-5" strokeWidth={2} aria-hidden="true" />
+                <HeaderCloseIcon />
               </button>
             </form>
           </div>
