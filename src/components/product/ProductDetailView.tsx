@@ -207,10 +207,6 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                   -{discountPercent}% Promo
                 </span>
               )}
-              <span className="absolute bottom-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-card/90 backdrop-blur-xs px-3 py-1 text-xs font-semibold text-brand-teal shadow-xs border border-border/50">
-                <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-                {locale === "ar" ? "متوفر في المخزون · شحن خلال 24 ساعة" : "En stock · Expédié sous 24h"}
-              </span>
             </div>
 
             {/* Thumbnail Row */}
