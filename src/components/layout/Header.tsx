@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Menu, Search, ShoppingBag, X } from "lucide-react";
-import { BrandLogo } from "@/components/ui/BrandLogo";
 import { TefLookLanguageSwitcher } from "@/components/teflook-language-switcher";
 import { useCartStore } from "@/lib/shopify-cart";
 import { CHILD_STORE_CATEGORIES, type ChildStoreCategory } from "@/lib/teflook-categories";
@@ -32,7 +33,7 @@ export function Header({
   const { items, hasHydrated } = useCartStore();
 
   const [isSearchOpen, setIsSearchOpen] = useState(defaultSearchOpen);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [internalQuery, setInternalQuery] = useState(searchTerm ?? "");
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -67,16 +68,21 @@ export function Header({
         setTimeout(() => {
           searchInputRef.current?.focus();
         }, 80);
-      } else if (e.key === "Escape" && isSearchOpen) {
-        e.preventDefault();
-        setIsSearchOpen(false);
-        searchInputRef.current?.blur();
+      } else if (e.key === "Escape") {
+        if (isSearchOpen) {
+          e.preventDefault();
+          setIsSearchOpen(false);
+          searchInputRef.current?.blur();
+        }
+        if (menuOpen) {
+          setMenuOpen(false);
+        }
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isSearchOpen]);
+  }, [isSearchOpen, menuOpen]);
 
   const categories = CHILD_STORE_CATEGORIES.map((category) => ({
     ...category,
@@ -126,11 +132,13 @@ export function Header({
     searchInputRef.current?.blur();
   }
 
-  function handleCategoryClick(category: ChildStoreCategory) {
-    setMobileMenuOpen(false);
+  function handleCategoryClick(category: ChildStoreCategory | "all") {
+    setMenuOpen(false);
     if (onSelectCategory) {
       onSelectCategory(category);
       document.getElementById("boutique")?.scrollIntoView({ behavior: "smooth" });
+    } else if (category === "all") {
+      router.push("/#boutique");
     } else {
       router.push(`/?category=${encodeURIComponent(category)}#boutique`);
     }
@@ -138,40 +146,63 @@ export function Header({
 
   return (
     <header className="sticky top-0 z-40 w-full" dir={direction}>
-      {/* 1. Main TefLook Navigation Bar */}
+      {/* 1. Main 3-Zone TefLook Navigation Bar */}
       <nav
         aria-label={t("a11y.categories")}
         className="w-full bg-[#FAF8F5]/95 backdrop-blur-md border-b border-[#E8E2D9]"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[72px] flex items-center justify-between gap-4">
-          {/* Left/Start: TefLook Brand Logo */}
-          <BrandLogo size="md" />
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-[72px] grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+          {/* Start Zone: Menu Trigger + FR/عربي Language Switcher */}
+          <div className="justify-self-start flex items-center gap-1.5 sm:gap-3 min-w-0">
+            <button
+              type="button"
+              aria-label={t("a11y.openMenu")}
+              aria-expanded={menuOpen}
+              aria-controls="teflook-category-menu"
+              onClick={() => setMenuOpen((open) => !open)}
+              className={cn(
+                "inline-flex items-center justify-center gap-1.5 h-9 sm:h-10 px-2.5 sm:px-3 rounded-xl text-[#1A4D4B] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797] cursor-pointer shrink-0",
+                menuOpen
+                  ? "bg-white border border-[#4b9797] ring-2 ring-[#4b9797]/20"
+                  : "border border-transparent hover:bg-white hover:border-[#E8E2D9] hover:text-[#4b9797]"
+              )}
+            >
+              {menuOpen ? (
+                <X size={19} aria-hidden="true" />
+              ) : (
+                <Menu size={19} aria-hidden="true" />
+              )}
+              <span
+                className={cn(
+                  "hidden sm:inline font-brand-logo text-[13px] font-semibold",
+                  isAr && "font-sans"
+                )}
+              >
+                {isAr ? "القائمة" : "Menu"}
+              </span>
+            </button>
 
-          {/* Center: Desktop Category Navigation Links (Top 4 on xl screens) */}
-          <div className="hidden xl:flex items-center gap-6 2xl:gap-7 min-w-0">
-            {categories.slice(0, 4).map((category) => {
-              const isSelected = activeCategory === category.value;
-              return (
-                <button
-                  key={category.value}
-                  type="button"
-                  onClick={() => handleCategoryClick(category.value)}
-                  className={cn(
-                    "font-brand-logo font-medium text-[13.5px] transition-colors duration-200 py-2 whitespace-nowrap shrink-0 cursor-pointer relative",
-                    isAr && "font-sans tracking-normal font-semibold",
-                    isSelected
-                      ? "text-[#E86F51] font-bold after:absolute after:bottom-1 after:inset-x-0 after:h-[2px] after:bg-[#E86F51] after:rounded-full"
-                      : "text-[#1A4D4B] hover:text-[#E86F51]"
-                  )}
-                >
-                  {category.label}
-                </button>
-              );
-            })}
+            <TefLookLanguageSwitcher compact />
           </div>
 
-          {/* Right/End: Utility Controls (Search Toggle, FR/AR Switcher, Mobile Menu, Shopping Bag) */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* Center Zone: Dead-Center Stacked TefLook Image Logo */}
+          <Link
+            href="/"
+            aria-label={isAr ? "الصفحة الرئيسية تيفلوك" : "Accueil TefLook"}
+            className="justify-self-center flex items-center justify-center rounded-xl px-1.5 py-1 transition-transform duration-200 hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797]"
+          >
+            <Image
+              src="/images/teflook-stacked-logo.png"
+              alt="TefLook"
+              width={140}
+              height={140}
+              priority
+              className="h-11 sm:h-12 w-auto object-contain mix-blend-multiply"
+            />
+          </Link>
+
+          {/* End Zone: Search Toggle Button + Shopping Bag Button */}
+          <div className="justify-self-end flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* Search Toggle Button */}
             <button
               type="button"
@@ -181,7 +212,7 @@ export function Header({
               aria-label={t("a11y.search")}
               title={isAr ? "بحث (اضغط /)" : "Rechercher (touche /)"}
               className={cn(
-                "relative w-10 h-10 rounded-xl flex items-center justify-center text-[#1A4D4B] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797] cursor-pointer",
+                "relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-[#1A4D4B] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797] cursor-pointer",
                 isSearchOpen
                   ? "bg-white border border-[#4b9797] ring-2 ring-[#4b9797]/25"
                   : "border border-transparent hover:bg-white hover:border-[#E8E2D9] hover:text-[#4b9797]"
@@ -190,30 +221,16 @@ export function Header({
               <Search size={19} strokeWidth={2.1} aria-hidden="true" />
             </button>
 
-            {/* Language Switcher Pill (FR / عربي) */}
-            <TefLookLanguageSwitcher compact />
-
-            {/* Mobile Categories Menu Toggle */}
-            <button
-              type="button"
-              aria-label={t("a11y.openMenu")}
-              aria-expanded={mobileMenuOpen}
-              onClick={() => setMobileMenuOpen((open) => !open)}
-              className="xl:hidden w-10 h-10 rounded-xl flex items-center justify-center text-[#1A4D4B] hover:bg-white border border-transparent hover:border-[#E8E2D9] transition-all duration-200 cursor-pointer"
-            >
-              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-
             {/* Shopping Bag Button with Coral Count Badge */}
             <button
               type="button"
               onClick={onOpenCart}
               aria-label={`${t("a11y.cart")}, ${count}`}
-              className="relative w-10 h-10 rounded-xl flex items-center justify-center text-[#1A4D4B] hover:bg-white hover:text-[#E86F51] border border-transparent hover:border-[#E8E2D9] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797] cursor-pointer"
+              className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-[#1A4D4B] hover:bg-white hover:text-[#E86F51] border border-transparent hover:border-[#E8E2D9] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797] cursor-pointer"
             >
               <ShoppingBag size={20} strokeWidth={2} aria-hidden="true" />
               {count > 0 && (
-                <span className="absolute top-1.5 end-1.5 min-w-[16px] h-4 px-1 rounded-full bg-[#E86F51] text-white font-brand-logo text-[10px] font-bold flex items-center justify-center ring-2 ring-[#FAF8F5]">
+                <span className="absolute top-1 end-1 min-w-[16px] h-4 px-1 rounded-full bg-[#E86F51] text-white font-brand-logo text-[10px] font-bold flex items-center justify-center ring-2 ring-[#FAF8F5]">
                   {count > 9 ? "9+" : count}
                 </span>
               )}
@@ -221,28 +238,50 @@ export function Header({
           </div>
         </div>
 
-        {/* Mobile Category Navigation Drawer */}
-        {mobileMenuOpen && (
-          <div className="border-t border-[#E8E2D9] bg-[#FAF8F5] px-5 py-3 xl:hidden">
-            {categories.map((category) => (
+        {/* Category Navigation Drawer */}
+        {menuOpen && (
+          <div
+            id="teflook-category-menu"
+            className="border-t border-[#E8E2D9] bg-[#FAF8F5] px-4 sm:px-6 lg:px-8 py-3 shadow-sm"
+          >
+            <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 sm:gap-2">
               <button
                 type="button"
-                key={category.value}
-                onClick={() => handleCategoryClick(category.value)}
+                onClick={() => handleCategoryClick("all")}
                 className={cn(
-                  "flex items-center justify-between w-full border-b border-[#E8E2D9] py-3 text-start text-sm font-bold transition-colors last:border-0 cursor-pointer",
-                  activeCategory === category.value
-                    ? "text-[#E86F51] bg-[#E86F51]/5 px-2.5 rounded-lg"
-                    : "text-[#1A4D4B] hover:text-[#E86F51]",
+                  "flex items-center justify-between w-full px-3 py-2.5 rounded-xl text-start text-sm font-bold transition-colors cursor-pointer",
+                  activeCategory === "all"
+                    ? "text-[#E86F51] bg-[#E86F51]/8"
+                    : "text-[#1A4D4B] hover:bg-white hover:text-[#E86F51]",
                   isAr && "font-sans"
                 )}
               >
-                <span>{category.label}</span>
-                {activeCategory === category.value && (
-                  <span className="w-2 h-2 rounded-full bg-[#E86F51]" />
+                <span>{t("footer.allProducts")}</span>
+                {activeCategory === "all" && (
+                  <span className="w-2 h-2 rounded-full bg-[#E86F51] shrink-0" />
                 )}
               </button>
-            ))}
+
+              {categories.map((category) => (
+                <button
+                  type="button"
+                  key={category.value}
+                  onClick={() => handleCategoryClick(category.value)}
+                  className={cn(
+                    "flex items-center justify-between w-full px-3 py-2.5 rounded-xl text-start text-sm font-bold transition-colors cursor-pointer",
+                    activeCategory === category.value
+                      ? "text-[#E86F51] bg-[#E86F51]/8"
+                      : "text-[#1A4D4B] hover:bg-white hover:text-[#E86F51]",
+                    isAr && "font-sans"
+                  )}
+                >
+                  <span>{category.label}</span>
+                  {activeCategory === category.value && (
+                    <span className="w-2 h-2 rounded-full bg-[#E86F51] shrink-0" />
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </nav>
