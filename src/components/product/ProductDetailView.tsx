@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Check,
@@ -36,9 +36,11 @@ import { useCartStore } from "@/lib/shopify-cart";
 import type { ShopifyProduct } from "@/lib/shopify-storefront";
 import { CHILD_STORE_CATEGORIES, getChildStoreCategory } from "@/lib/teflook-categories";
 import { CHILD_STORE_CATEGORY_MESSAGE_KEYS, useTefLookLanguage } from "@/lib/teflook-language";
-import { getLocalizedProduct, getLocalizedCategoryBadge } from "@/lib/product-localization";
+import { getLocalizedProduct } from "@/lib/product-localization";
 import { ProductReviewsSection } from "@/components/product/ProductReviewsSection";
+import type { ProductRatingSummary } from "@/lib/reviews-service";
 import { ProductInfoTabs } from "@/components/product/ProductInfoTabs";
+import { ProductCard } from "@/components/product/ProductCard";
 import { FAQAccordion } from "@/components/faq/FAQAccordion";
 import { FooterSocialLinks } from "@/components/footer/FooterSocialLinks";
 import { useCookieConsent } from "@/lib/cookies";
@@ -73,7 +75,6 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
   const [isCODModalOpen, setIsCODModalOpen] = useState(false);
   const [notice, setNotice] = useState("");
   const [adding, setAdding] = useState(false);
-  const [addedRelatedId, setAddedRelatedId] = useState<string | null>(null);
   const [liveRatingSummary, setLiveRatingSummary] = useState<{
     rating: number;
     reviewsCount: number;
@@ -81,6 +82,18 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
     rating: typeof product.rating === "number" ? product.rating : 0,
     reviewsCount: typeof product.reviewsCount === "number" ? product.reviewsCount : 0,
   });
+
+  const handleSummaryCalculated = useCallback((s: ProductRatingSummary) => {
+    setLiveRatingSummary((prev) => {
+      if (prev.rating === s.averageRating && prev.reviewsCount === s.totalReviews) {
+        return prev;
+      }
+      return {
+        rating: s.averageRating,
+        reviewsCount: s.totalReviews,
+      };
+    });
+  }, []);
 
   const { error: cartError } = useCartStore();
 
@@ -412,12 +425,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
           productId={product.id}
           productHandle={product.handle}
           productTitle={localized.title}
-          onSummaryCalculated={(s) => {
-            setLiveRatingSummary({
-              rating: s.averageRating,
-              reviewsCount: s.totalReviews,
-            });
-          }}
+          onSummaryCalculated={handleSummaryCalculated}
         />
 
         {/* 5. Collapsible FAQ Section */}
@@ -443,143 +451,15 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
-              {relatedProducts.map((rel) => {
-                const img = rel.images.edges[0]?.node?.url;
-                const price = Number(rel.priceRange.minVariantPrice.amount);
-                const isItemAdded = addedRelatedId === rel.id;
-                const relLocalized = getLocalizedProduct(rel, locale);
-
-                // Real rating and reviews count from Supabase
-                const relRating = typeof rel.rating === "number" ? rel.rating : 0;
-                const relReviewsCount = typeof rel.reviewsCount === "number" ? rel.reviewsCount : 0;
-
-                return (
-                  <article
-                    key={rel.id}
-                    dir={direction}
-                    className="group relative flex h-full flex-col justify-between rounded-2xl sm:rounded-3xl border border-[#E6E1D8]/80 bg-white p-2.5 sm:p-4 shadow-xs hover:shadow-xl hover:shadow-black/5 hover:border-[#4b9797]/40 hover:-translate-y-1 transition-all duration-300 select-none"
-                  >
-                    <div>
-                      {/* Image Container */}
-                      <div className="relative aspect-square w-full overflow-hidden rounded-xl sm:rounded-2xl bg-[#F9F8F6]">
-                        <Link
-                          href={`/product/${rel.handle}`}
-                          aria-label={`Voir ${relLocalized.title}`}
-                          className="absolute inset-0 block z-0"
-                        >
-                          {img ? (
-                            <img
-                              src={img}
-                              alt={relLocalized.title}
-                              className="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                              loading="lazy"
-                            />
-                          ) : (
-                            <div className="grid size-full place-items-center bg-[#F9F8F6] text-[#4b9797]">
-                              <img
-                                src="/images/Untitled Design.png"
-                                alt=""
-                                className="size-14 sm:size-16 rounded-xl opacity-40 object-contain"
-                              />
-                            </div>
-                          )}
-                          <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </Link>
-                      </div>
-
-                      {/* Content & Typography */}
-                      <div className="pt-2.5 sm:pt-3.5 flex flex-col">
-                        {/* Category Label */}
-                        <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.14em] text-[#4b9797] truncate block mb-1">
-                          {relLocalized.categoryBadge}
-                        </span>
-
-                        {/* Product Title */}
-                        <Link
-                          href={`/product/${rel.handle}`}
-                          className="line-clamp-2 text-[13px] sm:text-[15px] font-bold leading-snug text-[#1E293B] transition-colors group-hover:text-[#4b9797] min-h-[2.3rem] sm:min-h-[2.6rem]"
-                          title={relLocalized.title}
-                        >
-                          {relLocalized.title}
-                        </Link>
-
-                        {/* Real Star Ratings in #ffbf00 */}
-                        <div className="flex items-center gap-1 sm:gap-1.5 mt-1.5 mb-0.5 min-h-[1.25rem]">
-                          {isMounted && relReviewsCount > 0 ? (
-                            <>
-                              <div className="flex items-center text-[#ffbf00]">
-                                {[...Array(5)].map((_, i) => (
-                                  <Star
-                                    key={i}
-                                    className={cn(
-                                      "size-3",
-                                      i < Math.round(relRating)
-                                        ? "fill-[#ffbf00] text-[#ffbf00]"
-                                        : "text-muted-foreground/30 fill-none"
-                                    )}
-                                  />
-                                ))}
-                              </div>
-                              <span className="text-[10px] sm:text-[11px] font-bold text-[#1E293B]">
-                                {relRating.toFixed(1)}
-                              </span>
-                              <span className="text-[9px] sm:text-[10px] text-muted-foreground">
-                                ({relReviewsCount})
-                              </span>
-                            </>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-medium text-muted-foreground/75">
-                              <Star className="size-3 text-muted-foreground/35 fill-none" />
-                              <span>{isMounted && locale === "ar" ? "جديد • لا توجد تقييمات" : "Nouveau • Aucun avis"}</span>
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Action & Price Area */}
-                    <div className="mt-2.5 sm:mt-3.5 pt-2.5 sm:pt-3 border-t border-[#F1ECE4] flex items-center justify-between gap-1.5 sm:gap-2">
-                      {/* Price on left in bold #ff3500 */}
-                      <div className="flex flex-col min-w-0">
-                        <p className="truncate text-[14px] sm:text-[17px] font-black tracking-tight text-[#ff3500] leading-none">
-                          {Math.round(price)} MAD
-                        </p>
-                      </div>
-
-                      {/* Add to Cart button: Clean rounded-xl shape, soft hover background in #ffbf00 */}
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          const v = rel.variants.edges[0]?.node;
-                          if (v) {
-                            setAddedRelatedId(rel.id);
-                            await useCartStore.getState().addItem({
-                              product: rel,
-                              variantId: v.id,
-                              variantTitle: v.title,
-                              price: v.price,
-                              quantity: 1,
-                              selectedOptions: v.selectedOptions,
-                            });
-                            setIsCartOpen(true);
-                            setTimeout(() => setAddedRelatedId(null), 1600);
-                          }
-                        }}
-                        aria-label={`Ajouter ${rel.title} au panier`}
-                        title="Ajouter au panier"
-                        className="size-8 sm:size-9 shrink-0 rounded-xl border border-[#E6E1D8] bg-[#F9F8F6] text-[#1E293B] shadow-xs grid place-items-center transition-all duration-200 hover:bg-[#ffbf00] hover:border-[#ffbf00] hover:text-[#1E293B] hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ffbf00] cursor-pointer"
-                      >
-                        {isItemAdded ? (
-                          <Check className="size-3.5 sm:size-4 text-emerald-600 stroke-[3] animate-in zoom-in" />
-                        ) : (
-                          <Plus className="size-3.5 sm:size-4 stroke-[2.5]" />
-                        )}
-                      </button>
-                    </div>
-                  </article>
-                );
-              })}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-6 pt-4">
+              {relatedProducts.map((rel) => (
+                <ProductCard
+                  key={rel.id}
+                  product={rel}
+                  onAdded={() => setIsCartOpen(true)}
+                  onNotice={setNotice}
+                />
+              ))}
             </div>
           </section>
         )}

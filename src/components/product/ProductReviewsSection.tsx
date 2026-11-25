@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   BadgeCheck,
   CheckCircle2,
@@ -73,11 +73,16 @@ export function ProductReviewsSection({
 
   const summary = calculateRatingSummary(reviews);
 
+  const onSummaryCalculatedRef = useRef(onSummaryCalculated);
   useEffect(() => {
-    if (!isLoading && onSummaryCalculated) {
-      onSummaryCalculated(summary);
+    onSummaryCalculatedRef.current = onSummaryCalculated;
+  }, [onSummaryCalculated]);
+
+  useEffect(() => {
+    if (!isLoading && onSummaryCalculatedRef.current) {
+      onSummaryCalculatedRef.current(calculateRatingSummary(reviews));
     }
-  }, [reviews, isLoading, onSummaryCalculated]);
+  }, [reviews, isLoading, productId]);
 
   async function handleSubmitReview(e: React.FormEvent) {
     e.preventDefault();

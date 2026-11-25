@@ -53,6 +53,7 @@ export interface ShopifyProduct {
   origin_ar?: string;
   rating?: number;
   reviewsCount?: number;
+  badge?: string;
   features?: string[];
   features_ar?: string[];
   images: {
@@ -134,6 +135,7 @@ export function mapItemToShopifyProduct(item: any): ShopifyProduct {
     origin_ar: item.origin_ar || trAr?.origin || item.origin,
     rating: item.rating != null ? Number(item.rating) : 0,
     reviewsCount: item.reviewsCount != null ? Number(item.reviewsCount) : 0,
+    badge: typeof item.badge === "string" && item.badge.trim() ? item.badge.trim() : undefined,
     features: item.features || [],
     features_ar: item.features_ar || trAr?.features || item.features || [],
     tags: [category, item.categorySlug, item.ageBracket, ...(item.features || [])],
