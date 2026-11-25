@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@supabase/supabase-js";
-import { DEFAULT_SITE_SETTINGS } from "@/lib/site-settings";
+import { DEFAULT_SITE_SETTINGS, type WhatsAppPosition } from "@/lib/site-settings";
 import { ADMIN_BASE_PATH, ADMIN_SETTINGS_PATH } from "@/lib/admin-config";
 
 export const dynamic = "force-dynamic";
@@ -27,12 +27,16 @@ function getSupabaseAdmin() {
   });
 }
 
+function normalizePosition(pos: unknown): WhatsAppPosition {
+  return pos === "left" ? "left" : "right";
+}
+
 export async function GET() {
   try {
     const supabase = getSupabaseAdmin();
     const { data, error } = await supabase
       .from("site_settings")
-      .select("id, whatsapp_phone, whatsapp_enabled, updated_at")
+      .select("*")
       .eq("id", "default")
       .maybeSingle();
 
@@ -55,6 +59,7 @@ export async function GET() {
             ? data.whatsapp_phone.trim()
             : DEFAULT_SITE_SETTINGS.whatsapp_phone,
         whatsapp_enabled: data.whatsapp_enabled !== false,
+        whatsapp_position: normalizePosition(data.whatsapp_position),
         updated_at: data.updated_at,
       },
       { headers: NO_STORE_HEADERS }
@@ -75,6 +80,7 @@ async function handleUpsertSettings(req: NextRequest) {
       typeof body.whatsapp_phone === "string" ? body.whatsapp_phone.trim() : "";
     const enabled =
       body.whatsapp_enabled !== undefined ? Boolean(body.whatsapp_enabled) : true;
+    const position: WhatsAppPosition = normalizePosition(body.whatsapp_position);
 
     if (!phoneRaw) {
       return NextResponse.json(
@@ -87,6 +93,7 @@ async function handleUpsertSettings(req: NextRequest) {
       id: "default",
       whatsapp_phone: phoneRaw,
       whatsapp_enabled: enabled,
+      whatsapp_position: position,
       updated_at: new Date().toISOString(),
     };
 
@@ -94,7 +101,7 @@ async function handleUpsertSettings(req: NextRequest) {
     const { data, error } = await supabase
       .from("site_settings")
       .upsert(payload, { onConflict: "id" })
-      .select("id, whatsapp_phone, whatsapp_enabled, updated_at")
+      .select("*")
       .single();
 
     if (error) {
@@ -117,7 +124,12 @@ async function handleUpsertSettings(req: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        data: data || payload,
+        data: {
+          whatsapp_phone: data?.whatsapp_phone || payload.whatsapp_phone,
+          whatsapp_enabled: data?.whatsapp_enabled !== false,
+          whatsapp_position: normalizePosition(data?.whatsapp_position ?? payload.whatsapp_position),
+          updated_at: data?.updated_at || payload.updated_at,
+        },
       },
       { headers: NO_STORE_HEADERS }
     );

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { WhatsAppButton } from "@/components/whatsapp/WhatsAppButton";
+import { BackToTopButton } from "@/components/ui/BackToTopButton";
 import { CookieConsentProvider } from "@/lib/cookies";
 import { ConsentScriptLoader } from "@/components/cookies/ConsentScriptLoader";
 
@@ -62,6 +63,8 @@ export default function RootLayout({
           {children}
           {/* Floating WhatsApp Contact Button (Active across all pages) */}
           <WhatsAppButton />
+          {/* Opposite-Corner Back to Top Button */}
+          <BackToTopButton />
           {/* Production-Ready Cookie Consent Banner & Preferences Modal */}
           <ConsentScriptLoader />
         </CookieConsentProvider>

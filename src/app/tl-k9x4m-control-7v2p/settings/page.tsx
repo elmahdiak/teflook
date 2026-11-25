@@ -176,6 +176,70 @@ export default function AdminSettingsPage() {
               </p>
             </div>
 
+            {/* Floating Position Selector */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-foreground">
+                Position du bouton flottant sur l&apos;écran
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setSettings({ ...settings, whatsapp_position: "right" })}
+                  className={`flex items-center justify-between p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+                    settings.whatsapp_position !== "left"
+                      ? "border-[#25D366] bg-[#25D366]/10 ring-2 ring-[#25D366]/20"
+                      : "border-border bg-background hover:bg-muted/30"
+                  }`}
+                >
+                  <div>
+                    <span className="block text-xs sm:text-sm font-bold text-foreground">
+                      Bas à droite / Bottom Right
+                    </span>
+                    <span className="block text-[11px] text-muted-foreground mt-0.5">
+                      Bouton &laquo; Retour en haut &raquo; placé en bas à gauche
+                    </span>
+                  </div>
+                  <span
+                    className={`size-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                      settings.whatsapp_position !== "left" ? "border-[#25D366]" : "border-muted-foreground/40"
+                    }`}
+                  >
+                    {settings.whatsapp_position !== "left" && (
+                      <span className="size-2 rounded-full bg-[#25D366]" />
+                    )}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSettings({ ...settings, whatsapp_position: "left" })}
+                  className={`flex items-center justify-between p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
+                    settings.whatsapp_position === "left"
+                      ? "border-[#25D366] bg-[#25D366]/10 ring-2 ring-[#25D366]/20"
+                      : "border-border bg-background hover:bg-muted/30"
+                  }`}
+                >
+                  <div>
+                    <span className="block text-xs sm:text-sm font-bold text-foreground">
+                      Bas à gauche / Bottom Left
+                    </span>
+                    <span className="block text-[11px] text-muted-foreground mt-0.5">
+                      Bouton &laquo; Retour en haut &raquo; placé en bas à droite
+                    </span>
+                  </div>
+                  <span
+                    className={`size-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                      settings.whatsapp_position === "left" ? "border-[#25D366]" : "border-muted-foreground/40"
+                    }`}
+                  >
+                    {settings.whatsapp_position === "left" && (
+                      <span className="size-2 rounded-full bg-[#25D366]" />
+                    )}
+                  </span>
+                </button>
+              </div>
+            </div>
+
             {/* Live Preview & Direct Test Link */}
             <div className="p-4 rounded-xl border border-border bg-[#F9F8F6] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>

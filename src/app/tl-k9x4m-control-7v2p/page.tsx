@@ -338,7 +338,7 @@ export default function AdminDashboardPage() {
                         </span>
                       </td>
                       <td className="py-4 px-4 text-right whitespace-nowrap">
-                        <Link href={`/admin/orders?search=${order.id}`}>
+                        <Link href={`${ADMIN_ORDERS_PATH}?search=${order.id}`}>
                           <Button variant="ghost" size="sm" className="h-8 gap-1.5 rounded-lg text-xs">
                             <Eye size={14} />
                             <span>Détails</span>
@@ -403,7 +403,7 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 items-end">
-            <div className="sm:col-span-6 space-y-1">
+            <div className="sm:col-span-5 space-y-1">
               <label className="block text-xs font-bold text-foreground">
                 Numéro WhatsApp / WhatsApp Phone *
               </label>
@@ -428,7 +428,40 @@ export default function AdminDashboardPage() {
               </p>
             </div>
 
-            <div className="sm:col-span-3 flex items-center">
+            <div className="sm:col-span-3 space-y-1">
+              <label className="block text-xs font-bold text-foreground">
+                Position du bouton
+              </label>
+              <div className="grid grid-cols-2 gap-1.5 rounded-xl border border-border bg-background p-1 h-10">
+                <button
+                  type="button"
+                  onClick={() => setSiteSettings({ ...siteSettings, whatsapp_position: "left" })}
+                  className={`rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                    siteSettings.whatsapp_position === "left"
+                      ? "bg-[#25D366] text-white shadow-xs"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Bas à gauche
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSiteSettings({ ...siteSettings, whatsapp_position: "right" })}
+                  className={`rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                    siteSettings.whatsapp_position !== "left"
+                      ? "bg-[#25D366] text-white shadow-xs"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Bas à droite
+                </button>
+              </div>
+              <p className="text-[10px] text-muted-foreground">
+                Haut de page placé à l&apos;opposé.
+              </p>
+            </div>
+
+            <div className="sm:col-span-2 flex items-center sm:pb-4">
               <a
                 href={`https://wa.me/${cleanWhatsAppNumber(siteSettings.whatsapp_phone)}`}
                 target="_blank"
@@ -436,11 +469,11 @@ export default function AdminDashboardPage() {
                 className="w-full h-10 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl border border-border hover:border-[#25D366] hover:text-[#25D366] text-xs font-bold text-foreground bg-secondary/50 transition-colors"
               >
                 <ExternalLink size={13} />
-                <span>Tester le lien</span>
+                <span>Tester</span>
               </a>
             </div>
 
-            <div className="sm:col-span-3 flex items-center">
+            <div className="sm:col-span-2 flex items-center sm:pb-4">
               <Button
                 type="submit"
                 disabled={isSavingSettings}
@@ -449,7 +482,7 @@ export default function AdminDashboardPage() {
                 {isSavingSettings ? (
                   <>
                     <LoaderCircle size={14} className="animate-spin mr-1.5" />
-                    Enregistrement...
+                    ...
                   </>
                 ) : (
                   <>

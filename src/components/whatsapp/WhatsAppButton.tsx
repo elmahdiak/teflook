@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useTefLookLanguage } from "@/lib/teflook-language";
+import { useCookieConsent } from "@/lib/cookies";
 import { cleanWhatsAppNumber, fetchSiteSettings, type SiteSettings } from "@/lib/site-settings";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +13,7 @@ export interface WhatsAppButtonProps {
 
 export function WhatsAppButton({ className, defaultMessage }: WhatsAppButtonProps) {
   const { locale } = useTefLookLanguage();
+  const { hasConsented } = useCookieConsent();
   const [isMounted, setIsMounted] = useState(false);
   const [settings, setSettings] = useState<SiteSettings | null>(null);
 
@@ -66,12 +68,16 @@ export function WhatsAppButton({ className, defaultMessage }: WhatsAppButtonProp
   const whatsappUrl = `https://wa.me/${cleanedPhone}?text=${encodeURIComponent(greetingText)}`;
 
   const buttonLabel = isAr ? "تواصل معنا" : "Besoin d'aide ?";
+  const isLeft = settings.whatsapp_position === "left";
+  const bottomOffsetClass = !hasConsented ? "bottom-40 sm:bottom-5" : "bottom-5";
 
   return (
     <aside
       aria-label="Contact WhatsApp"
       className={cn(
-        "fixed bottom-5 right-4 sm:bottom-6 sm:right-6 z-40 select-none",
+        "fixed z-40 select-none transition-all duration-300",
+        bottomOffsetClass,
+        isLeft ? "left-5" : "right-5",
         className
       )}
     >

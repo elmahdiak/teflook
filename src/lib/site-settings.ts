@@ -1,12 +1,16 @@
+export type WhatsAppPosition = "right" | "left";
+
 export interface SiteSettings {
   whatsapp_phone: string;
   whatsapp_enabled: boolean;
+  whatsapp_position: WhatsAppPosition;
   updated_at?: string;
 }
 
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   whatsapp_phone: "+212600000000",
   whatsapp_enabled: true,
+  whatsapp_position: "right",
 };
 
 const STORAGE_KEY = "teflook_site_settings_v1";
@@ -42,6 +46,10 @@ export function cleanWhatsAppNumber(phone: string): string {
   return cleaned;
 }
 
+function normalizePosition(pos: unknown): WhatsAppPosition {
+  return pos === "left" ? "left" : "right";
+}
+
 /**
  * Fetch live settings from /api/settings (no-store) with localStorage fallback on network failure.
  */
@@ -61,6 +69,7 @@ export async function fetchSiteSettings(): Promise<SiteSettings> {
           const normalized: SiteSettings = {
             whatsapp_phone: data.whatsapp_phone.trim(),
             whatsapp_enabled: data.whatsapp_enabled !== false,
+            whatsapp_position: normalizePosition(data.whatsapp_position),
             updated_at: data.updated_at,
           };
           try {
@@ -78,7 +87,12 @@ export async function fetchSiteSettings(): Promise<SiteSettings> {
       if (local) {
         const parsed = JSON.parse(local);
         if (parsed && typeof parsed.whatsapp_phone === "string" && parsed.whatsapp_phone.trim()) {
-          return parsed;
+          return {
+            whatsapp_phone: parsed.whatsapp_phone.trim(),
+            whatsapp_enabled: parsed.whatsapp_enabled !== false,
+            whatsapp_position: normalizePosition(parsed.whatsapp_position),
+            updated_at: parsed.updated_at,
+          };
         }
       }
     } catch {}
@@ -109,14 +123,21 @@ export async function saveSiteSettings(
       };
     }
 
-    if (typeof window !== "undefined" && json.data) {
+    const normalizedData: SiteSettings = {
+      whatsapp_phone: json.data.whatsapp_phone,
+      whatsapp_enabled: json.data.whatsapp_enabled !== false,
+      whatsapp_position: normalizePosition(json.data.whatsapp_position),
+      updated_at: json.data.updated_at,
+    };
+
+    if (typeof window !== "undefined") {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(json.data));
-        window.dispatchEvent(new CustomEvent("teflook:settings-updated", { detail: json.data }));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizedData));
+        window.dispatchEvent(new CustomEvent("teflook:settings-updated", { detail: normalizedData }));
       } catch {}
     }
 
-    return { success: true, data: json.data };
+    return { success: true, data: normalizedData };
   } catch (e) {
     console.error("saveSiteSettings network error:", e);
     return { success: false, error: "Erreur réseau lors de la sauvegarde." };
