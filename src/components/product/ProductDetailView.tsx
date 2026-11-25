@@ -41,6 +41,7 @@ import { getLocalizedProduct, getLocalizedCategoryBadge } from "@/lib/product-lo
 import { ProductReviewsSection } from "@/components/product/ProductReviewsSection";
 import { ProductInfoTabs } from "@/components/product/ProductInfoTabs";
 import { FAQAccordion } from "@/components/faq/FAQAccordion";
+import { FooterSocialLinks } from "@/components/footer/FooterSocialLinks";
 import { useCookieConsent } from "@/lib/cookies";
 import { cleanWhatsAppNumber, fetchSiteSettings } from "@/lib/site-settings";
 import { cn } from "@/lib/utils";
@@ -630,6 +631,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
             <p className="mt-2 max-w-xs text-sm leading-6 text-primary-foreground/75">
               Des idées choisies pour les enfants qui grandissent et les familles qui les accompagnent.
             </p>
+            <FooterSocialLinks />
           </div>
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.12em]">La Boutique</p>

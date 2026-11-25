@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@supabase/supabase-js";
-import { DEFAULT_SITE_SETTINGS, type WhatsAppPosition } from "@/lib/site-settings";
+import {
+  DEFAULT_INSTAGRAM_URL,
+  DEFAULT_SITE_SETTINGS,
+  normalizeInstagramUrl,
+  type WhatsAppPosition,
+} from "@/lib/site-settings";
 import { ADMIN_BASE_PATH, ADMIN_SETTINGS_PATH } from "@/lib/admin-config";
 
 export const dynamic = "force-dynamic";
@@ -60,6 +65,10 @@ export async function GET() {
             : DEFAULT_SITE_SETTINGS.whatsapp_phone,
         whatsapp_enabled: data.whatsapp_enabled !== false,
         whatsapp_position: normalizePosition(data.whatsapp_position),
+        instagram_url:
+          typeof data.instagram_url === "string"
+            ? data.instagram_url.trim()
+            : DEFAULT_INSTAGRAM_URL,
         updated_at: data.updated_at,
       },
       { headers: NO_STORE_HEADERS }
@@ -81,6 +90,9 @@ async function handleUpsertSettings(req: NextRequest) {
     const enabled =
       body.whatsapp_enabled !== undefined ? Boolean(body.whatsapp_enabled) : true;
     const position: WhatsAppPosition = normalizePosition(body.whatsapp_position);
+    const instagramRaw =
+      typeof body.instagram_url === "string" ? body.instagram_url.trim() : "";
+    const normalizedInstagram = instagramRaw ? normalizeInstagramUrl(instagramRaw) : "";
 
     if (!phoneRaw) {
       return NextResponse.json(
@@ -94,6 +106,7 @@ async function handleUpsertSettings(req: NextRequest) {
       whatsapp_phone: phoneRaw,
       whatsapp_enabled: enabled,
       whatsapp_position: position,
+      instagram_url: normalizedInstagram,
       updated_at: new Date().toISOString(),
     };
 
@@ -128,6 +141,10 @@ async function handleUpsertSettings(req: NextRequest) {
           whatsapp_phone: data?.whatsapp_phone || payload.whatsapp_phone,
           whatsapp_enabled: data?.whatsapp_enabled !== false,
           whatsapp_position: normalizePosition(data?.whatsapp_position ?? payload.whatsapp_position),
+          instagram_url:
+            typeof data?.instagram_url === "string"
+              ? data.instagram_url.trim()
+              : payload.instagram_url,
           updated_at: data?.updated_at || payload.updated_at,
         },
       },

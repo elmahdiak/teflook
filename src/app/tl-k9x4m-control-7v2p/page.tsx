@@ -35,6 +35,8 @@ import {
   fetchSiteSettings,
   saveSiteSettings,
   cleanWhatsAppNumber,
+  normalizeInstagramUrl,
+  DEFAULT_INSTAGRAM_URL,
   DEFAULT_SITE_SETTINGS,
   type SiteSettings,
 } from "@/lib/site-settings";
@@ -491,6 +493,54 @@ export default function AdminDashboardPage() {
                   </>
                 )}
               </Button>
+            </div>
+          </div>
+
+          {/* Instagram URL Row */}
+          <div className="pt-3 border-t border-border/70 grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 items-end">
+            <div className="sm:col-span-9 space-y-1">
+              <label className="block text-xs font-bold text-foreground">
+                Lien Instagram / Instagram URL
+              </label>
+              <div className="relative">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
+                  <span className="grid size-5 place-items-center rounded-md bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] text-white">
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="size-3.5 fill-none stroke-current stroke-[2.2]"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                    </svg>
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  value={siteSettings.instagram_url}
+                  onChange={(e) =>
+                    setSiteSettings({ ...siteSettings, instagram_url: e.target.value })
+                  }
+                  placeholder="https://instagram.com/teflook"
+                  className="w-full h-10 pl-11 pr-3 rounded-xl border border-border bg-background text-xs sm:text-sm font-medium outline-none focus:border-[#dc2743]"
+                />
+              </div>
+              <p className="text-[10px] text-muted-foreground">
+                Affiché dans le pied de page de la boutique. Laissez vide pour utiliser le compte officiel par défaut.
+              </p>
+            </div>
+
+            <div className="sm:col-span-3 flex items-center sm:pb-4">
+              <a
+                href={normalizeInstagramUrl(siteSettings.instagram_url) || DEFAULT_INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full h-10 inline-flex items-center justify-center gap-1.5 px-3 rounded-xl border border-border hover:border-[#dc2743] hover:text-[#dc2743] text-xs font-bold text-foreground bg-secondary/50 transition-colors"
+              >
+                <ExternalLink size={13} />
+                <span>Ouvrir Instagram</span>
+              </a>
             </div>
           </div>
         </form>

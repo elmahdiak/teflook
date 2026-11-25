@@ -35,6 +35,7 @@ import { BrandLogo } from "@/components/ui/BrandLogo";
 import { TefLookLanguageSwitcher } from "@/components/teflook-language-switcher";
 import { CODCheckoutModal } from "@/components/cart/CODCheckoutModal";
 import { FAQAccordion } from "@/components/faq/FAQAccordion";
+import { FooterSocialLinks } from "@/components/footer/FooterSocialLinks";
 import {
   Sheet,
   SheetContent,
@@ -586,6 +587,7 @@ function TefLookStorefront() {
             <p className="mt-2 max-w-xs text-sm leading-6 text-primary-foreground/75">
               {t("footer.description")}
             </p>
+            <FooterSocialLinks />
           </div>
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.12em]">{t("footer.shop")}</p>

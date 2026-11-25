@@ -18,7 +18,9 @@ import { Button } from "@/components/ui/button";
 import {
   cleanWhatsAppNumber,
   fetchSiteSettings,
+  normalizeInstagramUrl,
   saveSiteSettings,
+  DEFAULT_INSTAGRAM_URL,
   DEFAULT_SITE_SETTINGS,
   type SiteSettings,
 } from "@/lib/site-settings";
@@ -260,6 +262,51 @@ export default function AdminSettingsPage() {
                 <ExternalLink size={14} />
                 <span>Tester le lien WhatsApp</span>
               </a>
+            </div>
+
+            {/* Instagram Official URL Input */}
+            <div className="pt-4 border-t border-border space-y-3">
+              <label className="block text-xs font-bold uppercase tracking-wider text-foreground">
+                Lien Instagram / Instagram URL
+              </label>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center pointer-events-none">
+                    <span className="grid size-6 place-items-center rounded-lg bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] text-white shadow-xs">
+                      <svg
+                        viewBox="0 0 24 24"
+                        className="size-3.5 fill-none stroke-current stroke-[2.2]"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                        <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+                      </svg>
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    value={settings.instagram_url}
+                    onChange={(e) =>
+                      setSettings({ ...settings, instagram_url: e.target.value })
+                    }
+                    placeholder="https://instagram.com/teflook"
+                    className="w-full h-11 pl-12 pr-4 rounded-xl border border-border bg-background text-sm font-medium outline-none focus:border-[#dc2743] transition-colors"
+                  />
+                </div>
+                <a
+                  href={normalizeInstagramUrl(settings.instagram_url) || DEFAULT_INSTAGRAM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-11 items-center justify-center gap-2 px-4 rounded-xl bg-white border border-border text-xs font-bold text-foreground hover:border-[#dc2743] hover:text-[#dc2743] transition-colors shadow-2xs shrink-0"
+                >
+                  <ExternalLink size={14} />
+                  <span>Tester Instagram</span>
+                </a>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                URL complète ou identifiant (ex: <code className="font-mono text-foreground font-bold">@teflook</code> ou <code className="font-mono text-foreground font-bold">https://instagram.com/teflook</code>). Affiché dans le pied de page de toute la boutique.
+              </p>
             </div>
 
             {/* Actions Bar */}

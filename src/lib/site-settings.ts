@@ -4,13 +4,17 @@ export interface SiteSettings {
   whatsapp_phone: string;
   whatsapp_enabled: boolean;
   whatsapp_position: WhatsAppPosition;
+  instagram_url: string;
   updated_at?: string;
 }
+
+export const DEFAULT_INSTAGRAM_URL = "https://instagram.com/teflook";
 
 export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   whatsapp_phone: "+212600000000",
   whatsapp_enabled: true,
   whatsapp_position: "right",
+  instagram_url: DEFAULT_INSTAGRAM_URL,
 };
 
 const STORAGE_KEY = "teflook_site_settings_v1";
@@ -46,6 +50,27 @@ export function cleanWhatsAppNumber(phone: string): string {
   return cleaned;
 }
 
+/**
+ * Normalize an Instagram handle or partial URL into a valid https://instagram.com/... URL.
+ */
+export function normalizeInstagramUrl(rawUrl: string | undefined | null): string {
+  if (!rawUrl) return "";
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return "";
+
+  if (trimmed.startsWith("@")) {
+    return `https://instagram.com/${trimmed.slice(1).replace(/^\/+/, "")}`;
+  }
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+  if (/^(www\.)?instagram\.com/i.test(trimmed)) {
+    return `https://${trimmed}`;
+  }
+  // Treat plain username like "teflook.ma" as an Instagram handle
+  return `https://instagram.com/${trimmed.replace(/^\/+/, "")}`;
+}
+
 function normalizePosition(pos: unknown): WhatsAppPosition {
   return pos === "left" ? "left" : "right";
 }
@@ -70,6 +95,10 @@ export async function fetchSiteSettings(): Promise<SiteSettings> {
             whatsapp_phone: data.whatsapp_phone.trim(),
             whatsapp_enabled: data.whatsapp_enabled !== false,
             whatsapp_position: normalizePosition(data.whatsapp_position),
+            instagram_url:
+              typeof data.instagram_url === "string"
+                ? data.instagram_url.trim()
+                : DEFAULT_INSTAGRAM_URL,
             updated_at: data.updated_at,
           };
           try {
@@ -91,6 +120,10 @@ export async function fetchSiteSettings(): Promise<SiteSettings> {
             whatsapp_phone: parsed.whatsapp_phone.trim(),
             whatsapp_enabled: parsed.whatsapp_enabled !== false,
             whatsapp_position: normalizePosition(parsed.whatsapp_position),
+            instagram_url:
+              typeof parsed.instagram_url === "string"
+                ? parsed.instagram_url.trim()
+                : DEFAULT_INSTAGRAM_URL,
             updated_at: parsed.updated_at,
           };
         }
@@ -127,6 +160,10 @@ export async function saveSiteSettings(
       whatsapp_phone: json.data.whatsapp_phone,
       whatsapp_enabled: json.data.whatsapp_enabled !== false,
       whatsapp_position: normalizePosition(json.data.whatsapp_position),
+      instagram_url:
+        typeof json.data.instagram_url === "string"
+          ? json.data.instagram_url.trim()
+          : "",
       updated_at: json.data.updated_at,
     };
 
