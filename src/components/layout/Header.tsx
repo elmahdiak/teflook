@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Menu, Search, ShoppingBag, X } from "lucide-react";
+import { Menu, Search, ShoppingBag, X } from "lucide-react";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { TefLookLanguageSwitcher } from "@/components/teflook-language-switcher";
 import { useCartStore } from "@/lib/shopify-cart";
@@ -25,7 +25,7 @@ export function Header({
   searchTerm,
   onSearchChange,
   onOpenCart,
-  defaultSearchOpen = true,
+  defaultSearchOpen = false,
 }: HeaderProps) {
   const router = useRouter();
   const { direction, locale, t, isMounted } = useTefLookLanguage();
@@ -66,20 +66,17 @@ export function Header({
         setIsSearchOpen(true);
         setTimeout(() => {
           searchInputRef.current?.focus();
-        }, 120);
-      } else if (e.key === "Escape") {
-        if (document.activeElement === searchInputRef.current && currentQuery) {
-          handleQueryUpdate("");
-        } else if (isSearchOpen) {
-          setIsSearchOpen(false);
-          searchInputRef.current?.blur();
-        }
+        }, 80);
+      } else if (e.key === "Escape" && isSearchOpen) {
+        e.preventDefault();
+        setIsSearchOpen(false);
+        searchInputRef.current?.blur();
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isSearchOpen, currentQuery]);
+  }, [isSearchOpen]);
 
   const categories = CHILD_STORE_CATEGORIES.map((category) => ({
     ...category,
@@ -99,7 +96,9 @@ export function Header({
     if (nextState) {
       setTimeout(() => {
         searchInputRef.current?.focus();
-      }, 120);
+      }, 80);
+    } else {
+      searchInputRef.current?.blur();
     }
   }
 
@@ -122,9 +121,9 @@ export function Header({
     }
   }
 
-  function handleClearSearch() {
-    handleQueryUpdate("");
-    searchInputRef.current?.focus();
+  function handleCloseSearch() {
+    setIsSearchOpen(false);
+    searchInputRef.current?.blur();
   }
 
   function handleCategoryClick(category: ChildStoreCategory) {
@@ -248,34 +247,35 @@ export function Header({
         )}
       </nav>
 
-      {/* 2. Expandable Branded Search Bar Panel */}
+      {/* 2. Collapsible Horizontal Search Bar Panel */}
       <div
         id="teflook-search-panel"
         role="search"
         aria-label={t("a11y.search")}
         className={cn(
-          "grid transition-all duration-300 ease-out bg-[#FAF8F5]/98 backdrop-blur-lg border-[#E8E2D9]",
+          "grid transition-all duration-200 ease-out bg-[#FAF8F5]/95 backdrop-blur-md border-[#E8E2D9]",
           isSearchOpen
-            ? "grid-rows-[1fr] opacity-100 border-b shadow-[0_24px_48px_-16px_rgba(26,60,52,0.12)]"
+            ? "grid-rows-[1fr] opacity-100 border-b shadow-xs"
             : "grid-rows-[0fr] opacity-0 border-b-0 pointer-events-none"
         )}
       >
         <div className="overflow-hidden">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-5 sm:pt-6 sm:pb-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3">
             <form
               onSubmit={handleSearchSubmit}
               noValidate
-              className="group relative flex items-center gap-2 p-1.5 sm:p-2 rounded-full bg-white border border-[#E2DCD3] shadow-[0_14px_34px_-14px_rgba(26,60,52,0.14),0_2px_6px_-1px_rgba(26,60,52,0.04)] hover:border-[#4b9797]/50 focus-within:border-[#4b9797] focus-within:ring-4 focus-within:ring-[#4b9797]/15 transition-all duration-300"
+              className="flex items-center gap-2 sm:gap-2.5 px-3 sm:px-4 h-11 sm:h-12 rounded-xl bg-white border border-[#E8E2D9] shadow-xs hover:border-[#4b9797]/50 focus-within:border-[#4b9797] focus-within:ring-2 focus-within:ring-[#4b9797]/20 transition-all duration-200"
             >
-              {/* Start Circular Brand Search Icon Badge */}
-              <div
-                aria-hidden="true"
-                className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#4b9797]/[0.10] group-focus-within:bg-[#4b9797] text-[#4b9797] group-focus-within:text-white flex items-center justify-center shrink-0 transition-colors duration-300"
+              {/* Search Submit Icon */}
+              <button
+                type="submit"
+                aria-label={t("a11y.search")}
+                className="text-[#4b9797] hover:text-[#1A4D4B] flex items-center justify-center shrink-0 transition-colors cursor-pointer"
               >
-                <Search size={18} strokeWidth={2.2} />
-              </div>
+                <Search size={18} strokeWidth={2.2} aria-hidden="true" />
+              </button>
 
-              {/* Seamless Search Input */}
+              {/* Horizontal Search Input */}
               <input
                 ref={searchInputRef}
                 type="text"
@@ -287,41 +287,38 @@ export function Header({
                 placeholder={isAr ? "ابحث عن منتج..." : "Rechercher..."}
                 aria-label={t("a11y.search")}
                 className={cn(
-                  "flex-1 min-w-0 bg-transparent border-0 px-2 sm:px-2.5 py-2.5 text-[14.5px] sm:text-[15.5px] font-medium text-[#1A3C34] placeholder:text-[#1A3C34]/45 placeholder:font-normal focus:outline-none text-start placeholder:text-start",
+                  "flex-1 min-w-0 bg-transparent border-0 px-1 py-2 text-sm sm:text-[15px] font-medium text-[#1A3C34] placeholder:text-[#1A3C34]/45 placeholder:font-normal focus:outline-none text-start placeholder:text-start",
                   isAr && "font-sans"
                 )}
               />
 
-              {/* Clear (X) Button */}
+              {/* Clear Query Button (when text is entered) */}
               {currentQuery.length > 0 && (
                 <button
                   type="button"
-                  onClick={handleClearSearch}
+                  onClick={() => {
+                    handleQueryUpdate("");
+                    searchInputRef.current?.focus();
+                  }}
                   aria-label={t("a11y.clearSearch")}
-                  className="w-8 h-8 rounded-full bg-[#FAF8F5] hover:bg-[#E86F51]/15 text-[#1A3C34]/60 hover:text-[#E86F51] flex items-center justify-center transition-colors duration-200 shrink-0 cursor-pointer"
+                  className={cn(
+                    "px-2.5 py-1 rounded-lg text-xs font-semibold text-[#1A3C34]/65 hover:text-[#E86F51] hover:bg-[#FAF8F5] transition-colors shrink-0 cursor-pointer",
+                    isAr && "font-sans"
+                  )}
                 >
-                  <X size={16} strokeWidth={2.2} />
+                  {isAr ? "مسح" : "Effacer"}
                 </button>
               )}
 
-              {/* Primary Brand Teal Pill Submit Button */}
+              {/* Close Search Bar Button */}
               <button
-                type="submit"
-                className="group/btn inline-flex items-center justify-center gap-2 px-4 sm:px-6 h-10 sm:h-11 rounded-full bg-[#4b9797] hover:bg-[#3d8282] active:scale-[0.98] text-white font-brand-logo font-semibold text-xs sm:text-sm tracking-wide shadow-[0_8px_18px_-6px_rgba(75,151,151,0.42)] transition-all duration-300 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#4b9797] cursor-pointer"
+                type="button"
+                onClick={handleCloseSearch}
+                aria-label={isAr ? "إغلاق البحث" : "Fermer la recherche"}
+                title={isAr ? "إغلاق" : "Fermer"}
+                className="w-8 h-8 rounded-lg bg-[#FAF8F5] hover:bg-[#E86F51]/15 text-[#1A3C34]/65 hover:text-[#E86F51] flex items-center justify-center transition-colors duration-200 shrink-0 cursor-pointer"
               >
-                <span className={cn("hidden sm:inline", isAr && "font-sans tracking-normal")}>
-                  {isAr ? "بحث" : "Rechercher"}
-                </span>
-                <ArrowRight
-                  size={16}
-                  strokeWidth={2.3}
-                  className={cn(
-                    "transition-transform duration-300",
-                    isAr
-                      ? "rotate-180 group-hover/btn:-translate-x-0.5"
-                      : "group-hover/btn:translate-x-0.5"
-                  )}
-                />
+                <X size={17} strokeWidth={2.2} aria-hidden="true" />
               </button>
             </form>
           </div>
