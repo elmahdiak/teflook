@@ -161,16 +161,16 @@ export function Header({
               aria-controls="teflook-category-menu"
               onClick={() => setMenuOpen((open) => !open)}
               className={cn(
-                "inline-flex items-center justify-center gap-1.5 h-9 sm:h-10 px-2.5 sm:px-3 rounded-xl text-[#1A4D4B] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797] cursor-pointer shrink-0",
+                "inline-flex items-center justify-center gap-1.5 h-10 px-2.5 sm:px-3 rounded-xl text-[#1A4D4B] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797] cursor-pointer shrink-0",
                 menuOpen
                   ? "bg-white border border-[#4b9797] ring-2 ring-[#4b9797]/20"
                   : "border border-transparent hover:bg-white hover:border-[#E8E2D9] hover:text-[#4b9797]"
               )}
             >
               {menuOpen ? (
-                <X size={19} aria-hidden="true" />
+                <X className="w-5 h-5" strokeWidth={2} aria-hidden="true" />
               ) : (
-                <Menu size={19} aria-hidden="true" />
+                <Menu className="w-5 h-5" strokeWidth={2} aria-hidden="true" />
               )}
               <span
                 className={cn(
@@ -213,13 +213,13 @@ export function Header({
               aria-label={t("a11y.search")}
               title={isAr ? "بحث (اضغط /)" : "Rechercher (touche /)"}
               className={cn(
-                "relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-[#1A4D4B] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797] cursor-pointer",
+                "relative w-10 h-10 rounded-xl flex items-center justify-center text-[#1A4D4B] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797] cursor-pointer",
                 isSearchOpen
                   ? "bg-white border border-[#4b9797] ring-2 ring-[#4b9797]/25"
                   : "border border-transparent hover:bg-white hover:border-[#E8E2D9] hover:text-[#4b9797]"
               )}
             >
-              <Search size={19} strokeWidth={2.1} aria-hidden="true" />
+              <Search className="w-5 h-5" strokeWidth={2} aria-hidden="true" />
             </button>
 
             {/* Shopping Bag Button with Coral Count Badge */}
@@ -227,9 +227,9 @@ export function Header({
               type="button"
               onClick={onOpenCart}
               aria-label={`${t("a11y.cart")}, ${count}`}
-              className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-[#1A4D4B] hover:bg-white hover:text-[#E86F51] border border-transparent hover:border-[#E8E2D9] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797] cursor-pointer"
+              className="relative w-10 h-10 rounded-xl flex items-center justify-center text-[#1A4D4B] hover:bg-white hover:text-[#E86F51] border border-transparent hover:border-[#E8E2D9] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797] cursor-pointer"
             >
-              <ShoppingBag size={20} strokeWidth={2} aria-hidden="true" />
+              <ShoppingBag className="w-5 h-5" strokeWidth={2} aria-hidden="true" />
               {count > 0 && (
                 <span className="absolute top-1 end-1 min-w-[16px] h-4 px-1 rounded-full bg-[#E86F51] text-white font-brand-logo text-[10px] font-bold flex items-center justify-center ring-2 ring-[#FAF8F5]">
                   {count > 9 ? "9+" : count}
@@ -310,9 +310,9 @@ export function Header({
               <button
                 type="submit"
                 aria-label={t("a11y.search")}
-                className="text-[#4b9797] hover:text-[#1A4D4B] flex items-center justify-center shrink-0 transition-colors cursor-pointer"
+                className="w-9 h-9 rounded-xl text-[#4b9797] hover:text-[#1A4D4B] hover:bg-[#FAF8F5] flex items-center justify-center shrink-0 transition-colors cursor-pointer"
               >
-                <Search size={18} strokeWidth={2.2} aria-hidden="true" />
+                <Search className="w-5 h-5" strokeWidth={2} aria-hidden="true" />
               </button>
 
               {/* Horizontal Search Input */}
@@ -356,9 +356,9 @@ export function Header({
                 onClick={handleCloseSearch}
                 aria-label={isAr ? "إغلاق البحث" : "Fermer la recherche"}
                 title={isAr ? "إغلاق" : "Fermer"}
-                className="w-8 h-8 rounded-lg bg-[#FAF8F5] hover:bg-[#E86F51]/15 text-[#1A3C34]/65 hover:text-[#E86F51] flex items-center justify-center transition-colors duration-200 shrink-0 cursor-pointer"
+                className="w-9 h-9 rounded-xl bg-[#FAF8F5] hover:bg-[#E86F51]/15 text-[#1A4D4B] hover:text-[#E86F51] border border-transparent hover:border-[#E8E2D9] flex items-center justify-center transition-colors duration-200 shrink-0 cursor-pointer"
               >
-                <X size={17} strokeWidth={2.2} aria-hidden="true" />
+                <X className="w-5 h-5" strokeWidth={2} aria-hidden="true" />
               </button>
             </form>
           </div>
