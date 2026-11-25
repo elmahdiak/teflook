@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { useTefLookLanguage, type Locale } from "@/lib/teflook-language";
+import { useTefLookLanguage } from "@/lib/teflook-language";
+import { cn } from "@/lib/utils";
 
 interface TefLookLanguageSwitcherProps {
   compact?: boolean;
@@ -17,20 +18,23 @@ export function TefLookLanguageSwitcher({
   return (
     <div
       dir="ltr"
-      className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-border bg-card/60 p-0.5 text-xs font-semibold ${className}`}
+      className={cn(
+        "inline-flex shrink-0 items-center whitespace-nowrap rounded-full border border-[#E2DCD3] bg-white/80 p-1",
+        className
+      )}
       role="group"
-      aria-label="Sélectionner la langue"
+      aria-label="Sélecteur de langue"
     >
       <button
         type="button"
         onClick={() => setLocale("fr")}
-        className={`rounded-full transition-all duration-200 ${
-          compact ? "px-2 py-0.5 text-[11px]" : "px-3 py-1 text-xs"
-        } ${
+        className={cn(
+          "rounded-full font-brand-logo font-bold tracking-wide transition-all duration-200 cursor-pointer",
+          compact ? "px-2.5 py-1 text-[11px]" : "px-3 py-1 text-xs",
           locale === "fr"
-            ? "bg-[#4C9A9C] text-white shadow-xs"
-            : "text-muted-foreground hover:text-foreground"
-        }`}
+            ? "bg-[#4b9797] text-white shadow-xs"
+            : "text-[#1A3C34] hover:text-[#4b9797]"
+        )}
         aria-pressed={locale === "fr"}
       >
         FR
@@ -38,13 +42,13 @@ export function TefLookLanguageSwitcher({
       <button
         type="button"
         onClick={() => setLocale("ar")}
-        className={`rounded-full transition-all duration-200 ${
-          compact ? "px-2 py-0.5 text-[11px]" : "px-3 py-1 text-xs"
-        } ${
+        className={cn(
+          "rounded-full font-sans font-semibold transition-all duration-200 cursor-pointer",
+          compact ? "px-2.5 py-1 text-[12px]" : "px-3 py-1 text-xs",
           locale === "ar"
-            ? "bg-[#4C9A9C] text-white shadow-xs"
-            : "text-muted-foreground hover:text-foreground"
-        }`}
+            ? "bg-[#4b9797] text-white shadow-xs"
+            : "text-[#1A3C34] hover:text-[#4b9797]"
+        )}
         aria-pressed={locale === "ar"}
       >
         عربي

@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  ArrowLeft,
   Check,
   ChevronDown,
   ChevronRight,
@@ -23,7 +22,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { BrandLogo } from "@/components/ui/BrandLogo";
-import { TefLookLanguageSwitcher } from "@/components/teflook-language-switcher";
+import { Header } from "@/components/layout/Header";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { CODCheckoutModal } from "@/components/cart/CODCheckoutModal";
 import {
@@ -83,8 +82,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
     reviewsCount: typeof product.reviewsCount === "number" ? product.reviewsCount : 0,
   });
 
-  const { items, hasHydrated, error: cartError } = useCartStore();
-  const count = isMounted && hasHydrated ? items.reduce((total, item) => total + item.quantity, 0) : 0;
+  const { error: cartError } = useCartStore();
 
   const currentVariant =
     product.variants.edges.find((e) => e.node.availableForSale)?.node ||
@@ -138,41 +136,8 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
 
   return (
     <div lang={locale} dir={direction} className="min-h-screen bg-background text-foreground flex flex-col">
-      {/* 1. Header Navigation */}
-      <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-md">
-        <div className="store-shell flex h-[76px] items-center justify-between gap-3 sm:gap-4">
-          <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
-            <Link
-              href="/"
-              className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-brand-teal hover:text-foreground"
-            >
-              <ArrowLeft size={15} className={cn("shrink-0", locale === "ar" && "rotate-180")} />
-              <span className="hidden sm:inline whitespace-nowrap">
-                {locale === "ar" ? "العودة إلى المتجر" : "Retour à la boutique"}
-              </span>
-            </Link>
-            <BrandLogo size="md" />
-          </div>
-
-          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-            <TefLookLanguageSwitcher compact />
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={`${t("a11y.cart")}, ${count}`}
-              onClick={() => setIsCartOpen(true)}
-              className="relative shrink-0"
-            >
-              <ShoppingBag strokeWidth={1.8} size={20} />
-              {count > 0 && (
-                <span className="absolute -end-0.5 -top-0.5 grid size-[17px] place-items-center rounded-full bg-brand-orange text-[10px] font-bold text-white">
-                  {count > 9 ? "9+" : count}
-                </span>
-              )}
-            </Button>
-          </div>
-        </div>
-      </header>
+      {/* 1. Sticky Header & Expandable Search Bar */}
+      <Header onOpenCart={() => setIsCartOpen(true)} defaultSearchOpen={false} />
 
       {/* 2. Breadcrumb */}
       <nav

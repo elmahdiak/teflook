@@ -11,12 +11,10 @@ import {
   Footprints,
   Heart,
   LoaderCircle,
-  Menu,
   Minus,
   Palette,
   Plus,
   Puzzle,
-  Search,
   ShoppingBag,
   Sparkles,
   Sprout,
@@ -32,7 +30,7 @@ import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tan
 
 import { Button } from "@/components/ui/button";
 import { BrandLogo } from "@/components/ui/BrandLogo";
-import { TefLookLanguageSwitcher } from "@/components/teflook-language-switcher";
+import { Header } from "@/components/layout/Header";
 import { CODCheckoutModal } from "@/components/cart/CODCheckoutModal";
 import { FAQAccordion } from "@/components/faq/FAQAccordion";
 import { FooterSocialLinks } from "@/components/footer/FooterSocialLinks";
@@ -157,13 +155,26 @@ function TefLookStorefront() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCODModalOpen, setIsCODModalOpen] = useState(false);
   const [notice, setNotice] = useState("");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const { items, hasHydrated, error: cartError } = useCartStore();
+  const { error: cartError } = useCartStore();
 
   useEffect(() => {
     setIsMounted(true);
     void useCartStore.persist.rehydrate();
+
+    // Support URL search/category params when navigating from product pages
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const qParam = params.get("q");
+      const catParam = params.get("category") as ChildStoreCategory | null;
+      if (qParam) setSearchTerm(qParam);
+      if (
+        catParam &&
+        CHILD_STORE_CATEGORIES.some((c) => c.value === catParam)
+      ) {
+        setActiveCategory(catParam);
+      }
+    } catch {}
 
     // Instant real-time synchronization with admin CRUD actions
     const handleSync = () => {
@@ -200,7 +211,6 @@ function TefLookStorefront() {
     });
   }, [products, activeCategory, searchTerm]);
 
-  const count = isMounted && hasHydrated ? items.reduce((total, item) => total + item.quantity, 0) : 0;
   const categories = CHILD_STORE_CATEGORIES.map((category) => ({
     ...category,
     label: t(CHILD_STORE_CATEGORY_MESSAGE_KEYS[category.value]),
@@ -245,119 +255,15 @@ function TefLookStorefront() {
         </div>
       </div>
 
-      {/* 2. Header & Navigation */}
-      <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-md">
-        <div className="store-shell flex h-[82px] items-center justify-between gap-2.5 sm:gap-4 xl:gap-5">
-          <BrandLogo size="md" />
-
-          <nav aria-label={t("a11y.categories")} className="hidden items-center gap-4 2xl:gap-7 xl:flex min-w-0">
-            {categories.slice(0, 4).map((category) => (
-              <button
-                key={category.value}
-                type="button"
-                onClick={() => {
-                  setActiveCategory(category.value);
-                  document.getElementById("boutique")?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className={cn(
-                  "text-[13px] font-bold transition-all relative py-1 cursor-pointer whitespace-nowrap shrink-0",
-                  locale === "ar" ? "tracking-normal font-sans" : "tracking-tight",
-                  activeCategory === category.value
-                    ? "text-[#2B6E73] after:absolute after:bottom-0 after:inset-x-0 after:h-[2px] after:bg-[#2B6E73] after:rounded-full"
-                    : "text-[#2B6E73] hover:text-[#193E3F] hover:underline underline-offset-4 decoration-[#2B6E73]/40"
-                )}
-              >
-                {category.label}
-              </button>
-            ))}
-          </nav>
-
-          <div className="flex min-w-0 flex-1 justify-center xl:max-w-[230px] 2xl:max-w-[290px]">
-            <label className="shop-search flex h-10 w-full max-w-[290px] items-center gap-1.5 border-b border-border px-1 text-muted-foreground sm:gap-2 sm:px-2">
-              <Search size={17} className="shrink-0" aria-hidden="true" />
-              <input
-                aria-label={t("a11y.search")}
-                type="search"
-                dir={direction}
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder={t("search.placeholder")}
-                className={cn(
-                  "min-w-0 flex-1 bg-transparent text-[13px] text-foreground outline-none placeholder:text-muted-foreground text-start placeholder:text-start",
-                  locale === "ar" && "font-sans"
-                )}
-              />
-              {searchTerm && (
-                <button
-                  type="button"
-                  onClick={() => setSearchTerm("")}
-                  aria-label={t("a11y.clearSearch")}
-                  className="grid size-7 shrink-0 place-items-center text-muted-foreground hover:text-foreground"
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </label>
-          </div>
-
-          <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-            <TefLookLanguageSwitcher compact />
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={t("a11y.openMenu")}
-              aria-expanded={mobileMenuOpen}
-              className="xl:hidden shrink-0"
-              onClick={() => setMobileMenuOpen((open) => !open)}
-            >
-              {mobileMenuOpen ? <X /> : <Menu />}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={`${t("a11y.cart")}, ${count}`}
-              onClick={() => setIsCartOpen(true)}
-              className="relative shrink-0"
-            >
-              <ShoppingBag strokeWidth={1.7} />
-              {count > 0 && (
-                <span className="absolute -end-0.5 -top-0.5 grid size-[17px] place-items-center rounded-full bg-brand-orange text-[10px] font-bold text-accent-foreground">
-                  {count > 9 ? "9+" : count}
-                </span>
-              )}
-            </Button>
-          </div>
-        </div>
-
-        {mobileMenuOpen && (
-          <nav
-            aria-label={t("a11y.categories")}
-            className="border-t border-border bg-background px-5 py-3 xl:hidden"
-          >
-            {categories.map((category) => (
-              <button
-                type="button"
-                key={category.value}
-                onClick={() => {
-                  setActiveCategory(category.value);
-                  setMobileMenuOpen(false);
-                  document.getElementById("boutique")?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className={`flex items-center justify-between w-full border-b border-border py-3 text-start text-sm font-bold transition-colors last:border-0 ${
-                  activeCategory === category.value
-                    ? "text-[#2B6E73] bg-[#2B6E73]/5 px-2.5 rounded-lg"
-                    : "text-[#2B6E73] hover:text-[#193E3F]"
-                }`}
-              >
-                <span>{category.label}</span>
-                {activeCategory === category.value && (
-                  <span className="w-2 h-2 rounded-full bg-[#2B6E73]" />
-                )}
-              </button>
-            ))}
-          </nav>
-        )}
-      </header>
+      {/* 2. Sticky Header & Expandable Search Bar */}
+      <Header
+        activeCategory={activeCategory}
+        onSelectCategory={setActiveCategory}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        onOpenCart={() => setIsCartOpen(true)}
+        defaultSearchOpen={true}
+      />
 
       {/* 3. Hero Section - Pure Full-Width Unobstructed Visual Display */}
       <section className="relative w-full overflow-hidden bg-[#FBF9F5]" aria-label="Bannière principale">
