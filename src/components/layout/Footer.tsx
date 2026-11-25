@@ -1,357 +1,314 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import Image from "next/image";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  ArrowUp,
-  MessageCircle,
-  ShieldCheck,
-  Truck,
-  CreditCard,
-  RotateCcw,
-  CheckCircle,
-  Lock,
-  PhoneCall,
-  Mail,
-  MapPin,
-} from "lucide-react";
 import { BrandLogo } from "@/components/ui/BrandLogo";
+import { FooterSocialLinks } from "@/components/footer/FooterSocialLinks";
+import { useCookieConsent } from "@/lib/cookies";
+import { cleanWhatsAppNumber, fetchSiteSettings, type SiteSettings } from "@/lib/site-settings";
+import { translations, useTefLookLanguage } from "@/lib/teflook-language";
+import { cn } from "@/lib/utils";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function Footer() {
-  const [showScrollTop, setShowScrollTop] = useState(false);
+  const { locale, direction } = useTefLookLanguage();
+  const { openSettingsModal } = useCookieConsent();
+  const [isMounted, setIsMounted] = useState(false);
+  const [email, setEmail] = useState("");
+  const [feedback, setFeedback] = useState<{
+    type: "error" | "success";
+    message: string;
+  } | null>(null);
+  const [whatsappPhone, setWhatsappPhone] = useState("212600000000");
 
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 300) {
-        setShowScrollTop(true);
-      } else {
-        setShowScrollTop(false);
+    setIsMounted(true);
+
+    fetchSiteSettings().then((s) => {
+      if (s?.whatsapp_phone && s.whatsapp_enabled !== false) {
+        const cleaned = cleanWhatsAppNumber(s.whatsapp_phone);
+        if (cleaned) setWhatsappPhone(cleaned);
+      }
+    });
+
+    const handleSettingsUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent<SiteSettings>;
+      if (customEvent.detail?.whatsapp_phone) {
+        const cleaned = cleanWhatsAppNumber(customEvent.detail.whatsapp_phone);
+        if (cleaned) setWhatsappPhone(cleaned);
       }
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("teflook:settings-updated", handleSettingsUpdate);
+    return () => {
+      window.removeEventListener("teflook:settings-updated", handleSettingsUpdate);
+    };
   }, []);
 
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
+  const currentLocale = isMounted ? locale : "fr";
+  const currentDirection = isMounted ? direction : "ltr";
+  const isAr = currentLocale === "ar";
+  const messages = translations[currentLocale];
+  const currentYear = isMounted ? new Date().getFullYear() : 2026;
 
-  const whatsappUrl =
-    "https://wa.me/212600000000?text=" +
-    encodeURIComponent(
-      "Bonjour TefLook, j'ai une question concernant un produit ou une commande sur la boutique en ligne."
-    );
+  const helpHref = whatsappPhone
+    ? `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(
+        isAr
+          ? "مرحباً تيفلوك، أحتاج إلى مساعدة بخصوص منتجاتكم."
+          : "Bonjour TefLook, j'ai besoin d'aide concernant vos produits."
+      )}`
+    : "/#faq";
+
+  function handleNewsletterSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const trimmed = email.trim();
+
+    if (!trimmed) {
+      setFeedback({
+        type: "error",
+        message: isAr
+          ? "يرجى إدخال عنوان بريد إلكتروني."
+          : "Veuillez entrer une adresse e-mail.",
+      });
+      return;
+    }
+
+    if (!EMAIL_REGEX.test(trimmed)) {
+      setFeedback({
+        type: "error",
+        message: isAr
+          ? "عنوان البريد الإلكتروني غير صالح. يرجى التحقق."
+          : "Adresse e-mail invalide. Veuillez vérifier.",
+      });
+      return;
+    }
+
+    setFeedback({
+      type: "success",
+      message: isAr
+        ? "شكراً لك! تم تسجيل اشتراكك بنجاح."
+        : "Merci ! Votre inscription a bien été enregistrée.",
+    });
+    setEmail("");
+  }
 
   return (
-    <footer className="bg-white border-t border-[#E8E5DF] text-[#1E293B] relative select-none">
-      
-      {/* ============================================================== */}
-      {/* 1. REASSURANCE TRUST BANNER (Top of Footer)                    */}
-      {/* ============================================================== */}
-      <div className="border-b border-[#E8E5DF] bg-[#FAF9F7] py-8 sm:py-10">
-        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
-            
-            {/* Reassurance 1 */}
-            <div className="flex items-start gap-3.5">
-              <div className="w-10 h-10 rounded-2xl bg-[#EBF5F5] text-[#4C9A9C] flex items-center justify-center shrink-0">
-                <Truck className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="font-extrabold text-xs sm:text-sm text-[#1E293B]">
-                  Livraison 24/48h au Maroc
-                </h4>
-                <p className="text-[11px] text-[#64748B] mt-0.5">
-                  Expédition rapide à domicile dans toutes les villes
-                </p>
-              </div>
-            </div>
-
-            {/* Reassurance 2 */}
-            <div className="flex items-start gap-3.5">
-              <div className="w-10 h-10 rounded-2xl bg-[#FDF2EE] text-[#FE7C58] flex items-center justify-center shrink-0">
-                <CreditCard className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="font-extrabold text-xs sm:text-sm text-[#1E293B]">
-                  Paiement à la Livraison
-                </h4>
-                <p className="text-[11px] text-[#64748B] mt-0.5">
-                  Réglez en espèces à réception ou par carte bancaire
-                </p>
-              </div>
-            </div>
-
-            {/* Reassurance 3 */}
-            <div className="flex items-start gap-3.5">
-              <div className="w-10 h-10 rounded-2xl bg-[#EBF5F5] text-[#4C9A9C] flex items-center justify-center shrink-0">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="font-extrabold text-xs sm:text-sm text-[#1E293B]">
-                  100% Produits Certifiés
-                </h4>
-                <p className="text-[11px] text-[#64748B] mt-0.5">
-                  Normes de sécurité européennes CE &amp; Oeko-Tex
-                </p>
-              </div>
-            </div>
-
-            {/* Reassurance 4 */}
-            <div className="flex items-start gap-3.5">
-              <div className="w-10 h-10 rounded-2xl bg-[#FDF2EE] text-[#FE7C58] flex items-center justify-center shrink-0">
-                <RotateCcw className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="font-extrabold text-xs sm:text-sm text-[#1E293B]">
-                  Retours Faciles sous 14j
-                </h4>
-                <p className="text-[11px] text-[#64748B] mt-0.5">
-                  Échange ou remboursement simple sans tracas
-                </p>
-              </div>
-            </div>
-
-          </div>
-        </div>
+    <footer
+      dir={currentDirection}
+      aria-label={isAr ? "تذييل صفحة تيفلوك" : "Pied de page TefLook"}
+      className="relative w-full text-white mt-auto select-none"
+    >
+      {/* Signature Diagonal Slanted Top Edge */}
+      <div
+        className="w-full overflow-hidden leading-none bg-white -mb-px"
+        aria-hidden="true"
+      >
+        <svg
+          className="relative block w-full h-14 sm:h-20 md:h-24 lg:h-28"
+          viewBox="0 0 1440 120"
+          preserveAspectRatio="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <polygon points="0,120 1440,0 1440,120" fill="#4b9797" />
+        </svg>
       </div>
 
-      {/* ============================================================== */}
-      {/* 2. MAIN 4-COLUMN FOOTER LAYOUT                                */}
-      {/* ============================================================== */}
-      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-14 sm:pt-16 pb-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-12 border-b border-[#E8E5DF]">
-          
-          {/* Column 1: Brand Info & Contact */}
-          <div className="lg:col-span-4 space-y-4">
-            <BrandLogo size="md" />
-            <p className="text-xs sm:text-sm text-[#64748B] max-w-sm leading-relaxed">
-              TefLook est votre destination de référence pour l&apos;éveil sensoriel, la sécurité domestique et le bien-être de votre enfant au Maroc.
-            </p>
+      {/* Main Teal Footer Body */}
+      <div className="bg-[#4b9797]">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-10 pt-10 sm:pt-14 pb-2">
+          {/* 3-Column Airy Grid (12-column layout on desktop: 5 / 3 / 4) */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-8 lg:gap-12 items-start">
+            {/* Column 1: Brand Identity + Email Subscription Form */}
+            <div className="md:col-span-5 flex flex-col items-start">
+              <BrandLogo size="md" variant="dark" href="/" />
 
-            <div className="space-y-2 pt-1 text-xs text-[#64748B]">
-              <div className="flex items-center gap-2">
-                <MapPin className="w-3.5 h-3.5 text-[#4C9A9C] shrink-0" />
-                <span>Casablanca &amp; Fès, Royaume du Maroc</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail className="w-3.5 h-3.5 text-[#4C9A9C] shrink-0" />
-                <span>contact@teflook.com</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <PhoneCall className="w-3.5 h-3.5 text-[#4C9A9C] shrink-0" />
-                <span>Support téléphonique : +212 5 22 00 00 00</span>
-              </div>
-            </div>
-
-            <div className="pt-2">
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-xs font-bold text-emerald-700 hover:text-emerald-800 transition-colors bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200"
+              <h2
+                className={cn(
+                  "mt-6 font-display font-bold text-xl sm:text-[22px] text-white tracking-tight",
+                  isAr && "font-sans tracking-normal"
+                )}
               >
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
-                <span>Conseils WhatsApp 7j/7 : +212 6 00 00 00 00</span>
-              </a>
+                {messages["footer.tagline"]}
+              </h2>
+
+              <p
+                className={cn(
+                  "mt-2.5 text-[15px] text-white/90 max-w-sm leading-relaxed",
+                  isAr && "font-sans"
+                )}
+              >
+                {messages["footer.description"]}
+              </p>
+
+              {/* Email Subscription Form */}
+              <form
+                onSubmit={handleNewsletterSubmit}
+                className="mt-6 w-full max-w-sm"
+                noValidate
+              >
+                <label htmlFor="footer-email" className="sr-only">
+                  {isAr ? "البريد الإلكتروني" : "Adresse e-mail"}
+                </label>
+                <input
+                  id="footer-email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (feedback) setFeedback(null);
+                  }}
+                  placeholder={isAr ? "البريد الإلكتروني" : "E-mail"}
+                  className={cn(
+                    "w-full rounded-xl bg-white/5 border border-white/60 focus:border-white focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/25 px-4 py-3.5 text-[15px] text-white placeholder:text-white/75 transition-all duration-200",
+                    isAr && "font-sans"
+                  )}
+                />
+
+                <button
+                  type="submit"
+                  className={cn(
+                    "mt-3 w-full rounded-2xl bg-white hover:bg-[#FAF8F5] active:scale-[0.99] py-3.5 px-6 font-display font-semibold text-[#4b9797] text-[15px] shadow-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#4b9797] focus-visible:ring-white cursor-pointer",
+                    isAr && "font-sans"
+                  )}
+                >
+                  {isAr ? "اشترك الآن" : "S’inscrire maintenant"}
+                </button>
+
+                <p
+                  role="status"
+                  aria-live="polite"
+                  className={cn(
+                    "mt-2.5 min-h-[20px] text-[13px] font-medium transition-opacity duration-200",
+                    feedback ? "opacity-100" : "opacity-0",
+                    feedback?.type === "error" ? "text-amber-200" : "text-white",
+                    isAr && "font-sans"
+                  )}
+                >
+                  {feedback?.message ?? ""}
+                </p>
+              </form>
+            </div>
+
+            {/* Column 2: LA BOUTIQUE */}
+            <div className="md:col-span-3 md:pt-2">
+              <h3
+                className={cn(
+                  "font-display text-xs sm:text-[13px] font-bold uppercase tracking-[0.12em] text-white/95 mb-5",
+                  isAr && "font-sans tracking-normal text-sm"
+                )}
+              >
+                {isAr ? messages["footer.shop"] : "LA BOUTIQUE"}
+              </h3>
+              <ul className="space-y-3.5">
+                <li>
+                  <Link
+                    href="/#boutique"
+                    className="inline-block text-[15px] text-white/90 hover:text-white hover:translate-x-0.5 transition-all duration-200"
+                  >
+                    {messages["footer.allProducts"]}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/#univers"
+                    className="inline-block text-[15px] text-white/90 hover:text-white hover:translate-x-0.5 transition-all duration-200"
+                  >
+                    {messages["footer.values"]}
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Column 3: TEFLOOK */}
+            <div className="md:col-span-4 md:pt-2">
+              <h3
+                className={cn(
+                  "font-display text-xs sm:text-[13px] font-bold uppercase tracking-[0.12em] text-white/95 mb-5",
+                  isAr && "font-sans tracking-normal text-sm"
+                )}
+              >
+                {isAr ? messages["footer.brand"] : "TEFLOOK"}
+              </h3>
+              <ul className="space-y-3.5">
+                <li>
+                  <Link
+                    href="/#boutique"
+                    className="inline-block text-[15px] text-white/90 hover:text-white hover:translate-x-0.5 transition-all duration-200"
+                  >
+                    {messages["footer.children"]}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/#univers"
+                    className="inline-block text-[15px] text-white/90 hover:text-white hover:translate-x-0.5 transition-all duration-200"
+                  >
+                    {messages["footer.families"]}
+                  </Link>
+                </li>
+                <li>
+                  {whatsappPhone ? (
+                    <a
+                      href={helpHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block text-[15px] text-white/90 hover:text-white hover:translate-x-0.5 transition-all duration-200"
+                    >
+                      {messages["footer.help"]}
+                    </a>
+                  ) : (
+                    <Link
+                      href="/#faq"
+                      className="inline-block text-[15px] text-white/90 hover:text-white hover:translate-x-0.5 transition-all duration-200"
+                    >
+                      {messages["footer.help"]}
+                    </Link>
+                  )}
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    onClick={openSettingsModal}
+                    className="inline-block text-start text-[15px] text-white/90 hover:text-white hover:translate-x-0.5 transition-all duration-200 focus:outline-none focus-visible:underline cursor-pointer"
+                  >
+                    {messages["cookies.manageLink"]}
+                  </button>
+                </li>
+              </ul>
             </div>
           </div>
 
-          {/* Column 2: Les 6 Piliers Éducatifs */}
-          <div className="lg:col-span-3 lg:pl-4 space-y-3.5">
-            <h4 className="text-xs font-black uppercase tracking-[0.15em] text-[#1E293B]">
-              Piliers Éducatifs
-            </h4>
-            <ul className="space-y-2.5 text-xs sm:text-sm font-medium text-[#64748B]">
-              <li>
-                <a href="#discipline-maitrise-de-soi" className="hover:text-[#4C9A9C] transition-colors inline-block">
-                  Discipline et maîtrise de soi
-                </a>
-              </li>
-              <li>
-                <a href="#intelligence-emotionnelle" className="hover:text-[#FE7C58] transition-colors inline-block">
-                  Intelligence émotionnelle
-                </a>
-              </li>
-              <li>
-                <a href="#autonomie-competences-de-vie" className="hover:text-[#4C9A9C] transition-colors inline-block">
-                  Autonomie et compétences de vie
-                </a>
-              </li>
-              <li>
-                <a href="#confiance-en-soi-competences-sociales" className="hover:text-[#FE7C58] transition-colors inline-block">
-                  Confiance en soi &amp; social
-                </a>
-              </li>
-              <li>
-                <a href="#creativite-imagination" className="hover:text-[#4C9A9C] transition-colors inline-block">
-                  Créativité et imagination
-                </a>
-              </li>
-              <li>
-                <a href="#esprit-critique-resolution-problemes" className="hover:text-[#FE7C58] transition-colors inline-block">
-                  Esprit critique &amp; résolution
-                </a>
-              </li>
-            </ul>
+          {/* Centered Social Icon Row */}
+          <div className="py-8 sm:py-10 flex items-center justify-center">
+            <FooterSocialLinks />
           </div>
+        </div>
 
-          {/* Column 3: Service Client & Aide */}
-          <div className="lg:col-span-2 space-y-3.5">
-            <h4 className="text-xs font-black uppercase tracking-[0.15em] text-[#1E293B]">
-              Service Client
-            </h4>
-            <ul className="space-y-2.5 text-xs sm:text-sm font-medium text-[#64748B]">
-              <li>
-                <a href="#suivi-commande" className="hover:text-[#4C9A9C] transition-colors inline-block">
-                  Suivi de Commande
-                </a>
-              </li>
-              <li>
-                <a href="#livraison" className="hover:text-[#4C9A9C] transition-colors inline-block">
-                  Délais &amp; Tarifs de Livraison
-                </a>
-              </li>
-              <li>
-                <a href="#paiement" className="hover:text-[#4C9A9C] transition-colors inline-block">
-                  Paiement à la Livraison
-                </a>
-              </li>
-              <li>
-                <a href="#retours" className="hover:text-[#4C9A9C] transition-colors inline-block">
-                  Retours &amp; Remboursements
-                </a>
-              </li>
-              <li>
-                <a href="#guide-tailles" className="hover:text-[#4C9A9C] transition-colors inline-block">
-                  Guide des Tailles
-                </a>
-              </li>
-              <li>
-                <a href="#faq" className="hover:text-[#4C9A9C] transition-colors inline-block">
-                  Foire Aux Questions (FAQ)
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Column 4: TefLook & Engagements */}
-          <div className="lg:col-span-3 space-y-3.5">
-            <h4 className="text-xs font-black uppercase tracking-[0.15em] text-[#1E293B]">
-              Engagements &amp; Légal
-            </h4>
-            <ul className="space-y-2.5 text-xs sm:text-sm font-medium text-[#64748B]">
-              <li>
-                <a href="#notre-histoire" className="hover:text-[#1E293B] transition-colors inline-block">
-                  Notre Histoire &amp; Mission
-                </a>
-              </li>
-              <li>
-                <a href="#charte-qualite" className="hover:text-[#1E293B] transition-colors inline-block">
-                  Charte Qualité &amp; Sécurité Enfant
-                </a>
-              </li>
-              <li>
-                <a href="#confidentialite" className="hover:text-[#1E293B] transition-colors inline-block">
-                  Politique de Confidentialité
-                </a>
-              </li>
-              <li>
-                <a href="#cgv" className="hover:text-[#1E293B] transition-colors inline-block">
-                  Conditions Générales de Vente
-                </a>
-              </li>
-              <li>
-                <a href="#mentions-legales" className="hover:text-[#1E293B] transition-colors inline-block">
-                  Mentions Légales
-                </a>
-              </li>
-            </ul>
-
-            {/* Mobile App Badges */}
-            <div className="pt-3">
-              <span className="text-[11px] font-bold text-[#94A3B8] block mb-2">
-                Application Mobile
+        {/* Full-Width Subtle Horizontal Divider & Copyright Bottom Row */}
+        <div className="w-full border-t border-white/25">
+          <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-10 py-6 pb-24 sm:pb-7 flex flex-col sm:flex-row items-center justify-between gap-3 text-[13.5px] text-white/90">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-2.5 gap-y-1 sm:ps-12 lg:ps-0">
+              <span>© {currentYear} TefLook</span>
+              <span aria-hidden="true" className="text-white/60">
+                •
               </span>
-              <div className="flex gap-2">
-                <div className="px-3 py-1.5 rounded-xl bg-[#FAF9F7] border border-[#E8E5DF] text-[11px] font-bold text-[#1E293B]">
-                  App Store
-                </div>
-                <div className="px-3 py-1.5 rounded-xl bg-[#FAF9F7] border border-[#E8E5DF] text-[11px] font-bold text-[#1E293B]">
-                  Google Play
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        {/* ============================================================== */}
-        {/* 3. PAYMENT METHODS & SECURITY BADGES ROW                       */}
-        {/* ============================================================== */}
-        <div className="py-6 flex flex-col md:flex-row items-center justify-between gap-4 border-b border-[#E8E5DF] text-xs">
-          <div className="flex items-center gap-2 text-[#64748B]">
-            <Lock className="w-4 h-4 text-emerald-600" />
-            <span className="font-semibold">Moyens de paiement 100% sécurisés :</span>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            {/* Cash on Delivery (COD) Badge */}
-            <span className="px-3 py-1 rounded-lg bg-[#FAF9F7] border border-[#E8E5DF] font-bold text-[#1E293B] text-[11px]">
-              💵 Paiement Cash à la Livraison
-            </span>
-            {/* CMI Maroc */}
-            <span className="px-3 py-1 rounded-lg bg-[#FAF9F7] border border-[#E8E5DF] font-black text-[#006699] text-[11px]">
-              CMI
-            </span>
-            {/* Visa */}
-            <span className="px-3 py-1 rounded-lg bg-[#FAF9F7] border border-[#E8E5DF] font-black text-[#1A1F71] text-[11px]">
-              VISA
-            </span>
-            {/* Mastercard */}
-            <span className="px-3 py-1 rounded-lg bg-[#FAF9F7] border border-[#E8E5DF] font-black text-[#EB001B] text-[11px]">
-              Mastercard
-            </span>
-            {/* SSL 256-bit */}
-            <span className="px-3 py-1 rounded-lg bg-emerald-50 border border-emerald-200 font-bold text-emerald-700 text-[11px] flex items-center gap-1">
-              <CheckCircle className="w-3 h-3 text-emerald-600" />
-              <span>SSL 256-bit</span>
-            </span>
-          </div>
-        </div>
-
-        {/* ============================================================== */}
-        {/* 4. COPYRIGHT & BOTTOM BAR                                      */}
-        {/* ============================================================== */}
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#94A3B8]">
-          <div className="flex items-center gap-2">
-            <p>© 2026 TEFLOOK. Tous droits réservés.</p>
-            <span>•</span>
-            <span className="font-arabic text-[#FE7C58] font-bold">
-              المملكة المغربية
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <span>Fait avec passion pour les familles marocaines</span>
-            {showScrollTop && (
               <button
-                onClick={scrollToTop}
-                className="w-8 h-8 rounded-full bg-[#4C9A9C] text-white flex items-center justify-center hover:bg-[#3E8688] transition-colors shadow-sm"
-                aria-label="Retour en haut"
-                title="Retour en haut de page"
+                type="button"
+                onClick={openSettingsModal}
+                className="underline underline-offset-4 decoration-white/70 hover:decoration-white hover:text-white transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-white rounded cursor-pointer"
               >
-                <ArrowUp className="w-4 h-4" />
+                {messages["cookies.manageLink"]}
               </button>
-            )}
+            </div>
+
+            <p className="text-center sm:text-end text-white/90 sm:pe-20 lg:pe-24">
+              {messages["footer.note"]}
+            </p>
           </div>
         </div>
-
       </div>
     </footer>
   );

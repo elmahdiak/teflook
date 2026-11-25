@@ -29,12 +29,11 @@ import {
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
-import { BrandLogo } from "@/components/ui/BrandLogo";
 import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/product/ProductCard";
 import { CODCheckoutModal } from "@/components/cart/CODCheckoutModal";
 import { FAQAccordion } from "@/components/faq/FAQAccordion";
-import { FooterSocialLinks } from "@/components/footer/FooterSocialLinks";
 import {
   Sheet,
   SheetContent,
@@ -52,7 +51,6 @@ import {
 import { CHILD_STORE_CATEGORY_MESSAGE_KEYS, useTefLookLanguage } from "@/lib/teflook-language";
 import { getLocalizedProduct } from "@/lib/product-localization";
 import { cn } from "@/lib/utils";
-import { useCookieConsent } from "@/lib/cookies";
 
 interface CategoryPillarTheme {
   icon: LucideIcon;
@@ -150,7 +148,6 @@ function TefLookStorefront() {
     queryFn: fetchProducts,
   });
   const { direction, locale, t } = useTefLookLanguage();
-  const { openSettingsModal } = useCookieConsent();
   const [activeCategory, setActiveCategory] = useState<ChildStoreCategory | "all">("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -483,63 +480,8 @@ function TefLookStorefront() {
       {/* 7. Collapsible Storefront FAQ Section */}
       <FAQAccordion />
 
-      {/* 8. Multi-column Footer */}
-      <footer className="border-t border-border bg-primary text-primary-foreground">
-        <div className="store-shell grid gap-9 py-10 sm:grid-cols-[1.5fr_1fr_1fr] sm:py-12">
-          <div>
-            <div className="mb-3.5">
-              <BrandLogo size="md" variant="dark" />
-            </div>
-            <p className="font-display text-xl font-semibold">{t("footer.tagline")}</p>
-            <p className="mt-2 max-w-xs text-sm leading-6 text-primary-foreground/75">
-              {t("footer.description")}
-            </p>
-            <FooterSocialLinks />
-          </div>
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.12em]">{t("footer.shop")}</p>
-            <div className="mt-4 flex flex-col gap-3 text-sm text-primary-foreground/75">
-              <a href="#boutique" className="transition-colors hover:text-primary-foreground">
-                {t("footer.allProducts")}
-              </a>
-              <a href="#univers" className="transition-colors hover:text-primary-foreground">
-                {t("footer.values")}
-              </a>
-            </div>
-          </div>
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.12em]">{t("footer.brand")}</p>
-            <div className="mt-4 flex flex-col gap-3 text-sm text-primary-foreground/75">
-              <span>{t("footer.children")}</span>
-              <span>{t("footer.families")}</span>
-              <span>{t("footer.help")}</span>
-              <button
-                type="button"
-                onClick={openSettingsModal}
-                className="text-start text-primary-foreground/75 hover:text-white transition-colors cursor-pointer"
-              >
-                {t("cookies.manageLink")}
-              </button>
-            </div>
-          </div>
-        </div>
-        <div className="border-t border-primary-foreground/15">
-          <div className="store-shell flex flex-wrap justify-between gap-2 py-4 pr-32 sm:pr-40 text-[11px] text-primary-foreground/65">
-            <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
-              <span>© {isMounted ? new Date().getFullYear() : 2026} TefLook</span>
-              <span>•</span>
-              <button
-                type="button"
-                onClick={openSettingsModal}
-                className="hover:text-white underline underline-offset-2 transition-colors cursor-pointer"
-              >
-                {t("cookies.manageLink")}
-              </button>
-            </div>
-            <span>{t("footer.note")}</span>
-          </div>
-        </div>
-      </footer>
+      {/* 8. Multi-column Slanted Teal Footer */}
+      <Footer />
 
       {/* Cart Sheet Drawer */}
       <CartSheet

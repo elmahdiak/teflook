@@ -52,25 +52,30 @@ export function FooterSocialLinks({ className }: FooterSocialLinksProps) {
   const resolvedHref = instagramUrl || DEFAULT_INSTAGRAM_URL;
 
   return (
-    <div className={cn("mt-4 flex items-center gap-3", className)}>
+    <div className={cn("flex items-center justify-center gap-3", className)}>
       <a
         href={resolvedHref}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label="Instagram TefLook"
+        aria-label="Suivre TefLook sur Instagram"
         title="Instagram"
-        className="group w-10 h-10 rounded-full inline-flex items-center justify-center bg-white/15 hover:bg-white/25 text-white border border-white/20 hover:scale-105 transition-all duration-200"
+        className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 border border-white/25 inline-flex items-center justify-center text-white transition-all duration-200 hover:scale-110 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
       >
         {/* Official Instagram SVG Icon */}
         <svg
           viewBox="0 0 24 24"
-          className="w-5 h-5 fill-none stroke-current stroke-[2] transition-transform duration-200 group-hover:scale-110"
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.9}
+          strokeLinecap="round"
+          strokeLinejoin="round"
           xmlns="http://www.w3.org/2000/svg"
           aria-hidden="true"
         >
-          <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+          <rect x="2.5" y="2.5" width="19" height="19" rx="5" ry="5" />
           <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-          <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
         </svg>
       </a>
     </div>

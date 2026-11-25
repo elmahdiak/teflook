@@ -68,8 +68,8 @@ export function BackToTopButton() {
 
   // Keep clean spacing above the mobile cookie banner when unconsented
   const bottomOffsetClass = !hasConsented
-    ? "bottom-40 sm:bottom-5"
-    : "bottom-5";
+    ? "bottom-40 sm:bottom-6"
+    : "bottom-5 sm:bottom-6";
 
   const handleScrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -82,15 +82,15 @@ export function BackToTopButton() {
       aria-label={label}
       title={label}
       className={cn(
-        "fixed z-40 w-11 h-11 rounded-full bg-[#4b9797] hover:bg-[#3d7d7d] text-white shadow-lg hover:shadow-xl flex items-center justify-center border border-white/25 transition-all duration-300 cursor-pointer active:scale-95",
+        "fixed z-40 w-11 h-11 rounded-full bg-[#4b9797]/85 hover:bg-[#3a7d7d] backdrop-blur-md border border-white/40 text-white shadow-[0_8px_22px_-4px_rgba(0,0,0,0.28)] flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white cursor-pointer",
         bottomOffsetClass,
-        isLeftCorner ? "left-5" : "right-5",
+        isLeftCorner ? "left-4 sm:left-6" : "right-4 sm:right-6",
         isVisible
           ? "opacity-100 scale-100 translate-y-0"
           : "opacity-0 scale-90 translate-y-3 pointer-events-none"
       )}
     >
-      <ChevronUp size={21} strokeWidth={2.5} aria-hidden="true" />
+      <ChevronUp size={20} strokeWidth={2.2} aria-hidden="true" />
     </button>
   );
 }

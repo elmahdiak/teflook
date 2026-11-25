@@ -21,9 +21,8 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { BrandLogo } from "@/components/ui/BrandLogo";
 import { Header } from "@/components/layout/Header";
-import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
+import { Footer } from "@/components/layout/Footer";
 import { CODCheckoutModal } from "@/components/cart/CODCheckoutModal";
 import {
   Sheet,
@@ -42,8 +41,6 @@ import type { ProductRatingSummary } from "@/lib/reviews-service";
 import { ProductInfoTabs } from "@/components/product/ProductInfoTabs";
 import { ProductCard } from "@/components/product/ProductCard";
 import { FAQAccordion } from "@/components/faq/FAQAccordion";
-import { FooterSocialLinks } from "@/components/footer/FooterSocialLinks";
-import { useCookieConsent } from "@/lib/cookies";
 import { cleanWhatsAppNumber, fetchSiteSettings } from "@/lib/site-settings";
 import { cn } from "@/lib/utils";
 
@@ -67,7 +64,6 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
   }, []);
 
   const { direction, locale, t } = useTefLookLanguage();
-  const { openSettingsModal } = useCookieConsent();
   const images = product.images.edges.map((e) => e.node);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -466,69 +462,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
       </main>
 
       {/* 5. Footer */}
-      <footer className="mt-16 border-t border-border bg-primary text-primary-foreground">
-        <div className="store-shell grid gap-8 py-10 sm:grid-cols-[1.5fr_1fr_1fr]">
-          <div>
-            <div className="mb-3.5">
-              <BrandLogo size="md" variant="dark" />
-            </div>
-            <p className="font-display text-xl font-semibold">Grandir, ensemble.</p>
-            <p className="mt-2 max-w-xs text-sm leading-6 text-primary-foreground/75">
-              Des idées choisies pour les enfants qui grandissent et les familles qui les accompagnent.
-            </p>
-            <FooterSocialLinks />
-          </div>
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.12em]">La Boutique</p>
-            <div className="mt-4 flex flex-col gap-2.5 text-sm text-primary-foreground/75">
-              <Link href="/#boutique" className="hover:text-white transition-colors">
-                Tous les produits
-              </Link>
-              <Link href="/#univers" className="hover:text-white transition-colors">
-                Nos engagements
-              </Link>
-            </div>
-          </div>
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.12em]">Contact & Support</p>
-            <div className="mt-4 flex flex-col gap-2.5 text-sm text-primary-foreground/75">
-              <span>Service client Maroc</span>
-              <span>contact@teflook.com</span>
-              <a
-                href={`https://wa.me/${whatsappPhone}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-emerald-400 hover:underline"
-              >
-                {locale === "ar" ? "الدعم عبر واتساب" : "Assistance WhatsApp"}
-              </a>
-              <button
-                type="button"
-                onClick={openSettingsModal}
-                className="text-start text-primary-foreground/75 hover:text-white transition-colors cursor-pointer"
-              >
-                {t("cookies.manageLink")}
-              </button>
-            </div>
-          </div>
-        </div>
-        <div className="border-t border-primary-foreground/15">
-          <div className="store-shell flex flex-wrap justify-between gap-2 py-4 pr-32 sm:pr-40 text-[11px] text-primary-foreground/65">
-            <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
-              <span>© {isMounted ? new Date().getFullYear() : 2026} TefLook. Tous droits réservés.</span>
-              <span>•</span>
-              <button
-                type="button"
-                onClick={openSettingsModal}
-                className="hover:text-white underline underline-offset-2 transition-colors cursor-pointer"
-              >
-                {t("cookies.manageLink")}
-              </button>
-            </div>
-            <span>Accompagner chaque petit pas.</span>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* 6. Cart Slide-over Sheet */}
       <CartSheet
@@ -540,10 +474,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
       {/* Cash on Delivery Modal */}
       <CODCheckoutModal open={isCODModalOpen} onOpenChange={setIsCODModalOpen} />
 
-      {/* 7. Floating WhatsApp Button */}
-      <WhatsAppButton />
-
-      {/* 8. Notification Toast */}
+      {/* 7. Notification Toast */}
       {(notice || cartError) && (
         <div
           role={cartError ? "alert" : "status"}
