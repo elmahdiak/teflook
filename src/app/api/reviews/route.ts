@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@supabase/supabase-js";
 import type { ProductReview } from "@/lib/reviews-service";
+import { ADMIN_PRODUCTS_PATH, ADMIN_REVIEWS_PATH } from "@/lib/admin-config";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -95,8 +96,8 @@ export async function POST(req: NextRequest) {
       if (productHandle) {
         revalidatePath(`/product/${productHandle}`);
       }
-      revalidatePath("/admin/reviews");
-      revalidatePath("/admin/products");
+      revalidatePath(ADMIN_REVIEWS_PATH);
+      revalidatePath(ADMIN_PRODUCTS_PATH);
       revalidatePath("/");
       revalidatePath("/", "layout");
     } catch (e) {
@@ -134,8 +135,8 @@ export async function DELETE(req: NextRequest) {
 
     try {
       revalidatePath("/product/[handle]", "page");
-      revalidatePath("/admin/reviews");
-      revalidatePath("/admin/products");
+      revalidatePath(ADMIN_REVIEWS_PATH);
+      revalidatePath(ADMIN_PRODUCTS_PATH);
       revalidatePath("/");
       revalidatePath("/", "layout");
     } catch {}
@@ -169,7 +170,7 @@ export async function PATCH(req: NextRequest) {
 
     try {
       revalidatePath("/product/[handle]", "page");
-      revalidatePath("/admin/reviews");
+      revalidatePath(ADMIN_REVIEWS_PATH);
     } catch {}
 
     return NextResponse.json({ success: true, review: data });

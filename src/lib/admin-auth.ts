@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ADMIN_LOGIN_PATH } from "./admin-config";
 
 const ADMIN_TOKEN_KEY = "teflook_admin_token";
 const DEFAULT_USER = "admin";
@@ -35,7 +36,7 @@ export function logoutAdmin(): void {
   if (typeof window !== "undefined") {
     localStorage.removeItem(ADMIN_TOKEN_KEY);
     document.cookie = `teflook_admin_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
-    window.location.href = "/admin/login";
+    window.location.href = ADMIN_LOGIN_PATH;
   }
 }
 

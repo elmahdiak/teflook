@@ -38,6 +38,13 @@ import {
   DEFAULT_SITE_SETTINGS,
   type SiteSettings,
 } from "@/lib/site-settings";
+import {
+  ADMIN_CATEGORIES_PATH,
+  ADMIN_ORDERS_PATH,
+  ADMIN_PRODUCTS_PATH,
+  ADMIN_REVIEWS_PATH,
+  ADMIN_SETTINGS_PATH,
+} from "@/lib/admin-config";
 
 const INITIAL_STATS: ReturnType<typeof getDashboardStats> = {
   totalRevenue: 0,
@@ -146,13 +153,13 @@ export default function AdminDashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/admin/products">
+          <Link href={ADMIN_PRODUCTS_PATH}>
             <Button variant="outline" size="sm" className="gap-2 rounded-xl text-xs">
               <Plus size={15} />
               Ajouter un produit
             </Button>
           </Link>
-          <Link href="/admin/orders">
+          <Link href={ADMIN_ORDERS_PATH}>
             <Button size="sm" className="gap-2 rounded-xl bg-brand-orange text-white hover:bg-brand-orange/90 text-xs">
               <Truck size={15} />
               Gérer les commandes ({stats.pendingOrders} en attente)
@@ -257,7 +264,7 @@ export default function AdminDashboardPage() {
             </p>
           </div>
           <Link
-            href="/admin/orders"
+            href={ADMIN_ORDERS_PATH}
             className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-teal hover:text-brand-orange transition-colors"
           >
             <span>Voir toutes les commandes</span>
@@ -290,7 +297,7 @@ export default function AdminDashboardPage() {
                   return (
                     <tr key={order.id} className="hover:bg-secondary/30 transition-colors">
                       <td className="py-4 px-4 sm:px-6 font-bold text-foreground">
-                        <Link href={`/admin/orders?search=${order.id}`} className="hover:text-brand-teal">
+                        <Link href={`${ADMIN_ORDERS_PATH}?search=${order.id}`} className="hover:text-brand-teal">
                           #{order.id}
                         </Link>
                         <span className="block text-[10px] text-muted-foreground font-normal">
@@ -521,7 +528,7 @@ export default function AdminDashboardPage() {
 
             <div className="space-y-2.5">
               <Link
-                href="/admin/orders"
+                href={ADMIN_ORDERS_PATH}
                 className="flex items-center justify-between rounded-xl border border-border p-3 hover:border-brand-teal hover:bg-brand-mist/30 transition-all text-xs font-bold text-foreground"
               >
                 <div className="flex items-center gap-2.5">
@@ -532,7 +539,7 @@ export default function AdminDashboardPage() {
               </Link>
 
               <Link
-                href="/admin/products"
+                href={ADMIN_PRODUCTS_PATH}
                 className="flex items-center justify-between rounded-xl border border-border p-3 hover:border-brand-teal hover:bg-brand-mist/30 transition-all text-xs font-bold text-foreground"
               >
                 <div className="flex items-center gap-2.5">
@@ -543,7 +550,7 @@ export default function AdminDashboardPage() {
               </Link>
 
               <Link
-                href="/admin/categories"
+                href={ADMIN_CATEGORIES_PATH}
                 className="flex items-center justify-between rounded-xl border border-border p-3 hover:border-brand-teal hover:bg-brand-mist/30 transition-all text-xs font-bold text-foreground"
               >
                 <div className="flex items-center gap-2.5">
@@ -554,7 +561,7 @@ export default function AdminDashboardPage() {
               </Link>
 
               <Link
-                href="/admin/reviews"
+                href={ADMIN_REVIEWS_PATH}
                 className="flex items-center justify-between rounded-xl border border-border p-3 hover:border-brand-teal hover:bg-brand-mist/30 transition-all text-xs font-bold text-foreground"
               >
                 <div className="flex items-center gap-2.5">
@@ -565,7 +572,7 @@ export default function AdminDashboardPage() {
               </Link>
 
               <Link
-                href="/admin/settings"
+                href={ADMIN_SETTINGS_PATH}
                 className="flex items-center justify-between rounded-xl border border-border p-3 hover:border-brand-teal hover:bg-brand-mist/30 transition-all text-xs font-bold text-foreground"
               >
                 <div className="flex items-center gap-2.5">

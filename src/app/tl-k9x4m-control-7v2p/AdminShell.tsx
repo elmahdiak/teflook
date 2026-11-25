@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  BarChart3,
   ExternalLink,
   FolderTree,
   LayoutDashboard,
@@ -13,17 +12,24 @@ import {
   MessageCircle,
   MessageSquare,
   Package,
-  ShoppingBag,
   Store,
   Truck,
-  Users,
   X,
 } from "lucide-react";
 import { isAuthenticated, logoutAdmin } from "@/lib/admin-auth";
+import {
+  ADMIN_BASE_PATH,
+  ADMIN_CATEGORIES_PATH,
+  ADMIN_LOGIN_PATH,
+  ADMIN_ORDERS_PATH,
+  ADMIN_PRODUCTS_PATH,
+  ADMIN_REVIEWS_PATH,
+  ADMIN_SETTINGS_PATH,
+} from "@/lib/admin-config";
 import { Button } from "@/components/ui/button";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -32,15 +38,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     setMounted(true);
     // Don't guard the login page itself
-    if (pathname === "/admin/login") return;
+    if (pathname === ADMIN_LOGIN_PATH) return;
 
     if (!isAuthenticated()) {
-      router.push("/admin/login");
+      router.push(ADMIN_LOGIN_PATH);
     }
   }, [pathname, router]);
 
   // If on login page, render children without sidebar shell
-  if (pathname === "/admin/login") {
+  if (pathname === ADMIN_LOGIN_PATH) {
     return <>{children}</>;
   }
 
@@ -55,35 +61,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navItems = [
     {
       label: "Vue d'ensemble",
-      href: "/admin",
+      href: ADMIN_BASE_PATH,
       icon: LayoutDashboard,
       exact: true,
     },
     {
       label: "Commandes COD",
-      href: "/admin/orders",
+      href: ADMIN_ORDERS_PATH,
       icon: Truck,
       badge: "COD",
     },
     {
       label: "Catalogue Produits",
-      href: "/admin/products",
+      href: ADMIN_PRODUCTS_PATH,
       icon: Package,
     },
     {
       label: "Catégories d'éveil",
-      href: "/admin/categories",
+      href: ADMIN_CATEGORIES_PATH,
       icon: FolderTree,
     },
     {
       label: "Avis & Témoignages",
-      href: "/admin/reviews",
+      href: ADMIN_REVIEWS_PATH,
       icon: MessageSquare,
       badge: "Vérifiés",
     },
     {
       label: "Support WhatsApp",
-      href: "/admin/settings",
+      href: ADMIN_SETTINGS_PATH,
       icon: MessageCircle,
       badge: "Direct",
     },
@@ -94,7 +100,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div>
         {/* Brand */}
         <div className="flex items-center justify-between pb-6 border-b border-white/10">
-          <BrandLogo size="md" variant="dark" href="/admin" subtitle="Admin Console" />
+          <BrandLogo size="md" variant="dark" href={ADMIN_BASE_PATH} subtitle="Admin Console" />
           <button
             type="button"
             onClick={() => setMobileSidebarOpen(false)}

@@ -7,6 +7,7 @@ import { ArrowLeft, KeyRound, LoaderCircle, Lock, ShieldCheck, User } from "luci
 import { Button } from "@/components/ui/button";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { loginAdmin } from "@/lib/admin-auth";
+import { ADMIN_BASE_PATH } from "@/lib/admin-config";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function AdminLoginPage() {
     setTimeout(() => {
       const success = loginAdmin(username, password);
       if (success) {
-        router.push("/admin");
+        router.push(ADMIN_BASE_PATH);
       } else {
         setError("Identifiant ou mot de passe incorrect. (Par défaut: admin / teflook2026)");
         setLoading(false);

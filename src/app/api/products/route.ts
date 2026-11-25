@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import { PRODUCTS, type ProductItem } from "@/data/teflookData";
 import { PRODUCT_TRANSLATIONS_AR } from "@/lib/product-localization";
 import type { AdminProduct } from "@/lib/cod-service";
+import { ADMIN_PRODUCTS_PATH } from "@/lib/admin-config";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -305,7 +306,7 @@ export async function POST(req: NextRequest) {
     try {
       revalidatePath("/", "layout");
       revalidatePath("/product/[handle]", "page");
-      revalidatePath("/admin/products");
+      revalidatePath(ADMIN_PRODUCTS_PATH);
       if (savedProduct.handle) {
         revalidatePath(`/product/${savedProduct.handle}`);
       }
@@ -378,7 +379,7 @@ export async function DELETE(req: NextRequest) {
       try {
         revalidatePath("/", "layout");
         revalidatePath("/product/[handle]", "page");
-        revalidatePath("/admin/products");
+        revalidatePath(ADMIN_PRODUCTS_PATH);
       } catch {}
 
       return NextResponse.json({
@@ -400,7 +401,7 @@ export async function DELETE(req: NextRequest) {
       try {
         revalidatePath("/", "layout");
         revalidatePath("/product/[handle]", "page");
-        revalidatePath("/admin/products");
+        revalidatePath(ADMIN_PRODUCTS_PATH);
       } catch {}
 
       return NextResponse.json({
@@ -429,7 +430,7 @@ export async function DELETE(req: NextRequest) {
       revalidatePath("/", "layout");
       revalidatePath("/product/[handle]", "page");
       revalidatePath(`/product/${id}`);
-      revalidatePath("/admin/products");
+      revalidatePath(ADMIN_PRODUCTS_PATH);
     } catch {}
 
     return NextResponse.json({
