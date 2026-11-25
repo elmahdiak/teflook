@@ -40,6 +40,7 @@ import { CHILD_STORE_CATEGORY_MESSAGE_KEYS, useTefLookLanguage } from "@/lib/tef
 import { getLocalizedProduct, getLocalizedCategoryBadge } from "@/lib/product-localization";
 import { ProductReviewsSection } from "@/components/product/ProductReviewsSection";
 import { ProductInfoTabs } from "@/components/product/ProductInfoTabs";
+import { FAQAccordion } from "@/components/faq/FAQAccordion";
 import { useCookieConsent } from "@/lib/cookies";
 import { cleanWhatsAppNumber, fetchSiteSettings } from "@/lib/site-settings";
 import { cn } from "@/lib/utils";
@@ -453,7 +454,10 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
           }}
         />
 
-        {/* 5. Related Products Section ("Vous aimerez aussi") */}
+        {/* 5. Collapsible FAQ Section */}
+        <FAQAccordion product={product} />
+
+        {/* 6. Related Products Section ("Vous aimerez aussi") */}
         {relatedProducts.length > 0 && (
           <section className="mt-16 sm:mt-24 border-t border-border pt-12 sm:pt-16">
             <div className="mb-8 flex items-end justify-between">

@@ -34,6 +34,7 @@ import { Button } from "@/components/ui/button";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { TefLookLanguageSwitcher } from "@/components/teflook-language-switcher";
 import { CODCheckoutModal } from "@/components/cart/CODCheckoutModal";
+import { FAQAccordion } from "@/components/faq/FAQAccordion";
 import {
   Sheet,
   SheetContent,
@@ -571,7 +572,10 @@ function TefLookStorefront() {
         </div>
       </section>
 
-      {/* 7. Multi-column Footer */}
+      {/* 7. Collapsible Storefront FAQ Section */}
+      <FAQAccordion />
+
+      {/* 8. Multi-column Footer */}
       <footer className="border-t border-border bg-primary text-primary-foreground">
         <div className="store-shell grid gap-9 py-10 sm:grid-cols-[1.5fr_1fr_1fr] sm:py-12">
           <div>
