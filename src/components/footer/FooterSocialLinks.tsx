@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useTefLookLanguage } from "@/lib/teflook-language";
 import {
   DEFAULT_INSTAGRAM_URL,
   fetchSiteSettings,
@@ -15,13 +14,9 @@ interface FooterSocialLinksProps {
 }
 
 export function FooterSocialLinks({ className }: FooterSocialLinksProps) {
-  const { locale } = useTefLookLanguage();
-  const [isMounted, setIsMounted] = useState(false);
   const [instagramUrl, setInstagramUrl] = useState<string>(DEFAULT_INSTAGRAM_URL);
 
   useEffect(() => {
-    setIsMounted(true);
-
     fetchSiteSettings().then((s) => {
       if (s) {
         const normalized = normalizeInstagramUrl(s.instagram_url);
@@ -54,8 +49,6 @@ export function FooterSocialLinks({ className }: FooterSocialLinksProps) {
     };
   }, []);
 
-  const currentLocale = isMounted ? locale : "fr";
-  const isAr = currentLocale === "ar";
   const resolvedHref = instagramUrl || DEFAULT_INSTAGRAM_URL;
 
   return (
@@ -64,14 +57,14 @@ export function FooterSocialLinks({ className }: FooterSocialLinksProps) {
         href={resolvedHref}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label={isAr ? "تابع تيفلوك على إنستغرام" : "Suivre TefLook sur Instagram"}
-        title={isAr ? "حساب تيفلوك الرسمي على إنستغرام" : "Suivez TefLook sur Instagram"}
-        className="group inline-flex items-center gap-2.5 rounded-full border border-white/20 bg-white/10 px-3.5 py-2 text-xs font-bold text-white transition-all duration-200 hover:border-[#ff3500] hover:bg-[#ff3500] hover:shadow-md hover:shadow-[#ff3500]/25"
+        aria-label="Instagram TefLook"
+        title="Instagram"
+        className="group w-10 h-10 rounded-full inline-flex items-center justify-center bg-white/15 hover:bg-white/25 text-white border border-white/20 hover:scale-105 transition-all duration-200"
       >
         {/* Official Instagram SVG Icon */}
         <svg
           viewBox="0 0 24 24"
-          className="size-4 shrink-0 fill-none stroke-current stroke-[2] transition-transform duration-200 group-hover:scale-110"
+          className="w-5 h-5 fill-none stroke-current stroke-[2] transition-transform duration-200 group-hover:scale-110"
           xmlns="http://www.w3.org/2000/svg"
           aria-hidden="true"
         >
@@ -79,9 +72,6 @@ export function FooterSocialLinks({ className }: FooterSocialLinksProps) {
           <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
           <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
         </svg>
-        <span className={cn(isAr && "font-sans")}>
-          {isAr ? "إنستغرام تيفلوك" : "Instagram TefLook"}
-        </span>
       </a>
     </div>
   );

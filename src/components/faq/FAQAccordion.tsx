@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { ChevronDown, HelpCircle, MessageCircle } from "lucide-react";
+import { ChevronDown, MessageCircle } from "lucide-react";
 import type { ShopifyProduct } from "@/lib/shopify-storefront";
 import { useTefLookLanguage } from "@/lib/teflook-language";
 import { getLocalizedProduct } from "@/lib/product-localization";
@@ -112,126 +112,168 @@ export function FAQAccordion({ product, className }: FAQAccordionProps) {
       id="faq"
       dir={currentDirection}
       lang={currentLocale}
-      aria-labelledby="faq-heading"
+      aria-labelledby="faq-title"
       className={cn(
-        product ? "mt-14 sm:mt-20 border-t border-border pt-12 sm:pt-16" : "store-shell pb-14 sm:pb-20",
+        "relative overflow-hidden bg-gradient-to-b from-[#F4F9F9] to-[#FCFDFD]",
+        product
+          ? "mt-14 sm:mt-20 rounded-3xl border border-[#4b9797]/15 py-12 sm:py-16 px-4 sm:px-8"
+          : "border-t border-[#4b9797]/10",
         className
       )}
     >
-      {/* Header */}
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="grid size-7 place-items-center rounded-lg bg-[#4b9797]/15 text-[#4b9797]">
-              <HelpCircle size={15} />
-            </span>
-            <p
-              className={cn(
-                "text-[11px] font-bold text-[#ff3500]",
-                isAr ? "tracking-normal font-sans text-xs" : "uppercase tracking-[0.15em]"
-              )}
-            >
-              {isAr ? "مساعدة ومعلومات" : "Aide & Informations"}
-            </p>
-          </div>
-          <h2
-            id="faq-heading"
+      {/* Soft Ambient Brand Radial Glows */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-28 -end-28 w-[28rem] h-[28rem] sm:w-[36rem] sm:h-[36rem] rounded-full bg-[radial-gradient(circle,rgba(75,151,151,0.08)_0%,rgba(75,151,151,0)_70%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-28 -start-28 w-[26rem] h-[26rem] sm:w-[34rem] sm:h-[34rem] rounded-full bg-[radial-gradient(circle,rgba(255,191,0,0.07)_0%,rgba(255,191,0,0)_70%)]"
+      />
+
+      {/* Centered Container */}
+      <div
+        className={cn(
+          "relative mx-auto",
+          product
+            ? "max-w-4xl"
+            : "max-w-4xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24"
+        )}
+      >
+        {/* Start-Aligned Section Header */}
+        <header className="text-start">
+          <p
             className={cn(
-              "mt-2 font-display text-2xl sm:text-3xl font-extrabold text-[#1A2D2A]",
-              isAr && "font-sans"
+              "font-display text-xs sm:text-[13px] font-bold text-[#4b9797]",
+              isAr ? "tracking-normal font-sans text-sm" : "uppercase tracking-[0.14em]"
+            )}
+          >
+            {isAr ? "الأسئلة المتداولة" : "QUESTIONS COURANTES"}
+          </p>
+          <h2
+            id="faq-title"
+            className={cn(
+              "mt-2.5 font-display text-3xl sm:text-5xl font-extrabold text-[#1A3C34] leading-[1.12]",
+              isAr ? "font-sans tracking-normal" : "tracking-tight"
             )}
           >
             {isAr ? "الأسئلة الشائعة" : "Questions Fréquentes"}
+            <span className="text-[#ffbf00]">.</span>
           </h2>
-          <p className="mt-1.5 text-xs sm:text-sm text-muted-foreground max-w-2xl">
-            {isAr
-              ? "كل ما يحتاج الآباء معرفته حول التوصيل، الدفع عند الاستلام وفوائد منتجات تيفلوك."
-              : "Tout ce que les parents doivent savoir sur la livraison, le paiement à la livraison et nos outils d'éveil."}
-          </p>
-        </div>
-      </div>
+        </header>
 
-      {/* Collapsible Accordion Container */}
-      <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white shadow-sm overflow-hidden">
-        {faqItems.map((item, idx) => {
-          const isOpen = openIndex === idx;
-          const question = isAr ? item.questionAr : item.questionFr;
-          const answer = isAr ? item.answerAr : item.answerFr;
+        {/* Stacked Accordion Cards */}
+        <div className="space-y-4 mt-10">
+          {faqItems.map((item, idx) => {
+            const isOpen = openIndex === idx;
+            const question = isAr ? item.questionAr : item.questionFr;
+            const answer = isAr ? item.answerAr : item.answerFr;
 
-          return (
-            <div
-              key={item.id}
-              className="border-b border-slate-100 dark:border-slate-800 last:border-b-0 transition-colors"
-            >
-              <button
-                type="button"
-                aria-expanded={isOpen}
-                aria-controls={`faq-panel-${item.id}`}
-                onClick={() => setOpenIndex((cur) => (cur === idx ? null : idx))}
-                className="w-full flex items-center justify-between gap-4 px-5 py-4 sm:px-6 sm:py-5 text-start hover:bg-slate-50/70 transition-colors cursor-pointer group"
-              >
-                <span
-                  className={cn(
-                    "font-bold text-sm sm:text-base transition-colors leading-snug",
-                    isOpen ? "text-[#4b9797]" : "text-slate-900 group-hover:text-[#4b9797]",
-                    isAr && "font-sans"
-                  )}
-                >
-                  {question}
-                </span>
-
-                <span
-                  className={cn(
-                    "grid size-8 shrink-0 place-items-center rounded-full transition-all duration-300",
-                    isOpen
-                      ? "bg-[#4b9797]/15 text-[#4b9797] rotate-180"
-                      : "bg-slate-100 text-slate-500 group-hover:bg-[#4b9797]/10 group-hover:text-[#4b9797]"
-                  )}
-                >
-                  <ChevronDown size={17} strokeWidth={2.3} />
-                </span>
-              </button>
-
-              {/* Smooth Grid Row Collapse/Expand Transition */}
-              <div
-                id={`faq-panel-${item.id}`}
+            return (
+              <article
+                key={item.id}
+                data-open={String(isOpen)}
                 className={cn(
-                  "grid transition-all duration-300 ease-out",
-                  isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                  "group rounded-2xl bg-white shadow-[0_4px_20px_-4px_rgba(26,60,52,0.06)] transition-all duration-300",
+                  isOpen
+                    ? "border border-[#4b9797] ring-1 ring-[#4b9797]/20"
+                    : "border border-[#4b9797]/20 hover:border-[#4b9797]/50"
                 )}
               >
-                <div className="overflow-hidden">
-                  <div className="px-5 pb-5 sm:px-6 sm:pb-6 pt-0.5 space-y-3">
-                    <p
+                <button
+                  type="button"
+                  id={`faq-btn-${item.id}`}
+                  aria-expanded={isOpen}
+                  aria-controls={`faq-panel-${item.id}`}
+                  onClick={() => setOpenIndex((cur) => (cur === idx ? null : idx))}
+                  className="w-full flex items-center justify-between gap-4 px-5 py-5 sm:px-6 sm:py-5 text-start rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797] cursor-pointer"
+                >
+                  <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
+                    {/* Crisp Circular '?' Icon in TefLook Terracotta/Orange */}
+                    <svg
+                      className="w-6 h-6 text-[#ff3500] shrink-0 transition-transform duration-300 group-hover:scale-105"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                      <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+
+                    <span
                       className={cn(
-                        "text-xs sm:text-sm text-slate-600 leading-relaxed text-start",
-                        isAr && "font-sans leading-loose"
+                        "font-display font-bold text-base sm:text-lg text-[#1A3C34] leading-snug",
+                        isAr && "font-sans"
                       )}
                     >
-                      {answer}
-                    </p>
+                      {question}
+                    </span>
+                  </div>
 
-                    {item.showWhatsAppCta && (
-                      <div>
-                        <a
-                          href={whatsappHelpUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 rounded-full bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/30 px-4 py-1.5 text-xs font-bold text-[#1a8f46] transition-colors"
-                        >
-                          <MessageCircle size={14} className="shrink-0" />
-                          <span>
-                            {isAr ? "تواصل مع خدمة العملاء عبر واتساب" : "Contacter le support sur WhatsApp"}
-                          </span>
-                        </a>
-                      </div>
+                  {/* Sleek Chevron-Down in Deep Teal */}
+                  <ChevronDown
+                    size={20}
+                    strokeWidth={2.25}
+                    aria-hidden="true"
+                    className={cn(
+                      "w-5 h-5 text-[#4b9797] shrink-0 transition-transform duration-300",
+                      isOpen && "rotate-180"
                     )}
+                  />
+                </button>
+
+                {/* Smooth CSS Grid Accordion Panel */}
+                <div
+                  id={`faq-panel-${item.id}`}
+                  role="region"
+                  aria-labelledby={`faq-btn-${item.id}`}
+                  className={cn(
+                    "grid transition-all duration-300 ease-in-out",
+                    isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                  )}
+                >
+                  <div className="overflow-hidden">
+                    <div className="ps-9 sm:ps-10 pe-4 sm:pe-8 pb-6 pt-1 ms-5 sm:ms-6">
+                      <div className="ps-4 border-s-2 border-[#ffbf00]/70 space-y-3">
+                        <p
+                          className={cn(
+                            "font-sans text-[15px] sm:text-base text-[#3D524D] leading-relaxed text-start",
+                            isAr && "leading-loose"
+                          )}
+                        >
+                          {answer}
+                        </p>
+
+                        {item.showWhatsAppCta && (
+                          <div>
+                            <a
+                              href={whatsappHelpUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 rounded-full bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/30 px-4 py-1.5 text-xs font-bold text-[#1a8f46] transition-colors"
+                            >
+                              <MessageCircle size={14} className="shrink-0" />
+                              <span>
+                                {isAr
+                                  ? "تواصل مع خدمة العملاء عبر واتساب"
+                                  : "Contacter le support sur WhatsApp"}
+                              </span>
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          );
-        })}
+              </article>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
