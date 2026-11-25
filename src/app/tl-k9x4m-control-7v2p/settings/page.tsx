@@ -50,7 +50,8 @@ export default function AdminSettingsPage() {
     const res = await saveSiteSettings(settings);
     setIsSaving(false);
 
-    if (res.success) {
+    if (res.success && res.data) {
+      setSettings(res.data);
       showToast("Paramètres WhatsApp enregistrés avec succès dans Supabase !");
     } else {
       showToast(res.error || "Erreur lors de la sauvegarde.", "error");

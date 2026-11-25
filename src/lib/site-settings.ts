@@ -16,12 +16,22 @@ const STORAGE_KEY = "teflook_site_settings_v1";
  * Automatically formats local Moroccan numbers (06XXXXXXXX -> 2126XXXXXXXX).
  */
 export function cleanWhatsAppNumber(phone: string): string {
-  if (!phone) return "212600000000";
+  if (!phone) return "";
 
-  // Remove whitespace, dashes, parens, plus
-  let cleaned = phone.replace(/[\s\-\(\)\+]/g, "").trim();
+  // Remove whitespace, dashes, parens, plus, dots
+  let cleaned = phone.replace(/[\s\-\(\)\+\.]/g, "").trim();
 
-  // If local Moroccan number starting with 0 (e.g. 0661234567 or 07...)
+  // Strip international 00 prefix (e.g. 002126... -> 2126...)
+  if (cleaned.startsWith("00")) {
+    cleaned = cleaned.substring(2);
+  }
+
+  // Handle accidental +212 06... -> 2126...
+  if (/^2120[5-7]\d{8}$/.test(cleaned)) {
+    cleaned = `212${cleaned.substring(4)}`;
+  }
+
+  // If local Moroccan number starting with 0 (e.g. 0661234567, 07..., 05...)
   if (/^0[5-7]\d{8}$/.test(cleaned)) {
     cleaned = `212${cleaned.substring(1)}`;
   }
@@ -29,33 +39,47 @@ export function cleanWhatsAppNumber(phone: string): string {
   // Remove any remaining non-digit characters
   cleaned = cleaned.replace(/\D/g, "");
 
-  return cleaned || "212600000000";
+  return cleaned;
 }
 
 /**
- * Fetch settings from API / Supabase with localStorage backup
+ * Fetch live settings from /api/settings (no-store) with localStorage fallback on network failure.
  */
 export async function fetchSiteSettings(): Promise<SiteSettings> {
   if (typeof window !== "undefined") {
     try {
-      const res = await fetch("/api/settings", { cache: "no-store" });
+      const res = await fetch("/api/settings", {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache",
+          Pragma: "no-cache",
+        },
+      });
       if (res.ok) {
         const data = await res.json();
-        if (data && typeof data.whatsapp_phone === "string") {
+        if (data && !data.error && typeof data.whatsapp_phone === "string" && data.whatsapp_phone.trim()) {
+          const normalized: SiteSettings = {
+            whatsapp_phone: data.whatsapp_phone.trim(),
+            whatsapp_enabled: data.whatsapp_enabled !== false,
+            updated_at: data.updated_at,
+          };
           try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
           } catch {}
-          return data;
+          return normalized;
         }
       }
     } catch (e) {
-      console.warn("fetchSiteSettings error:", e);
+      console.warn("fetchSiteSettings network error:", e);
     }
 
     try {
       const local = localStorage.getItem(STORAGE_KEY);
       if (local) {
-        return JSON.parse(local);
+        const parsed = JSON.parse(local);
+        if (parsed && typeof parsed.whatsapp_phone === "string" && parsed.whatsapp_phone.trim()) {
+          return parsed;
+        }
       }
     } catch {}
   }
@@ -72,16 +96,20 @@ export async function saveSiteSettings(
   try {
     const res = await fetch("/api/settings", {
       method: "POST",
+      cache: "no-store",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(settings),
     });
 
     const json = await res.json();
-    if (!res.ok || json.error) {
-      return { success: false, error: json.error || "Impossible d'enregistrer les paramètres." };
+    if (!res.ok || json.error || !json.success) {
+      return {
+        success: false,
+        error: json.error || "Impossible d'enregistrer les paramètres dans Supabase.",
+      };
     }
 
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && json.data) {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(json.data));
         window.dispatchEvent(new CustomEvent("teflook:settings-updated", { detail: json.data }));

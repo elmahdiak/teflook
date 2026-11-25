@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Check, CheckCircle2, LoaderCircle, Package, ShieldCheck, Truck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { saveCODOrder, type CODOrderItem } from "@/lib/cod-service";
 import { useCartStore } from "@/lib/shopify-cart";
+import { cleanWhatsAppNumber, fetchSiteSettings } from "@/lib/site-settings";
 
 const MOROCCAN_CITIES = [
   "Casablanca",
@@ -62,6 +63,14 @@ export function CODCheckoutModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdOrderId, setCreatedOrderId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
+  const [whatsappPhone, setWhatsappPhone] = useState("212600000000");
+
+  useEffect(() => {
+    fetchSiteSettings().then((s) => {
+      const cleaned = cleanWhatsAppNumber(s?.whatsapp_phone || "");
+      if (cleaned) setWhatsappPhone(cleaned);
+    });
+  }, []);
 
   if (!open) return null;
 
@@ -196,7 +205,7 @@ export function CODCheckoutModal({
             {/* Actions */}
             <div className="pt-2 flex flex-col gap-2.5">
               <a
-                href={`https://wa.me/212600000000?text=${encodeURIComponent(whatsappMessage)}`}
+                href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMessage)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] text-white font-bold text-sm hover:bg-[#20ba59] transition-all shadow-md shadow-[#25D366]/20"

@@ -86,7 +86,8 @@ export default function AdminDashboardPage() {
     const res = await saveSiteSettings(siteSettings);
     setIsSavingSettings(false);
 
-    if (res.success) {
+    if (res.success && res.data) {
+      setSiteSettings(res.data);
       setSettingsToast({ message: "Numéro WhatsApp mis à jour avec succès !", type: "success" });
     } else {
       setSettingsToast({ message: res.error || "Erreur de sauvegarde", type: "error" });

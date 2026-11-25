@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useTefLookLanguage } from "@/lib/teflook-language";
-import { cleanWhatsAppNumber, fetchSiteSettings, type SiteSettings, DEFAULT_SITE_SETTINGS } from "@/lib/site-settings";
+import { cleanWhatsAppNumber, fetchSiteSettings, type SiteSettings } from "@/lib/site-settings";
 import { cn } from "@/lib/utils";
 
 export interface WhatsAppButtonProps {
@@ -13,12 +13,12 @@ export interface WhatsAppButtonProps {
 export function WhatsAppButton({ className, defaultMessage }: WhatsAppButtonProps) {
   const { locale } = useTefLookLanguage();
   const [isMounted, setIsMounted] = useState(false);
-  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
+  const [settings, setSettings] = useState<SiteSettings | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
 
-    // Initial fetch of live settings from Supabase / API
+    // Fetch live settings from Supabase / API with cache: 'no-store'
     fetchSiteSettings().then((s) => {
       if (s) setSettings(s);
     });
@@ -31,21 +31,30 @@ export function WhatsAppButton({ className, defaultMessage }: WhatsAppButtonProp
       }
     };
 
+    const handleStorageUpdate = () => {
+      fetchSiteSettings().then((s) => {
+        if (s) setSettings(s);
+      });
+    };
+
     window.addEventListener("teflook:settings-updated", handleSettingsUpdate);
+    window.addEventListener("storage", handleStorageUpdate);
     return () => {
       window.removeEventListener("teflook:settings-updated", handleSettingsUpdate);
+      window.removeEventListener("storage", handleStorageUpdate);
     };
   }, []);
 
-  // Hydration safety: do not render until client mounts
-  if (!isMounted) return null;
+  // Hydration safety & avoid flashing stale fallback before live settings load
+  if (!isMounted || !settings) return null;
 
   // If store owner disabled WhatsApp support in admin, hide cleanly
   if (settings.whatsapp_enabled === false) return null;
 
+  const cleanedPhone = cleanWhatsAppNumber(settings.whatsapp_phone);
+  if (!cleanedPhone) return null;
+
   const isAr = locale === "ar";
-  const rawPhone = settings.whatsapp_phone || "+212600000000";
-  const cleanedPhone = cleanWhatsAppNumber(rawPhone);
 
   // Pre-filled bilingual message
   const greetingText =
