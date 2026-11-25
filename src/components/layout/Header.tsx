@@ -151,7 +151,7 @@ export function Header({
         aria-label={t("a11y.categories")}
         className="w-full bg-[#FAF8F5]/95 backdrop-blur-md border-b border-[#E8E2D9]"
       >
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-[72px] grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-20 sm:h-22 md:h-24 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
           {/* Start Zone: Menu Trigger + FR/عربي Language Switcher */}
           <div className="justify-self-start flex items-center gap-1.5 sm:gap-3 min-w-0">
             <button
@@ -189,15 +189,16 @@ export function Header({
           <Link
             href="/"
             aria-label={isAr ? "الصفحة الرئيسية تيفلوك" : "Accueil TefLook"}
-            className="justify-self-center flex items-center justify-center rounded-xl px-1.5 py-1 transition-transform duration-200 hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797]"
+            className="justify-self-center flex items-center justify-center rounded-xl transition-transform duration-200 hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797]"
           >
             <Image
               src="/images/teflook-stacked-logo.png"
               alt="TefLook"
-              width={140}
-              height={140}
+              width={220}
+              height={220}
+              quality={100}
               priority
-              className="h-11 sm:h-12 w-auto object-contain mix-blend-multiply"
+              className="h-14 sm:h-16 md:h-20 w-auto object-contain mix-blend-multiply"
             />
           </Link>
 
