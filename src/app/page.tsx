@@ -260,7 +260,7 @@ function TefLookStorefront() {
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         onOpenCart={() => setIsCartOpen(true)}
-        defaultSearchOpen={true}
+        defaultSearchOpen={false}
       />
 
       {/* 3. Hero Section - Pure Full-Width Unobstructed Visual Display */}
