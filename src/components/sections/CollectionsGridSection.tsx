@@ -140,13 +140,13 @@ export function CollectionsGridSection() {
           </div>
 
           {/* Product Items Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-6 sm:gap-x-6 sm:gap-y-8 pt-4">
             {filteredProducts.map((product) => {
               const price = currency === "MAD" ? product.priceMad : product.priceEur;
               return (
                 <div
                   key={product.id}
-                  className="group rounded-3xl bg-white border border-[#E8E5DF] shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden"
+                  className="group rounded-2xl sm:rounded-3xl bg-white border border-[#E8E5DF] shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden"
                 >
                   {/* Image Container */}
                   <div className="relative aspect-square w-full overflow-hidden bg-[#FBF9F5]">
@@ -154,14 +154,14 @@ export function CollectionsGridSection() {
                       src={product.images[0]}
                       alt={product.name}
                       fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       className="object-cover group-hover:scale-108 transition-transform duration-500"
                     />
 
                     {/* Badge */}
                     {product.badge && (
-                      <div className="absolute top-3 left-3">
-                        <Badge variant="orange">{product.badge}</Badge>
+                      <div className="absolute top-2 left-2 sm:top-3 sm:left-3">
+                        <Badge variant="orange" className="text-[10px] sm:text-xs px-2 sm:px-2.5 py-0.5">{product.badge}</Badge>
                       </div>
                     )}
 
@@ -189,30 +189,30 @@ export function CollectionsGridSection() {
                   </div>
 
                   {/* Body Content */}
-                  <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+                  <div className="p-2.5 sm:p-5 flex-1 flex flex-col justify-between space-y-2 sm:space-y-3">
                     <div className="space-y-1">
-                      <div className="flex items-center justify-between text-[11px] text-[#4C9A9C] font-bold uppercase tracking-wider">
-                        <span>{product.categoryName}</span>
-                        <div className="flex items-center gap-1 text-[#FE7C58]">
+                      <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-[#4C9A9C] font-bold uppercase tracking-wider gap-1">
+                        <span className="truncate">{product.categoryName}</span>
+                        <div className="flex items-center gap-0.5 sm:gap-1 text-[#FE7C58] shrink-0">
                           <Star className="w-3 h-3 fill-[#FE7C58]" />
                           <span className="text-[#1E293B] font-semibold">{product.rating}</span>
                         </div>
                       </div>
                       <h4
                         onClick={() => setActiveQuickProduct(product)}
-                        className="font-serif-brand font-bold text-base text-[#1E293B] group-hover:text-[#4C9A9C] transition-colors cursor-pointer line-clamp-1"
+                        className="font-serif-brand font-bold text-xs sm:text-base text-[#1E293B] group-hover:text-[#4C9A9C] transition-colors cursor-pointer line-clamp-2 sm:line-clamp-1 min-h-[2.4em] sm:min-h-0"
                       >
                         {product.name}
                       </h4>
-                      <p className="text-xs text-[#64748B] line-clamp-2">
+                      <p className="hidden sm:block text-xs text-[#64748B] line-clamp-2">
                         {product.description}
                       </p>
                     </div>
 
-                    <div className="pt-2 border-t border-[#F1F5F9] flex items-center justify-between">
+                    <div className="pt-2 border-t border-[#F1F5F9] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div>
                         <span className="text-[10px] text-[#64748B] block">Prix atelier</span>
-                        <span className="font-bold text-lg text-[#4C9A9C]">
+                        <span className="font-bold text-sm sm:text-lg text-[#4C9A9C] whitespace-nowrap">
                           {price} {currency}
                         </span>
                       </div>
@@ -220,7 +220,7 @@ export function CollectionsGridSection() {
                         variant="orange"
                         size="sm"
                         onClick={() => addToCart(product, product.sizes[0])}
-                        className="text-xs shadow-xs"
+                        className="w-full sm:w-auto text-xs shadow-xs whitespace-nowrap"
                       >
                         Commander
                       </Button>

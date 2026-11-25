@@ -111,14 +111,14 @@ export function TrendingProductsSection() {
         {/* ============================================================== */}
         {/* PRODUCT CARDS GRID (3 Columns Matching Reference)             */}
         {/* ============================================================== */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-6 sm:gap-6 lg:gap-8 pt-4">
           {filteredProducts.map((product) => {
             const isAdded = addedId === product.id;
 
             return (
               <div
                 key={product.id}
-                className="group flex flex-col bg-white rounded-3xl overflow-hidden border border-[#E8E5DF] hover:border-[#4C9A9C]/40 hover:shadow-xl hover:shadow-[#4C9A9C]/10 transition-all duration-300"
+                className="group flex flex-col bg-white rounded-2xl sm:rounded-3xl overflow-hidden border border-[#E8E5DF] hover:border-[#4C9A9C]/40 hover:shadow-xl hover:shadow-[#4C9A9C]/10 transition-all duration-300"
               >
                 {/* 1. Card Media & Image Showcase */}
                 <div className="relative aspect-4/3 w-full overflow-hidden bg-slate-50 cursor-pointer">
@@ -126,7 +126,7 @@ export function TrendingProductsSection() {
                     src={product.images[0]}
                     alt={product.name}
                     fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    sizes="(max-width: 768px) 50vw, (max-width: 1200px) 50vw, 33vw"
                     className="object-cover object-center group-hover:scale-106 transition-transform duration-700 ease-out"
                     onClick={() => setActiveQuickProduct(product)}
                   />
@@ -135,28 +135,28 @@ export function TrendingProductsSection() {
                   <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity" />
 
                   {/* Top Left Badge */}
-                  <div className="absolute top-3.5 left-3.5 z-10 flex flex-col gap-1.5">
+                  <div className="absolute top-2 left-2 sm:top-3.5 sm:left-3.5 z-10 flex flex-col gap-1.5">
                     {product.badge && (
-                      <span className="px-3 py-1 rounded-full text-xs font-extrabold tracking-wide uppercase bg-[#ff3500] text-white shadow-md">
+                      <span className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-extrabold tracking-wide uppercase bg-[#ff3500] text-white shadow-md">
                         {product.badge}
                       </span>
                     )}
                   </div>
 
                   {/* Top Right Quick View Action */}
-                  <div className="absolute top-3.5 right-3.5 z-10 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
+                  <div className="absolute top-2 right-2 sm:top-3.5 sm:right-3.5 z-10 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
                     <button
                       onClick={() => setActiveQuickProduct(product)}
-                      className="p-2.5 rounded-full bg-white/95 hover:bg-white text-[#1E293B] hover:text-[#4b9797] shadow-lg transition-transform hover:scale-110 active:scale-95"
+                      className="p-2 sm:p-2.5 rounded-full bg-white/95 hover:bg-white text-[#1E293B] hover:text-[#4b9797] shadow-lg transition-transform hover:scale-110 active:scale-95"
                       aria-label="Aperçu rapide"
                       title="Aperçu rapide"
                     >
-                      <Eye className="w-4 h-4" />
+                      <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </button>
                   </div>
 
                   {/* Category Pill Tag at Bottom of Image */}
-                  <div className="absolute bottom-3 left-3.5 z-10">
+                  <div className="hidden sm:block absolute bottom-3 left-3.5 z-10">
                     <span className="px-2.5 py-1 rounded-lg bg-white/95 backdrop-blur-md text-[11px] font-bold uppercase tracking-wider text-[#4b9797] border border-white/40 shadow-xs">
                       TEFLOOK {product.categoryName.toUpperCase()}
                     </span>
@@ -164,15 +164,15 @@ export function TrendingProductsSection() {
                 </div>
 
                 {/* 2. Card Content & Details */}
-                <div className="flex-1 p-5 sm:p-6 flex flex-col justify-between">
+                <div className="flex-1 p-2.5 sm:p-6 flex flex-col justify-between">
                   <div>
                     {/* Star Rating & Reviews Count */}
-                    <div className="flex items-center gap-1.5 mb-2.5">
+                    <div className="flex items-center gap-1 sm:gap-1.5 mb-1.5 sm:mb-2.5">
                       <div className="flex items-center text-amber-400">
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
-                            className={`w-4 h-4 ${
+                            className={`w-3 h-3 sm:w-4 sm:h-4 ${
                               i < Math.floor(product.rating)
                                 ? "fill-amber-400 text-amber-400"
                                 : "text-slate-200 fill-slate-200"
@@ -180,10 +180,10 @@ export function TrendingProductsSection() {
                           />
                         ))}
                       </div>
-                      <span className="text-xs font-extrabold text-[#1E293B]">
+                      <span className="text-[11px] sm:text-xs font-extrabold text-[#1E293B]">
                         {product.rating.toFixed(1)}
                       </span>
-                      <span className="text-xs text-[#94A3B8]">
+                      <span className="hidden sm:inline text-xs text-[#94A3B8]">
                         ({product.reviewsCount} avis)
                       </span>
                     </div>
@@ -191,19 +191,19 @@ export function TrendingProductsSection() {
                     {/* Product Name */}
                     <h3
                       onClick={() => setActiveQuickProduct(product)}
-                      className="font-bold text-lg sm:text-xl text-[#1E293B] group-hover:text-[#4C9A9C] transition-colors cursor-pointer line-clamp-1"
+                      className="font-bold text-xs sm:text-lg md:text-xl text-[#1E293B] group-hover:text-[#4C9A9C] transition-colors cursor-pointer line-clamp-2 sm:line-clamp-1 min-h-[2.4em] sm:min-h-0"
                     >
                       {product.name}
                     </h3>
 
                     {/* Short Description */}
-                    <p className="mt-2 text-xs sm:text-sm text-[#64748B] line-clamp-2 leading-relaxed">
+                    <p className="hidden sm:block mt-2 text-xs sm:text-sm text-[#64748B] line-clamp-2 leading-relaxed">
                       {product.description}
                     </p>
 
                     {/* Key Feature Highlight Pill */}
                     {product.features && product.features[0] && (
-                      <div className="mt-3.5 flex items-center gap-1.5 text-xs text-[#4C9A9C] font-medium bg-[#EBF5F5] px-2.5 py-1 rounded-lg w-fit">
+                      <div className="hidden sm:flex mt-3.5 items-center gap-1.5 text-xs text-[#4C9A9C] font-medium bg-[#EBF5F5] px-2.5 py-1 rounded-lg w-fit">
                         <Check className="w-3.5 h-3.5 text-[#4C9A9C] stroke-[2.5]" />
                         <span className="line-clamp-1">{product.features[0]}</span>
                       </div>
@@ -211,14 +211,14 @@ export function TrendingProductsSection() {
                   </div>
 
                   {/* 3. Card Footer: Price & Add to Cart Button */}
-                  <div className="mt-6 pt-4 border-t border-[#F1EFEA] flex items-center justify-between gap-3">
+                  <div className="mt-3 sm:mt-6 pt-2.5 sm:pt-4 border-t border-[#F1EFEA] flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3">
                     {/* Formatted Price */}
                     <div>
-                      <span className="text-[11px] font-semibold text-[#94A3B8] block uppercase">
+                      <span className="hidden sm:block text-[11px] font-semibold text-[#94A3B8] uppercase">
                         Prix unitaire
                       </span>
                       <div className="flex items-baseline gap-1">
-                        <span className="text-xl sm:text-2xl font-black text-[#1E293B]">
+                        <span className="text-sm sm:text-2xl font-black text-[#1E293B] whitespace-nowrap">
                           {currency === "MAD"
                             ? `${product.priceMad} MAD`
                             : `${product.priceEur.toFixed(2).replace(".", ",")} €`}
@@ -230,7 +230,7 @@ export function TrendingProductsSection() {
                     <button
                       onClick={() => handleAddToCart(product)}
                       disabled={isAdded}
-                      className={`relative inline-flex items-center gap-2 px-5 py-3 rounded-full font-bold text-xs sm:text-sm transition-all duration-200 active:scale-95 shadow-md ${
+                      className={`relative w-full sm:w-auto inline-flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 py-2 sm:px-5 sm:py-3 rounded-full font-bold text-xs sm:text-sm whitespace-nowrap transition-all duration-200 active:scale-95 shadow-md ${
                         isAdded
                           ? "bg-emerald-600 text-white cursor-default"
                           : "bg-[#FE7C58] hover:bg-[#E66000] text-white hover:shadow-lg hover:shadow-[#FE7C58]/25"
@@ -239,12 +239,12 @@ export function TrendingProductsSection() {
                     >
                       {isAdded ? (
                         <>
-                          <Check className="w-4 h-4 stroke-[3] animate-in zoom-in" />
+                          <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4 stroke-[3] animate-in zoom-in" />
                           <span>Ajouté !</span>
                         </>
                       ) : (
                         <>
-                          <ShoppingBag className="w-4 h-4" />
+                          <ShoppingBag className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           <span>Ajouter au panier</span>
                         </>
                       )}

@@ -519,7 +519,7 @@ function TefLookStorefront() {
           ) : (
             <div
               id="product-grid"
-              className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4"
+              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 gap-y-6 sm:gap-x-6 sm:gap-y-8 pt-4"
             >
               {filteredProducts.map((product) => (
                 <ProductCard
