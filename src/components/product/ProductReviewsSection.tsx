@@ -11,6 +11,7 @@ import {
   MessageSquare,
   MessageSquarePlus,
   PenLine,
+  Pencil,
   Quote,
   Sparkles,
   Star,
@@ -24,7 +25,9 @@ import {
   calculateRatingSummary,
   fetchReviewsByProduct,
   getReviewImages,
+  getStoredReviewTokens,
   submitProductReview,
+  updateProductReview,
 } from "@/lib/reviews-service";
 import { useTefLookLanguage } from "@/lib/teflook-language";
 import { cn } from "@/lib/utils";
@@ -73,16 +76,43 @@ export function ProductReviewsSection({
     images: string[];
     index: number;
   } | null>(null);
+  const [ownedTokens, setOwnedTokens] = useState<Record<string, string>>({});
+
+  // Inline Edit State
+  const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
+  const [editRating, setEditRating] = useState(5);
+  const [editHoverRating, setEditHoverRating] = useState(0);
+  const [editAuthorName, setEditAuthorName] = useState("");
+  const [editAuthorRole, setEditAuthorRole] = useState("");
+  const [editComment, setEditComment] = useState("");
+  const [editExistingUrls, setEditExistingUrls] = useState<string[]>([]);
+  const [editNewPhotos, setEditNewPhotos] = useState<AttachedReviewPhoto[]>([]);
+  const [editPhotoNotice, setEditPhotoNotice] = useState<string | null>(null);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [isEditCompressing, setIsEditCompressing] = useState(false);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const editFileInputRef = useRef<HTMLInputElement>(null);
   const photosRef = useRef<AttachedReviewPhoto[]>([]);
+  const editPhotosRef = useRef<AttachedReviewPhoto[]>([]);
+
+  useEffect(() => {
+    setOwnedTokens(getStoredReviewTokens());
+  }, []);
 
   useEffect(() => {
     photosRef.current = attachedPhotos;
   }, [attachedPhotos]);
 
   useEffect(() => {
+    editPhotosRef.current = editNewPhotos;
+  }, [editNewPhotos]);
+
+  useEffect(() => {
     return () => {
       photosRef.current.forEach((p) => URL.revokeObjectURL(p.previewUrl));
+      editPhotosRef.current.forEach((p) => URL.revokeObjectURL(p.previewUrl));
     };
   }, []);
 
@@ -142,60 +172,70 @@ export function ProductReviewsSection({
     }
   }, [reviews, isLoading, productId]);
 
+  async function processSelectedImageFiles(
+    selectedFiles: File[],
+    currentCount: number
+  ): Promise<{
+    photos: AttachedReviewPhoto[];
+    notice: string | null;
+    error: string | null;
+  }> {
+    const remainingSlots = MAX_REVIEW_IMAGES - currentCount;
+    const maxNotice =
+      locale === "ar" ? "الحد الأقصى 3 صور لكل تقييم" : "Maximum 3 photos par avis";
+
+    if (remainingSlots <= 0) {
+      return { photos: [], notice: maxNotice, error: null };
+    }
+
+    const notice = selectedFiles.length > remainingSlots ? maxNotice : null;
+    const filesToCompress = selectedFiles.slice(0, remainingSlots);
+    const results = await Promise.allSettled(
+      filesToCompress.map((file) => compressReviewImage(file))
+    );
+
+    const photos: AttachedReviewPhoto[] = [];
+    let error: string | null = null;
+
+    results.forEach((result) => {
+      if (result.status === "fulfilled") {
+        photos.push({
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          file: result.value,
+          previewUrl: URL.createObjectURL(result.value),
+        });
+      } else if (!error) {
+        error =
+          result.reason instanceof Error
+            ? result.reason.message
+            : locale === "ar"
+            ? "تعذر تحسين إحدى الصور المختارة."
+            : "Impossible d'optimiser l'une des images sélectionnées.";
+      }
+    });
+
+    return { photos, notice, error };
+  }
+
   async function handleImagesSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const selectedFiles = Array.from(e.target.files || []);
     e.target.value = "";
     if (selectedFiles.length === 0) return;
 
-    const remainingSlots = MAX_REVIEW_IMAGES - attachedPhotos.length;
-    const maxNotice =
-      locale === "ar" ? "الحد الأقصى 3 صور لكل تقييم" : "Maximum 3 photos par avis";
-
-    if (remainingSlots <= 0) {
-      setPhotoNotice(maxNotice);
-      return;
-    }
-
-    if (selectedFiles.length > remainingSlots) {
-      setPhotoNotice(maxNotice);
-    } else {
-      setPhotoNotice(null);
-    }
-
-    const filesToCompress = selectedFiles.slice(0, remainingSlots);
     setFormError(null);
     setIsCompressingImages(true);
 
     try {
-      const results = await Promise.allSettled(
-        filesToCompress.map((file) => compressReviewImage(file))
+      const { photos, notice, error } = await processSelectedImageFiles(
+        selectedFiles,
+        attachedPhotos.length
       );
-
-      const newPhotos: AttachedReviewPhoto[] = [];
-      let firstError: string | null = null;
-
-      results.forEach((result) => {
-        if (result.status === "fulfilled") {
-          newPhotos.push({
-            id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-            file: result.value,
-            previewUrl: URL.createObjectURL(result.value),
-          });
-        } else if (!firstError) {
-          firstError =
-            result.reason instanceof Error
-              ? result.reason.message
-              : locale === "ar"
-              ? "تعذر تحسين إحدى الصور المختارة."
-              : "Impossible d'optimiser l'une des images sélectionnées.";
-        }
-      });
-
-      if (newPhotos.length > 0) {
-        setAttachedPhotos((prev) => [...prev, ...newPhotos].slice(0, MAX_REVIEW_IMAGES));
+      setPhotoNotice(notice);
+      if (photos.length > 0) {
+        setAttachedPhotos((prev) => [...prev, ...photos].slice(0, MAX_REVIEW_IMAGES));
       }
-      if (firstError) {
-        setFormError(firstError);
+      if (error) {
+        setFormError(error);
       }
     } finally {
       setIsCompressingImages(false);
@@ -211,6 +251,138 @@ export function ProductReviewsSection({
       }
       return prev.filter((p) => p.id !== photoId);
     });
+  }
+
+  function startEditingReview(rev: ProductReview) {
+    editPhotosRef.current.forEach((p) => URL.revokeObjectURL(p.previewUrl));
+    setEditingReviewId(rev.id);
+    setEditRating(Math.max(1, Math.min(5, Math.round(rev.rating || 5))));
+    setEditHoverRating(0);
+    setEditAuthorName(rev.author_name || "");
+    setEditAuthorRole(rev.author_role || "");
+    setEditComment(rev.comment || "");
+    setEditExistingUrls(getReviewImages(rev));
+    setEditNewPhotos([]);
+    setEditPhotoNotice(null);
+    setEditError(null);
+  }
+
+  function cancelEditingReview() {
+    editPhotosRef.current.forEach((p) => URL.revokeObjectURL(p.previewUrl));
+    setEditingReviewId(null);
+    setEditNewPhotos([]);
+    setEditExistingUrls([]);
+    setEditPhotoNotice(null);
+    setEditError(null);
+  }
+
+  async function handleEditImagesSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const selectedFiles = Array.from(e.target.files || []);
+    e.target.value = "";
+    if (selectedFiles.length === 0) return;
+
+    setEditError(null);
+    setIsEditCompressing(true);
+
+    try {
+      const currentTotal = editExistingUrls.length + editNewPhotos.length;
+      const { photos, notice, error } = await processSelectedImageFiles(
+        selectedFiles,
+        currentTotal
+      );
+      setEditPhotoNotice(notice);
+      if (photos.length > 0) {
+        setEditNewPhotos((prev) =>
+          [...prev, ...photos].slice(
+            0,
+            Math.max(0, MAX_REVIEW_IMAGES - editExistingUrls.length)
+          )
+        );
+      }
+      if (error) {
+        setEditError(error);
+      }
+    } finally {
+      setIsEditCompressing(false);
+    }
+  }
+
+  function handleRemoveEditExistingUrl(urlToRemove: string) {
+    setEditPhotoNotice(null);
+    setEditExistingUrls((prev) => prev.filter((u) => u !== urlToRemove));
+  }
+
+  function handleRemoveEditNewPhoto(photoId: string) {
+    setEditPhotoNotice(null);
+    setEditNewPhotos((prev) => {
+      const target = prev.find((p) => p.id === photoId);
+      if (target) {
+        URL.revokeObjectURL(target.previewUrl);
+      }
+      return prev.filter((p) => p.id !== photoId);
+    });
+  }
+
+  async function handleSaveEdit(e: React.FormEvent, revId: string) {
+    e.preventDefault();
+    if (isEditCompressing || isSavingEdit) return;
+    if (!editAuthorName.trim() || !editComment.trim()) {
+      setEditError(
+        locale === "ar"
+          ? "يرجى ملء الاسم ونص التقييم."
+          : "Veuillez remplir votre nom et votre avis."
+      );
+      return;
+    }
+
+    const editToken = ownedTokens[revId];
+    if (!editToken) {
+      setEditError(
+        locale === "ar"
+          ? "غير مصرح بتعديل هذا التقييم من هذا المتصفح."
+          : "Modification non autorisée depuis ce navigateur."
+      );
+      return;
+    }
+
+    setEditError(null);
+    setIsSavingEdit(true);
+
+    const res = await updateProductReview({
+      id: revId,
+      editToken,
+      authorName: editAuthorName.trim(),
+      authorRole: editAuthorRole.trim(),
+      rating: editRating,
+      comment: editComment.trim(),
+      existingImageUrls: editExistingUrls,
+      newImageFiles: editNewPhotos.map((p) => p.file),
+    });
+
+    setIsSavingEdit(false);
+
+    if (res.success && res.review) {
+      setReviews((prev) =>
+        prev.map((item) => (item.id === revId ? res.review! : item))
+      );
+      if (res.summary && onSummaryCalculatedRef.current) {
+        onSummaryCalculatedRef.current(res.summary);
+      }
+      cancelEditingReview();
+      setToastMessage(
+        locale === "ar"
+          ? "تم تحديث تقييمك بنجاح!"
+          : "Votre avis a été mis à jour avec succès !"
+      );
+      setTimeout(() => setToastMessage(null), 5000);
+    } else {
+      setEditError(
+        res.error ||
+          (locale === "ar"
+            ? "تعذر حفظ التعديلات."
+            : "Erreur lors de la mise à jour de l'avis.")
+      );
+    }
   }
 
   async function handleSubmitReview(e: React.FormEvent) {
@@ -237,6 +409,9 @@ export function ProductReviewsSection({
     setIsSubmitting(false);
 
     if (res.success && res.review) {
+      if (res.editToken) {
+        setOwnedTokens((prev) => ({ ...prev, [res.review!.id]: res.editToken! }));
+      }
       setReviews((prev) => [res.review!, ...prev]);
       setIsFormOpen(false);
       setAuthorName("");
@@ -649,15 +824,23 @@ export function ProductReviewsSection({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8 pt-4">
           {reviews.map((rev) => {
             const isAr = locale === "ar";
+            const canEdit = Boolean(ownedTokens[rev.id]);
+            const isEditing = editingReviewId === rev.id;
             const bottomTag = rev.author_role
               ? `${rev.author_role} • ${productTitle}`
               : productTitle;
+            const totalEditPhotos = editExistingUrls.length + editNewPhotos.length;
 
             return (
               <article
                 key={rev.id}
                 dir={direction}
-                className="relative bg-slate-50/80 border border-slate-100 rounded-2xl p-6 sm:p-8 shadow-[0_4px_20px_-4px_rgba(26,60,52,0.06)] flex flex-col items-center text-center"
+                className={cn(
+                  "relative bg-slate-50/80 border rounded-2xl p-6 sm:p-8 shadow-[0_4px_20px_-4px_rgba(26,60,52,0.06)] flex flex-col",
+                  isEditing
+                    ? "border-[#4b9797]/45 bg-white text-start items-stretch"
+                    : "border-slate-100 items-center text-center"
+                )}
               >
                 {/* Floating Teal Circular Quote Badge */}
                 <span
@@ -670,100 +853,332 @@ export function ProductReviewsSection({
                   <Quote className="w-4 h-4 fill-current" />
                 </span>
 
-                {/* Centered 5-Star Rating Row */}
-                <div
-                  className="text-[#ffbf00] flex items-center justify-center gap-1 mb-3"
-                  aria-label={`${rev.rating} / 5`}
-                >
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      size={16}
-                      className={cn(
-                        i < rev.rating
-                          ? "fill-[#ffbf00] text-[#ffbf00]"
-                          : "fill-slate-200/70 text-slate-200"
+                {isEditing ? (
+                  <form
+                    onSubmit={(e) => void handleSaveEdit(e, rev.id)}
+                    className="space-y-4 w-full"
+                  >
+                    <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-100">
+                      <h4
+                        className={cn(
+                          "font-display font-bold text-base sm:text-lg text-[#1A3C34]",
+                          isAr && "font-sans"
+                        )}
+                      >
+                        {isAr ? "تعديل تقييمك" : "Modifier votre avis"}
+                      </h4>
+                    </div>
+
+                    {editError && (
+                      <div className="rounded-xl bg-rose-50 border border-rose-200 px-3.5 py-2 text-xs font-semibold text-rose-700">
+                        {editError}
+                      </div>
+                    )}
+
+                    {/* Inline Star Rating Selector */}
+                    <div>
+                      <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                        {t("reviews.ratingLabel")}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((starValue) => {
+                          const isActive =
+                            (editHoverRating || editRating) >= starValue;
+                          return (
+                            <button
+                              type="button"
+                              key={starValue}
+                              onMouseEnter={() => setEditHoverRating(starValue)}
+                              onMouseLeave={() => setEditHoverRating(0)}
+                              onClick={() => setEditRating(starValue)}
+                              aria-label={`${starValue} / 5`}
+                              className="p-0.5 rounded-md hover:scale-110 transition-transform cursor-pointer"
+                            >
+                              <Star
+                                size={22}
+                                className={cn(
+                                  "transition-colors",
+                                  isActive
+                                    ? "text-[#ffbf00] fill-[#ffbf00]"
+                                    : "text-slate-300 fill-transparent"
+                                )}
+                              />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Inline Author Name & Optional Role */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                          {t("reviews.nameLabel")} *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={editAuthorName}
+                          onChange={(e) => setEditAuthorName(e.target.value)}
+                          className="w-full h-9 px-3 text-xs sm:text-sm rounded-xl border border-slate-200 bg-[#FBF9F5] focus:bg-white focus:border-[#4b9797] focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                          {t("reviews.roleLabel")}
+                        </label>
+                        <input
+                          type="text"
+                          value={editAuthorRole}
+                          onChange={(e) => setEditAuthorRole(e.target.value)}
+                          className="w-full h-9 px-3 text-xs sm:text-sm rounded-xl border border-slate-200 bg-[#FBF9F5] focus:bg-white focus:border-[#4b9797] focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Inline Comment Textarea */}
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                        {t("reviews.commentLabel")} *
+                      </label>
+                      <textarea
+                        required
+                        rows={4}
+                        value={editComment}
+                        onChange={(e) => setEditComment(e.target.value)}
+                        className="w-full p-3 text-xs sm:text-sm rounded-xl border border-slate-200 bg-[#FBF9F5] focus:bg-white focus:border-[#4b9797] focus:outline-none resize-y"
+                      />
+                    </div>
+
+                    {/* Inline Multi-Photo Manager (Max 3) */}
+                    <div className="space-y-2">
+                      <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                        {isAr
+                          ? `الصور (${totalEditPhotos}/3)`
+                          : `Photos (${totalEditPhotos}/3)`}
+                      </span>
+
+                      <input
+                        ref={editFileInputRef}
+                        type="file"
+                        multiple
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={(e) => void handleEditImagesSelect(e)}
+                        className="sr-only"
+                      />
+
+                      {totalEditPhotos > 0 && (
+                        <div className="flex items-center gap-2.5 flex-wrap">
+                          {editExistingUrls.map((url, idx) => (
+                            <div key={`existing-${idx}`} className="relative">
+                              <img
+                                src={url}
+                                alt={`Photo ${idx + 1}`}
+                                className="w-16 h-16 rounded-xl object-cover border border-slate-200"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveEditExistingUrl(url)}
+                                aria-label={isAr ? "إزالة الصورة" : "Supprimer la photo"}
+                                className="absolute -top-2 -end-2 grid size-5 place-items-center rounded-full bg-white border border-slate-200 text-slate-600 hover:text-rose-600 shadow-xs cursor-pointer"
+                              >
+                                <X size={12} />
+                              </button>
+                            </div>
+                          ))}
+
+                          {editNewPhotos.map((photo, idx) => (
+                            <div key={photo.id} className="relative">
+                              <img
+                                src={photo.previewUrl}
+                                alt={`Nouvelle photo ${idx + 1}`}
+                                className="w-16 h-16 rounded-xl object-cover border border-[#4b9797]/40"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveEditNewPhoto(photo.id)}
+                                aria-label={isAr ? "إزالة الصورة" : "Supprimer la photo"}
+                                className="absolute -top-2 -end-2 grid size-5 place-items-center rounded-full bg-white border border-slate-200 text-slate-600 hover:text-rose-600 shadow-xs cursor-pointer"
+                              >
+                                <X size={12} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
                       )}
-                    />
-                  ))}
-                </div>
 
-                {/* Centered Reviewer Name */}
-                <h4
-                  className={cn(
-                    "font-display font-bold text-lg sm:text-xl text-[#1A3C34] mb-3",
-                    isAr && "font-sans"
-                  )}
-                >
-                  {rev.author_name}
-                </h4>
+                      {isEditCompressing && (
+                        <div className="flex items-center gap-2 text-xs font-semibold text-[#4b9797]">
+                          <LoaderCircle size={15} className="animate-spin" />
+                          <span>
+                            {isAr
+                              ? "جاري تحسين الصور..."
+                              : "Optimisation des images..."}
+                          </span>
+                        </div>
+                      )}
 
-                {/* Centered Review Comment */}
-                <p
-                  className={cn(
-                    "font-sans text-sm sm:text-base text-[#3D524D] leading-relaxed mb-6 max-w-xl",
-                    isAr && "leading-loose"
-                  )}
-                >
-                  {rev.comment}
-                </p>
-
-                {/* Optional Customer Multi-Photo Thumbnails (1 to 3) */}
-                {(() => {
-                  const reviewImages = getReviewImages(rev);
-                  if (reviewImages.length === 0) return null;
-                  return (
-                    <div className="flex items-center justify-center gap-2.5 flex-wrap mb-5">
-                      {reviewImages.map((imgUrl, idx) => (
+                      {totalEditPhotos < MAX_REVIEW_IMAGES && !isEditCompressing && (
                         <button
-                          key={`${rev.id}-img-${idx}`}
                           type="button"
-                          onClick={() =>
-                            setLightboxState({ images: reviewImages, index: idx })
-                          }
-                          aria-label={
-                            isAr
-                              ? `تكبير الصورة ${idx + 1} لتقييم ${rev.author_name}`
-                              : `Agrandir la photo ${idx + 1} de l'avis de ${rev.author_name}`
-                          }
-                          className="focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797] rounded-xl cursor-zoom-in"
+                          onClick={() => editFileInputRef.current?.click()}
+                          className="inline-flex items-center gap-2 rounded-xl border border-dashed border-[#4b9797]/45 bg-[#FBF9F5] hover:border-[#4b9797] px-3 py-2 text-xs font-semibold text-[#1A3C34] transition-colors cursor-pointer"
                         >
-                          <img
-                            src={imgUrl}
-                            alt={
-                              isAr
-                                ? `صورة تقييم ${rev.author_name} (${idx + 1})`
-                                : `Photo de l'avis de ${rev.author_name} (${idx + 1})`
-                            }
-                            loading="lazy"
-                            decoding="async"
-                            className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border border-slate-200 hover:scale-105 transition-transform shadow-xs"
-                          />
+                          <ImagePlus size={15} className="text-[#4b9797]" />
+                          <span>
+                            {isAr
+                              ? `إضافة صور (${totalEditPhotos}/3)`
+                              : `Ajouter des photos (${totalEditPhotos}/3)`}
+                          </span>
                         </button>
+                      )}
+
+                      {editPhotoNotice && (
+                        <p className="text-xs font-semibold text-[#ff3500]">
+                          {editPhotoNotice}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Save & Cancel Buttons */}
+                    <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={cancelEditingReview}
+                        disabled={isSavingEdit}
+                        className="px-4 py-2 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold text-slate-600 transition-colors cursor-pointer disabled:opacity-50"
+                      >
+                        {isAr ? "إلغاء" : "Annuler"}
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isSavingEdit || isEditCompressing}
+                        className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-[#4b9797] hover:bg-[#3a7d7d] text-white text-xs font-bold shadow-sm transition-colors cursor-pointer disabled:opacity-50"
+                      >
+                        {isSavingEdit && <LoaderCircle size={13} className="animate-spin" />}
+                        <span>
+                          {isSavingEdit
+                            ? isAr
+                              ? "جاري الحفظ..."
+                              : "Enregistrement..."
+                            : isAr
+                            ? "حفظ"
+                            : "Enregistrer"}
+                        </span>
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    {/* Centered 5-Star Rating Row */}
+                    <div
+                      className="text-[#ffbf00] flex items-center justify-center gap-1 mb-3"
+                      aria-label={`${rev.rating} / 5`}
+                    >
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          size={16}
+                          className={cn(
+                            i < rev.rating
+                              ? "fill-[#ffbf00] text-[#ffbf00]"
+                              : "fill-slate-200/70 text-slate-200"
+                          )}
+                        />
                       ))}
                     </div>
-                  );
-                })()}
 
-                {/* Subtle Horizontal Separator */}
-                <div className="w-full border-t border-slate-200/80 mb-4 mt-auto" />
+                    {/* Centered Reviewer Name */}
+                    <h4
+                      className={cn(
+                        "font-display font-bold text-lg sm:text-xl text-[#1A3C34] mb-3",
+                        isAr && "font-sans"
+                      )}
+                    >
+                      {rev.author_name}
+                    </h4>
 
-                {/* Bottom Product Reference / Verified Author Tag */}
-                <div
-                  className={cn(
-                    "font-sans text-xs sm:text-sm text-slate-500 font-medium flex items-center justify-center gap-1.5 flex-wrap",
-                    isAr && "font-sans"
-                  )}
-                >
-                  {rev.is_verified && (
-                    <BadgeCheck
-                      size={15}
-                      className="text-[#4b9797] shrink-0"
-                      aria-label={t("reviews.verified")}
-                    />
-                  )}
-                  <span>{bottomTag}</span>
-                </div>
+                    {/* Centered Review Comment */}
+                    <p
+                      className={cn(
+                        "font-sans text-sm sm:text-base text-[#3D524D] leading-relaxed mb-6 max-w-xl",
+                        isAr && "leading-loose"
+                      )}
+                    >
+                      {rev.comment}
+                    </p>
+
+                    {/* Optional Customer Multi-Photo Thumbnails (1 to 3) */}
+                    {(() => {
+                      const reviewImages = getReviewImages(rev);
+                      if (reviewImages.length === 0) return null;
+                      return (
+                        <div className="flex items-center justify-center gap-2.5 flex-wrap mb-5">
+                          {reviewImages.map((imgUrl, idx) => (
+                            <button
+                              key={`${rev.id}-img-${idx}`}
+                              type="button"
+                              onClick={() =>
+                                setLightboxState({ images: reviewImages, index: idx })
+                              }
+                              aria-label={
+                                isAr
+                                  ? `تكبير الصورة ${idx + 1} لتقييم ${rev.author_name}`
+                                  : `Agrandir la photo ${idx + 1} de l'avis de ${rev.author_name}`
+                              }
+                              className="focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797] rounded-xl cursor-zoom-in"
+                            >
+                              <img
+                                src={imgUrl}
+                                alt={
+                                  isAr
+                                    ? `صورة تقييم ${rev.author_name} (${idx + 1})`
+                                    : `Photo de l'avis de ${rev.author_name} (${idx + 1})`
+                                }
+                                loading="lazy"
+                                decoding="async"
+                                className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border border-slate-200 hover:scale-105 transition-transform shadow-xs"
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      );
+                    })()}
+
+                    {/* Subtle Horizontal Separator */}
+                    <div className="w-full border-t border-slate-200/80 mb-4 mt-auto" />
+
+                    {/* Bottom Product Reference / Verified Author Tag + Owner Edit Action */}
+                    <div
+                      className={cn(
+                        "font-sans text-xs sm:text-sm text-slate-500 font-medium flex items-center justify-center gap-2 flex-wrap",
+                        isAr && "font-sans"
+                      )}
+                    >
+                      <span className="inline-flex items-center gap-1.5">
+                        {rev.is_verified && (
+                          <BadgeCheck
+                            size={15}
+                            className="text-[#4b9797] shrink-0"
+                            aria-label={t("reviews.verified")}
+                          />
+                        )}
+                        <span>{bottomTag}</span>
+                      </span>
+
+                      {canEdit && (
+                        <button
+                          type="button"
+                          onClick={() => startEditingReview(rev)}
+                          className="inline-flex items-center gap-1 rounded-full border border-[#4b9797]/30 bg-white px-2.5 py-0.5 text-[11px] font-bold text-[#4b9797] hover:bg-[#4b9797] hover:text-white transition-colors cursor-pointer"
+                        >
+                          <Pencil size={11} aria-hidden="true" />
+                          <span>{isAr ? "تعديل" : "Modifier"}</span>
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
               </article>
             );
           })}

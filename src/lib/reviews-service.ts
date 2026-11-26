@@ -12,6 +12,30 @@ export interface ProductReview {
   created_at: string;
 }
 
+const REVIEW_TOKENS_STORAGE_KEY = "teflook_review_tokens";
+
+export function getStoredReviewTokens(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(REVIEW_TOKENS_STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return parsed as Record<string, string>;
+    }
+  } catch {}
+  return {};
+}
+
+export function saveReviewToken(reviewId: string, token: string): void {
+  if (typeof window === "undefined" || !reviewId || !token) return;
+  try {
+    const existing = getStoredReviewTokens();
+    const updated = { ...existing, [reviewId]: token };
+    window.localStorage.setItem(REVIEW_TOKENS_STORAGE_KEY, JSON.stringify(updated));
+  } catch {}
+}
+
 export function getReviewImages(
   review: Pick<ProductReview, "image_url" | "image_urls">
 ): string[] {
@@ -62,7 +86,7 @@ export function calculateRatingSummary(reviews: ProductReview[]): ProductRatingS
   }
 
   let sum = 0;
-  let positiveCount = 0; // 4 or 5 stars
+  let positiveCount = 0;
 
   reviews.forEach((r) => {
     const star = Math.max(1, Math.min(5, Math.round(r.rating || 5))) as 1 | 2 | 3 | 4 | 5;
@@ -129,7 +153,12 @@ export async function submitProductReview(payload: {
   imageFile?: File | null;
   imageUrls?: string[];
   imageUrl?: string;
-}): Promise<{ success: boolean; review?: ProductReview; error?: string }> {
+}): Promise<{
+  success: boolean;
+  review?: ProductReview;
+  editToken?: string;
+  error?: string;
+}> {
   try {
     let res: Response;
     const filesToSend =
@@ -168,9 +197,86 @@ export async function submitProductReview(payload: {
       return { success: false, error: data.error || "Impossible d'enregistrer l'avis." };
     }
 
-    return { success: true, review: data.review };
+    if (data.review?.id && typeof data.editToken === "string") {
+      saveReviewToken(data.review.id, data.editToken);
+    }
+
+    return { success: true, review: data.review, editToken: data.editToken };
   } catch (error) {
     console.error("submitProductReview error:", error);
     return { success: false, error: "Erreur réseau lors de l'envoi." };
+  }
+}
+
+export async function updateProductReview(payload: {
+  id: string;
+  editToken: string;
+  authorName: string;
+  authorRole?: string;
+  rating: number;
+  comment: string;
+  existingImageUrls?: string[];
+  newImageFiles?: File[];
+}): Promise<{
+  success: boolean;
+  review?: ProductReview;
+  summary?: ProductRatingSummary;
+  error?: string;
+}> {
+  try {
+    const newFiles = (payload.newImageFiles || []).slice(0, 3);
+    const existingUrls = (payload.existingImageUrls || []).slice(0, 3);
+    const endpoint = `/api/reviews/${encodeURIComponent(payload.id)}`;
+
+    let res: Response;
+    if (newFiles.length > 0) {
+      const formData = new FormData();
+      formData.append("editToken", payload.editToken);
+      formData.append("authorName", payload.authorName);
+      if (payload.authorRole !== undefined) {
+        formData.append("authorRole", payload.authorRole);
+      }
+      formData.append("rating", String(payload.rating));
+      formData.append("comment", payload.comment);
+      formData.append("existingImageUrls", JSON.stringify(existingUrls));
+      for (const file of newFiles) {
+        formData.append("images", file);
+      }
+
+      res = await fetch(endpoint, {
+        method: "PATCH",
+        body: formData,
+      });
+    } else {
+      res = await fetch(endpoint, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          editToken: payload.editToken,
+          authorName: payload.authorName,
+          authorRole: payload.authorRole,
+          rating: payload.rating,
+          comment: payload.comment,
+          existingImageUrls: existingUrls,
+        }),
+      });
+    }
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      return {
+        success: false,
+        error: data.error || "Impossible de modifier cet avis.",
+      };
+    }
+
+    return {
+      success: true,
+      review: data.review,
+      summary: data.summary,
+    };
+  } catch (error) {
+    console.error("updateProductReview error:", error);
+    return { success: false, error: "Erreur réseau lors de la modification." };
   }
 }

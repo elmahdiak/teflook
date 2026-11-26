@@ -1,103 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { createClient } from "@supabase/supabase-js";
 import { getReviewImages } from "@/lib/reviews-service";
+import {
+  getSupabaseAdmin,
+  MAX_REVIEW_IMAGES,
+  normalizeUrlList,
+  signReviewToken,
+  uploadReviewImage,
+} from "@/lib/review-server";
 import { ADMIN_PRODUCTS_PATH, ADMIN_REVIEWS_PATH } from "@/lib/admin-config";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
-
-const REVIEW_IMAGES_BUCKET = "review-images";
-const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
-const MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB safety limit per compressed file
-const MAX_REVIEW_IMAGES = 3;
-
-function getSupabaseAdmin() {
-  const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL || "https://zvqcsxwwkgypvqfewbtn.supabase.co";
-  const supabaseKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    "sb_publishable_IkjoHS4mwYG9qEXkBWy8Xg_jw3TI_AF";
-
-  return createClient(supabaseUrl, supabaseKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-}
-
-async function uploadReviewImage(
-  supabase: ReturnType<typeof getSupabaseAdmin>,
-  file: File,
-  productHandle: string,
-  index: number
-): Promise<{ url?: string; error?: string }> {
-  if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
-    return { error: "Format d'image non supporté (JPG, PNG ou WebP uniquement)." };
-  }
-
-  if (file.size > MAX_UPLOAD_SIZE_BYTES) {
-    return { error: "Une image compressée dépasse la limite autorisée (5 Mo)." };
-  }
-
-  const ext = file.type === "image/webp" ? "webp" : file.type === "image/png" ? "png" : "jpg";
-  const safeHandle = productHandle.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 40) || "product";
-  const storagePath = `${safeHandle}/${Date.now()}-${index}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const buffer = Buffer.from(await file.arrayBuffer());
-
-  let uploadResult = await supabase.storage
-    .from(REVIEW_IMAGES_BUCKET)
-    .upload(storagePath, buffer, {
-      contentType: file.type,
-      cacheControl: "31536000",
-      upsert: false,
-    });
-
-  if (
-    uploadResult.error &&
-    /bucket/i.test(uploadResult.error.message) &&
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-  ) {
-    await supabase.storage.createBucket(REVIEW_IMAGES_BUCKET, {
-      public: true,
-      fileSizeLimit: MAX_UPLOAD_SIZE_BYTES,
-      allowedMimeTypes: ["image/jpeg", "image/png", "image/webp"],
-    });
-
-    uploadResult = await supabase.storage
-      .from(REVIEW_IMAGES_BUCKET)
-      .upload(storagePath, buffer, {
-        contentType: file.type,
-        cacheControl: "31536000",
-        upsert: false,
-      });
-  }
-
-  if (uploadResult.error) {
-    console.error("Review image upload error:", uploadResult.error.message);
-    return { error: "Impossible de téléverser la photo de l'avis dans Supabase Storage." };
-  }
-
-  const { data: publicUrlData } = supabase.storage
-    .from(REVIEW_IMAGES_BUCKET)
-    .getPublicUrl(storagePath);
-
-  return { url: publicUrlData.publicUrl };
-}
-
-function normalizeUrlList(rawUrls: unknown, singleUrl?: unknown): string[] {
-  const result: string[] = [];
-  if (Array.isArray(rawUrls)) {
-    for (const item of rawUrls) {
-      if (typeof item === "string" && item.trim() && !result.includes(item.trim())) {
-        result.push(item.trim());
-      }
-    }
-  }
-  if (typeof singleUrl === "string" && singleUrl.trim() && !result.includes(singleUrl.trim())) {
-    result.push(singleUrl.trim());
-  }
-  return result.slice(0, MAX_REVIEW_IMAGES);
-}
 
 export async function GET(req: NextRequest) {
   try {
@@ -249,6 +163,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const editToken = signReviewToken(data.id);
+
     // Live cache invalidation
     try {
       revalidatePath("/product/[handle]", "page");
@@ -265,6 +181,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      editToken,
       review: {
         ...data,
         image_urls: getReviewImages(data),
