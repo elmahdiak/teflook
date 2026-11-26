@@ -214,7 +214,7 @@ export function Footer() {
                 </li>
                 <li>
                   <Link
-                    href="/#univers"
+                    href="/about"
                     className="inline-block text-[15px] text-white/90 hover:text-white hover:translate-x-0.5 transition-all duration-200"
                   >
                     {messages["footer.values"]}
@@ -244,7 +244,7 @@ export function Footer() {
                 </li>
                 <li>
                   <Link
-                    href="/#univers"
+                    href="/about"
                     className="inline-block text-[15px] text-white/90 hover:text-white hover:translate-x-0.5 transition-all duration-200"
                   >
                     {messages["footer.families"]}

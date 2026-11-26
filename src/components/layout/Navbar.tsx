@@ -249,7 +249,7 @@ export function Navbar() {
               {[
                 { label: "Accueil", href: "/" },
                 { label: "Collections", href: "/#boutique" },
-                { label: "À propos", href: "/#univers" },
+                { label: "À propos", href: "/about" },
                 { label: "Contact", href: "/contact" },
               ].map((item) => (
                 <Link
@@ -273,7 +273,7 @@ export function Navbar() {
               {[
                 { label: "Accueil", href: "/" },
                 { label: "Collections", href: "/#boutique" },
-                { label: "À propos", href: "/#univers" },
+                { label: "À propos", href: "/about" },
                 { label: "Contact", href: "/contact" },
               ].map((item) => (
                 <Link

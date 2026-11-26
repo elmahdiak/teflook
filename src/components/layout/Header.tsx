@@ -135,7 +135,7 @@ export function Header({
   const navLinks = [
     { key: "home", label: t("nav.home"), href: "/" },
     { key: "collections", label: t("nav.collections"), href: "/#boutique" },
-    { key: "about", label: t("nav.about"), href: "/#univers" },
+    { key: "about", label: t("nav.about"), href: "/about" },
     { key: "contact", label: t("nav.contact"), href: "/contact" },
   ] as const;
 
