@@ -13,27 +13,89 @@ export interface ProductReview {
 }
 
 const REVIEW_TOKENS_STORAGE_KEY = "teflook_review_tokens";
+export const REVIEW_EDIT_WINDOW_MS = 90_000; // 1 minute 30 seconds
 
-export function getStoredReviewTokens(): Record<string, string> {
+export interface StoredReviewOwnership {
+  token: string;
+  createdAt: number;
+}
+
+export function getStoredReviewTokens(): Record<string, StoredReviewOwnership> {
   if (typeof window === "undefined") return {};
   try {
     const raw = window.localStorage.getItem(REVIEW_TOKENS_STORAGE_KEY);
     if (!raw) return {};
     const parsed = JSON.parse(raw);
     if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-      return parsed as Record<string, string>;
+      const normalized: Record<string, StoredReviewOwnership> = {};
+      for (const [id, val] of Object.entries(parsed)) {
+        if (typeof val === "string" && val) {
+          normalized[id] = { token: val, createdAt: 0 };
+        } else if (
+          val &&
+          typeof val === "object" &&
+          typeof (val as StoredReviewOwnership).token === "string"
+        ) {
+          normalized[id] = {
+            token: (val as StoredReviewOwnership).token,
+            createdAt: Number((val as StoredReviewOwnership).createdAt) || 0,
+          };
+        }
+      }
+      return normalized;
     }
   } catch {}
   return {};
 }
 
-export function saveReviewToken(reviewId: string, token: string): void {
-  if (typeof window === "undefined" || !reviewId || !token) return;
+export function saveReviewToken(
+  reviewId: string,
+  token: string,
+  createdAtMs?: number
+): StoredReviewOwnership | null {
+  if (typeof window === "undefined" || !reviewId || !token) return null;
+  const entry: StoredReviewOwnership = {
+    token,
+    createdAt:
+      typeof createdAtMs === "number" && Number.isFinite(createdAtMs) && createdAtMs > 0
+        ? createdAtMs
+        : Date.now(),
+  };
   try {
     const existing = getStoredReviewTokens();
-    const updated = { ...existing, [reviewId]: token };
+    const updated = { ...existing, [reviewId]: entry };
     window.localStorage.setItem(REVIEW_TOKENS_STORAGE_KEY, JSON.stringify(updated));
   } catch {}
+  return entry;
+}
+
+export function getRemainingEditMs(
+  reviewCreatedAt: string | undefined,
+  storedCreatedAt: number | undefined,
+  nowMs: number
+): number {
+  if (!nowMs || nowMs <= 0) return 0;
+
+  const candidates: number[] = [];
+  if (typeof storedCreatedAt === "number" && storedCreatedAt > 0) {
+    candidates.push(REVIEW_EDIT_WINDOW_MS - (nowMs - storedCreatedAt));
+  }
+  if (reviewCreatedAt) {
+    const serverMs = new Date(reviewCreatedAt).getTime();
+    if (Number.isFinite(serverMs) && serverMs > 0) {
+      candidates.push(REVIEW_EDIT_WINDOW_MS - (nowMs - serverMs));
+    }
+  }
+
+  if (candidates.length === 0) return 0;
+  return Math.max(0, Math.min(...candidates));
+}
+
+export function formatEditCountdown(remainingMs: number): string {
+  const totalSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+  const mins = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
+  const secs = String(totalSeconds % 60).padStart(2, "0");
+  return `${mins}:${secs}`;
 }
 
 export function getReviewImages(
@@ -198,7 +260,14 @@ export async function submitProductReview(payload: {
     }
 
     if (data.review?.id && typeof data.editToken === "string") {
-      saveReviewToken(data.review.id, data.editToken);
+      const parsedServerMs = data.review.created_at
+        ? new Date(data.review.created_at).getTime()
+        : NaN;
+      saveReviewToken(
+        data.review.id,
+        data.editToken,
+        Number.isFinite(parsedServerMs) && parsedServerMs > 0 ? parsedServerMs : Date.now()
+      );
     }
 
     return { success: true, review: data.review, editToken: data.editToken };

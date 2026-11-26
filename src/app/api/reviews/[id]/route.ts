@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { calculateRatingSummary, getReviewImages } from "@/lib/reviews-service";
+import {
+  calculateRatingSummary,
+  getReviewImages,
+  REVIEW_EDIT_WINDOW_MS,
+} from "@/lib/reviews-service";
 import {
   getSupabaseAdmin,
   MAX_REVIEW_IMAGES,
@@ -94,12 +98,30 @@ async function handleUpdateReview(
 
     const { data: existingReview, error: fetchError } = await supabase
       .from("product_reviews")
-      .select("id, product_id, product_handle, author_role")
+      .select("id, product_id, product_handle, author_role, created_at")
       .eq("id", id)
       .maybeSingle();
 
     if (fetchError || !existingReview) {
       return NextResponse.json({ error: "Avis introuvable." }, { status: 404 });
+    }
+
+    const createdAtMs = existingReview.created_at
+      ? new Date(existingReview.created_at).getTime()
+      : NaN;
+    const elapsedMs = Number.isFinite(createdAtMs)
+      ? Date.now() - createdAtMs
+      : Number.POSITIVE_INFINITY;
+
+    if (elapsedMs > REVIEW_EDIT_WINDOW_MS) {
+      return NextResponse.json(
+        {
+          error:
+            "Le délai de modification (1 min 30 s) est expiré. / انتهت مهلة التعديل (دقيقة و30 ثانية).",
+          code: "EDIT_WINDOW_EXPIRED",
+        },
+        { status: 403 }
+      );
     }
 
     let uploadedUrls: string[] = [];

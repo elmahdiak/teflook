@@ -22,8 +22,11 @@ import { compressReviewImage } from "@/lib/compress-image";
 import {
   ProductReview,
   ProductRatingSummary,
+  type StoredReviewOwnership,
   calculateRatingSummary,
   fetchReviewsByProduct,
+  formatEditCountdown,
+  getRemainingEditMs,
   getReviewImages,
   getStoredReviewTokens,
   submitProductReview,
@@ -76,7 +79,10 @@ export function ProductReviewsSection({
     images: string[];
     index: number;
   } | null>(null);
-  const [ownedTokens, setOwnedTokens] = useState<Record<string, string>>({});
+  const [ownedTokens, setOwnedTokens] = useState<
+    Record<string, StoredReviewOwnership>
+  >({});
+  const [nowMs, setNowMs] = useState<number>(0);
 
   // Inline Edit State
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
@@ -99,6 +105,7 @@ export function ProductReviewsSection({
 
   useEffect(() => {
     setOwnedTokens(getStoredReviewTokens());
+    setNowMs(Date.now());
   }, []);
 
   useEffect(() => {
@@ -323,6 +330,45 @@ export function ProductReviewsSection({
     });
   }
 
+  useEffect(() => {
+    if (!nowMs) return;
+
+    const hasActiveEditWindow =
+      editingReviewId !== null ||
+      reviews.some((rev) => {
+        const ownership = ownedTokens[rev.id];
+        if (!ownership) return false;
+        return getRemainingEditMs(rev.created_at, ownership.createdAt, nowMs) > 0;
+      });
+
+    if (!hasActiveEditWindow) return;
+
+    const interval = window.setInterval(() => {
+      setNowMs(Date.now());
+    }, 1000);
+
+    return () => window.clearInterval(interval);
+  }, [nowMs, reviews, ownedTokens, editingReviewId]);
+
+  useEffect(() => {
+    if (!editingReviewId || !nowMs) return;
+    const activeReview = reviews.find((r) => r.id === editingReviewId);
+    const ownership = ownedTokens[editingReviewId];
+    const remaining = activeReview
+      ? getRemainingEditMs(activeReview.created_at, ownership?.createdAt, nowMs)
+      : 0;
+
+    if (remaining <= 0) {
+      cancelEditingReview();
+      setToastMessage(
+        locale === "ar"
+          ? "انتهت مهلة التعديل (دقيقة و30 ثانية)."
+          : "Le délai de modification (1 min 30 s) est expiré."
+      );
+      setTimeout(() => setToastMessage(null), 5000);
+    }
+  }, [nowMs, editingReviewId, reviews, ownedTokens, locale]);
+
   async function handleSaveEdit(e: React.FormEvent, revId: string) {
     e.preventDefault();
     if (isEditCompressing || isSavingEdit) return;
@@ -335,8 +381,8 @@ export function ProductReviewsSection({
       return;
     }
 
-    const editToken = ownedTokens[revId];
-    if (!editToken) {
+    const ownership = ownedTokens[revId];
+    if (!ownership?.token) {
       setEditError(
         locale === "ar"
           ? "غير مصرح بتعديل هذا التقييم من هذا المتصفح."
@@ -350,7 +396,7 @@ export function ProductReviewsSection({
 
     const res = await updateProductReview({
       id: revId,
-      editToken,
+      editToken: ownership.token,
       authorName: editAuthorName.trim(),
       authorRole: editAuthorRole.trim(),
       rating: editRating,
@@ -410,7 +456,18 @@ export function ProductReviewsSection({
 
     if (res.success && res.review) {
       if (res.editToken) {
-        setOwnedTokens((prev) => ({ ...prev, [res.review!.id]: res.editToken! }));
+        const parsedCreated = res.review.created_at
+          ? new Date(res.review.created_at).getTime()
+          : NaN;
+        const createdAtMs =
+          Number.isFinite(parsedCreated) && parsedCreated > 0
+            ? parsedCreated
+            : Date.now();
+        setOwnedTokens((prev) => ({
+          ...prev,
+          [res.review!.id]: { token: res.editToken!, createdAt: createdAtMs },
+        }));
+        setNowMs(Date.now());
       }
       setReviews((prev) => [res.review!, ...prev]);
       setIsFormOpen(false);
@@ -824,7 +881,12 @@ export function ProductReviewsSection({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8 pt-4">
           {reviews.map((rev) => {
             const isAr = locale === "ar";
-            const canEdit = Boolean(ownedTokens[rev.id]);
+            const ownership = ownedTokens[rev.id];
+            const remainingEditMs = ownership
+              ? getRemainingEditMs(rev.created_at, ownership.createdAt, nowMs)
+              : 0;
+            const canEdit = Boolean(ownership?.token && nowMs > 0 && remainingEditMs > 0);
+            const countdownLabel = formatEditCountdown(remainingEditMs);
             const isEditing = editingReviewId === rev.id;
             const bottomTag = rev.author_role
               ? `${rev.author_role} • ${productTitle}`
@@ -867,6 +929,12 @@ export function ProductReviewsSection({
                       >
                         {isAr ? "تعديل تقييمك" : "Modifier votre avis"}
                       </h4>
+                      <span
+                        dir="ltr"
+                        className="rounded-full bg-[#4b9797]/10 px-2.5 py-0.5 text-[11px] font-bold text-[#4b9797] tabular-nums"
+                      >
+                        {countdownLabel}
+                      </span>
                     </div>
 
                     {editError && (
@@ -1170,10 +1238,14 @@ export function ProductReviewsSection({
                         <button
                           type="button"
                           onClick={() => startEditingReview(rev)}
-                          className="inline-flex items-center gap-1 rounded-full border border-[#4b9797]/30 bg-white px-2.5 py-0.5 text-[11px] font-bold text-[#4b9797] hover:bg-[#4b9797] hover:text-white transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1 rounded-full border border-[#4b9797]/30 bg-white px-2.5 py-0.5 text-[11px] font-bold text-[#4b9797] hover:bg-[#4b9797] hover:text-white transition-colors cursor-pointer tabular-nums"
                         >
                           <Pencil size={11} aria-hidden="true" />
-                          <span>{isAr ? "تعديل" : "Modifier"}</span>
+                          <span>
+                            {isAr
+                              ? `تعديل (${countdownLabel})`
+                              : `Modifier (${countdownLabel})`}
+                          </span>
                         </button>
                       )}
                     </div>
