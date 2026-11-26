@@ -30,6 +30,7 @@ export default function AdminReviewsPage() {
 
   // Modal State
   const [modalOpen, setModalOpen] = useState(false);
+  const [lightboxImageUrl, setLightboxImageUrl] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
@@ -423,6 +424,26 @@ export default function AdminReviewsPage() {
                   <p className="mt-3 text-xs text-foreground/85 leading-relaxed italic bg-secondary/30 p-3 rounded-xl border border-border/50">
                     « {rev.comment} »
                   </p>
+
+                  {/* Customer Review Photo Thumbnail */}
+                  {rev.image_url && (
+                    <div className="mt-3">
+                      <button
+                        type="button"
+                        onClick={() => setLightboxImageUrl(rev.image_url!)}
+                        aria-label={`Voir la photo de ${rev.author_name}`}
+                        className="group/thumb rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal cursor-zoom-in"
+                      >
+                        <img
+                          src={rev.image_url}
+                          alt={`Photo de l'avis de ${rev.author_name}`}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-16 h-16 rounded-xl object-cover border border-border shadow-2xs transition-transform duration-200 group-hover/thumb:scale-105"
+                        />
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 {/* Bottom Actions */}
@@ -453,6 +474,31 @@ export default function AdminReviewsPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* LIGHTBOX PREVIEW MODAL */}
+      {lightboxImageUrl && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setLightboxImageUrl(null)}
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4"
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxImageUrl(null)}
+            aria-label="Fermer l'aperçu"
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center cursor-pointer"
+          >
+            <X size={20} />
+          </button>
+          <img
+            src={lightboxImageUrl}
+            alt="Photo de l'avis client"
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[85vh] max-w-[92vw] rounded-2xl object-contain shadow-2xl"
+          />
         </div>
       )}
 

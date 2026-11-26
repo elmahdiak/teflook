@@ -6,6 +6,7 @@ export interface ProductReview {
   author_role?: string;
   rating: number; // 1 to 5
   comment: string;
+  image_url?: string | null;
   is_verified?: boolean;
   created_at: string;
 }
@@ -102,13 +103,33 @@ export async function submitProductReview(payload: {
   authorRole?: string;
   rating: number;
   comment: string;
+  imageFile?: File | null;
+  imageUrl?: string;
 }): Promise<{ success: boolean; review?: ProductReview; error?: string }> {
   try {
-    const res = await fetch("/api/reviews", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    let res: Response;
+
+    if (payload.imageFile) {
+      const formData = new FormData();
+      formData.append("productId", payload.productId);
+      if (payload.productHandle) formData.append("productHandle", payload.productHandle);
+      formData.append("authorName", payload.authorName);
+      if (payload.authorRole) formData.append("authorRole", payload.authorRole);
+      formData.append("rating", String(payload.rating));
+      formData.append("comment", payload.comment);
+      formData.append("image", payload.imageFile);
+
+      res = await fetch("/api/reviews", {
+        method: "POST",
+        body: formData,
+      });
+    } else {
+      res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    }
 
     const data = await res.json();
     if (!res.ok || !data.success) {

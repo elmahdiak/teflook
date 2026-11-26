@@ -5,6 +5,7 @@ import {
   BadgeCheck,
   CheckCircle2,
   ChevronDown,
+  ImagePlus,
   LoaderCircle,
   MessageSquare,
   MessageSquarePlus,
@@ -15,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { compressReviewImage } from "@/lib/compress-image";
 import {
   ProductReview,
   ProductRatingSummary,
@@ -54,6 +56,30 @@ export function ProductReviewsSection({
   const [authorRole, setAuthorRole] = useState("");
   const [comment, setComment] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
+  const [compressedImage, setCompressedImage] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [isCompressingImage, setIsCompressingImage] = useState(false);
+  const [lightboxImageUrl, setLightboxImageUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    return () => {
+      if (imagePreviewUrl) {
+        URL.revokeObjectURL(imagePreviewUrl);
+      }
+    };
+  }, [imagePreviewUrl]);
+
+  useEffect(() => {
+    if (!lightboxImageUrl) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setLightboxImageUrl(null);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [lightboxImageUrl]);
 
   // Load reviews on mount
   useEffect(() => {
@@ -85,8 +111,40 @@ export function ProductReviewsSection({
     }
   }, [reviews, isLoading, productId]);
 
+  async function handleImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    setFormError(null);
+    setIsCompressingImage(true);
+
+    try {
+      const optimized = await compressReviewImage(file);
+      const nextPreviewUrl = URL.createObjectURL(optimized);
+      setCompressedImage(optimized);
+      setImagePreviewUrl(nextPreviewUrl);
+    } catch (err) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : locale === "ar"
+          ? "تعذر تحسين الصورة المختارة."
+          : "Impossible d'optimiser l'image sélectionnée.";
+      setFormError(message);
+    } finally {
+      setIsCompressingImage(false);
+    }
+  }
+
+  function handleRemoveImage() {
+    setCompressedImage(null);
+    setImagePreviewUrl(null);
+  }
+
   async function handleSubmitReview(e: React.FormEvent) {
     e.preventDefault();
+    if (isCompressingImage || isSubmitting) return;
     if (!authorName.trim() || !comment.trim()) {
       setFormError(locale === "ar" ? "يرجى ملء جميع الحقول المطلوبة." : "Veuillez remplir votre nom et votre avis.");
       return;
@@ -102,6 +160,7 @@ export function ProductReviewsSection({
       authorRole: authorRole.trim() || (locale === "ar" ? "ولي أمر" : "Parent"),
       rating,
       comment: comment.trim(),
+      imageFile: compressedImage,
     });
 
     setIsSubmitting(false);
@@ -113,6 +172,8 @@ export function ProductReviewsSection({
       setAuthorRole("");
       setComment("");
       setRating(5);
+      setCompressedImage(null);
+      setImagePreviewUrl(null);
       setToastMessage(t("reviews.success"));
       setTimeout(() => setToastMessage(null), 5000);
     } else {
@@ -292,6 +353,73 @@ export function ProductReviewsSection({
                 />
               </div>
 
+              {/* Optional Photo Upload with Client-Side WebP Compression */}
+              <div>
+                <span className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                  {locale === "ar" ? "أضف صورة (اختياري)" : "Ajouter une photo (optionnel)"}
+                </span>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(e) => void handleImageSelect(e)}
+                  className="sr-only"
+                />
+
+                {isCompressingImage ? (
+                  <div className="flex items-center justify-center gap-2.5 rounded-xl border border-[#4b9797]/40 bg-[#4b9797]/5 px-4 py-4 text-xs sm:text-sm font-semibold text-[#1A3C34]">
+                    <LoaderCircle size={17} className="animate-spin text-[#4b9797]" />
+                    <span>
+                      {locale === "ar" ? "جاري تحسين الصورة..." : "Optimisation de l'image..."}
+                    </span>
+                  </div>
+                ) : imagePreviewUrl && compressedImage ? (
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-[#4b9797]/30 bg-[#FBF9F5] p-2.5">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <img
+                        src={imagePreviewUrl}
+                        alt={
+                          locale === "ar" ? "معاينة صورة التقييم" : "Aperçu de la photo"
+                        }
+                        className="w-16 h-16 rounded-xl object-cover border border-slate-200 shrink-0"
+                      />
+                      <div className="min-w-0 text-start">
+                        <p className="text-xs font-bold text-[#1A3C34] truncate">
+                          {compressedImage.name}
+                        </p>
+                        <p className="text-[11px] font-medium text-[#4b9797] mt-0.5 tabular-nums">
+                          {Math.max(1, Math.round(compressedImage.size / 1024))}{" "}
+                          {locale === "ar" ? "ك.ب • جاهزة" : "Ko • optimisée"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      aria-label={locale === "ar" ? "إزالة الصورة" : "Supprimer la photo"}
+                      className="grid size-8 shrink-0 place-items-center rounded-full bg-white border border-slate-200 text-slate-500 hover:text-rose-600 hover:border-rose-200 transition-colors cursor-pointer"
+                    >
+                      <X size={15} />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full flex items-center justify-center gap-2.5 rounded-xl border border-dashed border-[#4b9797]/45 bg-[#FBF9F5] hover:border-[#4b9797] hover:bg-[#4b9797]/5 px-4 py-3.5 text-xs sm:text-sm font-semibold text-[#1A3C34] transition-colors cursor-pointer"
+                  >
+                    <ImagePlus size={18} className="text-[#4b9797] shrink-0" />
+                    <span>
+                      {locale === "ar"
+                        ? "أضف صورة (اختياري)"
+                        : "Ajouter une photo (optionnel)"}
+                    </span>
+                  </button>
+                )}
+              </div>
+
               {/* Submit & Cancel Buttons */}
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-border/70">
                 <button
@@ -303,7 +431,7 @@ export function ProductReviewsSection({
                 </button>
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isCompressingImage}
                   className="px-5 py-2.5 rounded-xl bg-[#ff3500] hover:bg-[#e03000] text-white text-xs sm:text-sm font-bold shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50"
                 >
                   {isSubmitting ? (
@@ -495,6 +623,32 @@ export function ProductReviewsSection({
                   {rev.comment}
                 </p>
 
+                {/* Optional Customer Photo Thumbnail */}
+                {rev.image_url && (
+                  <button
+                    type="button"
+                    onClick={() => setLightboxImageUrl(rev.image_url!)}
+                    aria-label={
+                      isAr
+                        ? `تكبير صورة تقييم ${rev.author_name}`
+                        : `Agrandir la photo de l'avis de ${rev.author_name}`
+                    }
+                    className="mb-5 group/thumb focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797] rounded-xl cursor-zoom-in"
+                  >
+                    <img
+                      src={rev.image_url}
+                      alt={
+                        isAr
+                          ? `صورة تقييم ${rev.author_name}`
+                          : `Photo de l'avis de ${rev.author_name}`
+                      }
+                      loading="lazy"
+                      decoding="async"
+                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover border border-slate-200 shadow-xs transition-transform duration-200 group-hover/thumb:scale-105"
+                    />
+                  </button>
+                )}
+
                 {/* Subtle Horizontal Separator */}
                 <div className="w-full border-t border-slate-200/80 mb-4 mt-auto" />
 
@@ -517,6 +671,32 @@ export function ProductReviewsSection({
               </article>
             );
           })}
+        </div>
+      )}
+
+      {/* Full-Screen Image Lightbox Preview */}
+      {lightboxImageUrl && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={locale === "ar" ? "عرض صورة التقييم" : "Aperçu de la photo"}
+          onClick={() => setLightboxImageUrl(null)}
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxImageUrl(null)}
+            aria-label={locale === "ar" ? "إغلاق" : "Fermer"}
+            className="absolute top-4 end-4 w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition-colors cursor-pointer"
+          >
+            <X size={20} />
+          </button>
+          <img
+            src={lightboxImageUrl}
+            alt={locale === "ar" ? "صورة تقييم العميل" : "Photo du client"}
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[85vh] max-w-[92vw] rounded-2xl object-contain shadow-2xl"
+          />
         </div>
       )}
     </section>
