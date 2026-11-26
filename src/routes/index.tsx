@@ -238,23 +238,20 @@ function TefLookStorefront() {
             </span>
           </Link>
 
-          <nav aria-label={t("a11y.categories")} className="hidden items-center gap-7 xl:flex">
-            {categories.slice(0, 4).map((category) => (
-              <button
-                key={category.value}
-                type="button"
-                onClick={() => {
-                  setActiveCategory(category.value);
-                  document.getElementById("boutique")?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className={`text-[13px] font-bold tracking-tight transition-all relative py-1 cursor-pointer ${
-                  activeCategory === category.value
-                    ? "text-[#2B6E73] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:bg-[#2B6E73] after:rounded-full"
-                    : "text-[#2B6E73] hover:text-[#193E3F] hover:underline underline-offset-4 decoration-[#2B6E73]/40"
-                }`}
+          <nav aria-label={t("a11y.navigation")} className="hidden items-center gap-7 xl:flex">
+            {[
+              { key: "home", label: t("nav.home"), href: "/" },
+              { key: "collections", label: t("nav.collections"), href: "#boutique" },
+              { key: "about", label: t("nav.about"), href: "#univers" },
+              { key: "contact", label: t("nav.contact"), href: "#contact" },
+            ].map((item) => (
+              <a
+                key={item.key}
+                href={item.href}
+                className="text-[13px] font-bold tracking-tight text-[#2B6E73] hover:text-[#193E3F] hover:underline underline-offset-4 decoration-[#2B6E73]/40 transition-all relative py-1 cursor-pointer"
               >
-                {category.label}
-              </button>
+                {item.label}
+              </a>
             ))}
           </nav>
 
@@ -312,29 +309,23 @@ function TefLookStorefront() {
         </div>
         {mobileMenuOpen && (
           <nav
-            aria-label={t("a11y.categories")}
+            aria-label={t("a11y.navigation")}
             className="border-t border-border bg-background px-5 py-3 xl:hidden"
           >
-            {categories.map((category) => (
-              <button
-                type="button"
-                key={category.value}
-                onClick={() => {
-                  setActiveCategory(category.value);
-                  setMobileMenuOpen(false);
-                  document.getElementById("boutique")?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className={`flex items-center justify-between w-full border-b border-border py-3 text-start text-sm font-bold transition-colors last:border-0 ${
-                  activeCategory === category.value
-                    ? "text-[#2B6E73] bg-[#2B6E73]/5 px-2.5 rounded-lg"
-                    : "text-[#2B6E73] hover:text-[#193E3F]"
-                }`}
+            {[
+              { key: "home", label: t("nav.home"), href: "/" },
+              { key: "collections", label: t("nav.collections"), href: "#boutique" },
+              { key: "about", label: t("nav.about"), href: "#univers" },
+              { key: "contact", label: t("nav.contact"), href: "#contact" },
+            ].map((item) => (
+              <a
+                key={item.key}
+                href={item.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-between w-full border-b border-border py-3 text-start text-sm font-bold text-[#2B6E73] hover:text-[#193E3F] transition-colors last:border-0"
               >
-                <span>{category.label}</span>
-                {activeCategory === category.value && (
-                  <span className="w-2 h-2 rounded-full bg-[#2B6E73]" />
-                )}
-              </button>
+                <span>{item.label}</span>
+              </a>
             ))}
           </nav>
         )}

@@ -6,8 +6,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { TefLookLanguageSwitcher } from "@/components/teflook-language-switcher";
 import { useCartStore } from "@/lib/shopify-cart";
-import { CHILD_STORE_CATEGORIES, type ChildStoreCategory } from "@/lib/teflook-categories";
-import { CHILD_STORE_CATEGORY_MESSAGE_KEYS, useTefLookLanguage } from "@/lib/teflook-language";
+import type { ChildStoreCategory } from "@/lib/teflook-categories";
+import { useTefLookLanguage } from "@/lib/teflook-language";
 import { cn } from "@/lib/utils";
 
 const HEADER_SVG_PROPS = {
@@ -132,10 +132,12 @@ export function Header({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isSearchOpen, menuOpen]);
 
-  const categories = CHILD_STORE_CATEGORIES.map((category) => ({
-    ...category,
-    label: t(CHILD_STORE_CATEGORY_MESSAGE_KEYS[category.value]),
-  }));
+  const navLinks = [
+    { key: "home", label: t("nav.home"), href: "/" },
+    { key: "collections", label: t("nav.collections"), href: "/#boutique" },
+    { key: "about", label: t("nav.about"), href: "/#univers" },
+    { key: "contact", label: t("nav.contact"), href: "/#contact" },
+  ] as const;
 
   function handleQueryUpdate(value: string) {
     setInternalQuery(value);
@@ -180,33 +182,21 @@ export function Header({
     searchInputRef.current?.blur();
   }
 
-  function handleCategoryClick(category: ChildStoreCategory | "all") {
-    setMenuOpen(false);
-    if (onSelectCategory) {
-      onSelectCategory(category);
-      document.getElementById("boutique")?.scrollIntoView({ behavior: "smooth" });
-    } else if (category === "all") {
-      router.push("/#boutique");
-    } else {
-      router.push(`/?category=${encodeURIComponent(category)}#boutique`);
-    }
-  }
-
   return (
     <header className="sticky top-0 z-40 w-full" dir={direction}>
       {/* 1. Main 3-Zone TefLook Navigation Bar */}
       <nav
-        aria-label={t("a11y.categories")}
+        aria-label={t("a11y.navigation")}
         className="w-full bg-[#FAF8F5]/95 backdrop-blur-md border-b border-[#E8E2D9]"
       >
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-20 sm:h-22 md:h-24 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-          {/* Start Zone: Menu Trigger + FR/عربي Language Switcher */}
+          {/* Start Zone: Menu Trigger + Minimalist Language Dropdown */}
           <div className="justify-self-start flex items-center gap-1.5 sm:gap-3 min-w-0">
             <button
               type="button"
               aria-label={t("a11y.openMenu")}
               aria-expanded={menuOpen}
-              aria-controls="teflook-category-menu"
+              aria-controls="teflook-navigation-menu"
               onClick={() => setMenuOpen((open) => !open)}
               className={cn(
                 "inline-flex items-center justify-center gap-1.5 h-10 px-2.5 sm:px-3 rounded-xl text-[#1A4D4B] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797] cursor-pointer shrink-0",
@@ -283,48 +273,25 @@ export function Header({
           </div>
         </div>
 
-        {/* Category Navigation Drawer */}
+        {/* Main Navigation Menu Drawer (Desktop & Mobile) */}
         {menuOpen && (
           <div
-            id="teflook-category-menu"
+            id="teflook-navigation-menu"
             className="border-t border-[#E8E2D9] bg-[#FAF8F5] px-4 sm:px-6 lg:px-8 py-3 shadow-sm"
           >
-            <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 sm:gap-2">
-              <button
-                type="button"
-                onClick={() => handleCategoryClick("all")}
-                className={cn(
-                  "flex items-center justify-between w-full px-3 py-2.5 rounded-xl text-start text-sm font-bold transition-colors cursor-pointer",
-                  activeCategory === "all"
-                    ? "text-[#E86F51] bg-[#E86F51]/8"
-                    : "text-[#1A4D4B] hover:bg-white hover:text-[#E86F51]",
-                  isAr && "font-sans"
-                )}
-              >
-                <span>{t("footer.allProducts")}</span>
-                {activeCategory === "all" && (
-                  <span className="w-2 h-2 rounded-full bg-[#E86F51] shrink-0" />
-                )}
-              </button>
-
-              {categories.map((category) => (
-                <button
-                  type="button"
-                  key={category.value}
-                  onClick={() => handleCategoryClick(category.value)}
+            <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1 sm:gap-2">
+              {navLinks.map((item) => (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  onClick={() => setMenuOpen(false)}
                   className={cn(
-                    "flex items-center justify-between w-full px-3 py-2.5 rounded-xl text-start text-sm font-bold transition-colors cursor-pointer",
-                    activeCategory === category.value
-                      ? "text-[#E86F51] bg-[#E86F51]/8"
-                      : "text-[#1A4D4B] hover:bg-white hover:text-[#E86F51]",
+                    "flex items-center justify-between w-full px-3 py-2.5 rounded-xl text-start text-sm font-bold text-[#1A4D4B] hover:bg-white hover:text-[#E86F51] transition-colors",
                     isAr && "font-sans"
                   )}
                 >
-                  <span>{category.label}</span>
-                  {activeCategory === category.value && (
-                    <span className="w-2 h-2 rounded-full bg-[#E86F51] shrink-0" />
-                  )}
-                </button>
+                  <span>{item.label}</span>
+                </Link>
               ))}
             </div>
           </div>

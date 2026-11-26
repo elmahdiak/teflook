@@ -15,7 +15,6 @@ import {
 import { useCart } from "@/context/CartContext";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { AccountModal } from "./AccountModal";
-import { CATEGORIES } from "@/data/teflookData";
 
 export function Navbar() {
   const {
@@ -242,54 +241,49 @@ export function Navbar() {
         </div>
 
         {/* ============================================================== */}
-        {/* 2. SUB-HEADER: THE 6 OFFICIAL EDUCATIONAL CATEGORIES           */}
+        {/* 2. SUB-HEADER: MAIN NAVIGATION LINKS                           */}
         {/* ============================================================== */}
         <div className="bg-[#FAF9F7] border-b border-[#E8E5DF] overflow-x-auto no-scrollbar">
           <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <nav className="flex items-center gap-2 sm:gap-2.5 py-2.5 whitespace-nowrap text-xs font-bold tracking-tight">
-              {CATEGORIES.map((cat) => (
-                <a
-                  key={cat.id}
-                  href={`#${cat.slug}`}
-                  className="group inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#E8E5DF] bg-white text-[#2B6E73] hover:text-[#193E3F] hover:border-[#2B6E73]/40 hover:bg-[#2B6E73]/5 active:bg-[#2B6E73]/10 transition-all shrink-0 font-bold"
+              {[
+                { label: "Accueil", href: "/" },
+                { label: "Collections", href: "/#boutique" },
+                { label: "À propos", href: "/#univers" },
+                { label: "Contact", href: "/#contact" },
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="inline-flex items-center px-3.5 py-1.5 rounded-full border border-[#E8E5DF] bg-white text-[#2B6E73] hover:text-[#193E3F] hover:border-[#2B6E73]/40 hover:bg-[#2B6E73]/5 transition-all shrink-0 font-bold"
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#2B6E73] transition-transform group-hover:scale-125" />
-                  <span className="text-[#2B6E73] group-hover:text-[#193E3F] transition-colors">{cat.name}</span>
-                  {cat.highlight && (
-                    <span className="text-[9px] px-1.5 py-0.2 rounded-full font-black bg-[#2B6E73]/10 text-[#2B6E73]">
-                      {cat.highlight}
-                    </span>
-                  )}
-                </a>
+                  {item.label}
+                </Link>
               ))}
             </nav>
           </div>
         </div>
 
         {/* ============================================================== */}
-        {/* MOBILE NAVIGATION DRAWER (6 OFFICIAL CATEGORIES)               */}
+        {/* MOBILE NAVIGATION DRAWER                                       */}
         {/* ============================================================== */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-[#E8E5DF] bg-white px-4 py-4 space-y-3 animate-in slide-in-from-top-2 duration-200">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#2B6E73]">
-              Les 6 Piliers Éducatifs &amp; Développementaux
-            </p>
+          <div className="lg:hidden border-t border-[#E8E5DF] bg-white px-4 py-4 space-y-2 animate-in slide-in-from-top-2 duration-200">
             <div className="space-y-1.5">
-              {CATEGORIES.map((cat) => (
-                <a
-                  key={cat.id}
-                  href={`#${cat.slug}`}
+              {[
+                { label: "Accueil", href: "/" },
+                { label: "Collections", href: "/#boutique" },
+                { label: "À propos", href: "/#univers" },
+                { label: "Contact", href: "/#contact" },
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center justify-between p-3 rounded-xl bg-[#FAF9F7] hover:bg-[#2B6E73]/5 text-xs font-bold text-[#2B6E73] hover:text-[#193E3F] border border-[#E8E5DF] hover:border-[#2B6E73]/30 transition-colors"
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#2B6E73]" />
-                    <span className="text-[#2B6E73]">{cat.name}</span>
-                  </div>
-                  <span className="text-[10px] text-[#2B6E73]/70 font-semibold">
-                    {cat.itemCount} outils
-                  </span>
-                </a>
+                  <span>{item.label}</span>
+                </Link>
               ))}
             </div>
           </div>

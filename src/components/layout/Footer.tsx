@@ -95,9 +95,10 @@ export function Footer() {
 
   return (
     <footer
+      id="contact"
       dir={currentDirection}
       aria-label={isAr ? "تذييل صفحة تيفلوك" : "Pied de page TefLook"}
-      className="relative w-full text-white mt-auto select-none"
+      className="relative w-full text-white mt-auto select-none scroll-mt-24"
     >
       {/* Signature Diagonal Slanted Top Edge */}
       <div
