@@ -98,7 +98,7 @@ export function ProductCard({ product, onAdded, onNotice }: ProductCardProps) {
       const isBestseller = upper.includes("BEST") || upper.includes("TOP");
       return {
         text: isAr && isBestseller ? "الأكثر طلباً" : upper,
-        bgClass: isBestseller ? "bg-brand-orange" : "bg-[#4b9797]",
+        bgClass: isBestseller ? "bg-brand-orange" : "bg-tef-teal",
         showTagIcon: false,
       };
     }
@@ -113,7 +113,7 @@ export function ProductCard({ product, onAdded, onNotice }: ProductCardProps) {
 
     return {
       text: isAr ? "جديد" : "NOUVEAU",
-      bgClass: "bg-[#4b9797]",
+      bgClass: "bg-tef-teal",
       showTagIcon: false,
     };
   })();
@@ -195,7 +195,7 @@ export function ProductCard({ product, onAdded, onNotice }: ProductCardProps) {
         href={`/product/${product.handle}`}
         title={localized.title}
         className={cn(
-          "block w-full font-display font-bold text-xs sm:text-base md:text-[17px] text-[#1A3C34] hover:text-[#4b9797] line-clamp-2 leading-[1.2] sm:leading-snug mb-1 sm:mb-1.5 min-h-[2.4em] transition-colors",
+          "block w-full font-display font-bold text-xs sm:text-base md:text-[17px] text-tef-teal-dark hover:text-tef-teal line-clamp-2 leading-[1.2] sm:leading-snug mb-1 sm:mb-1.5 min-h-[2.4em] transition-colors",
           isAr && "font-sans"
         )}
       >
@@ -205,7 +205,7 @@ export function ProductCard({ product, onAdded, onNotice }: ProductCardProps) {
       {ageSummary && (
         <p
           title={ageSummary}
-          className="text-[10px] sm:text-[11px] font-semibold text-[#4b9797] mb-1.5 line-clamp-1 max-w-full"
+          className="text-[10px] sm:text-[11px] font-semibold text-tef-teal mb-1.5 line-clamp-1 max-w-full"
         >
           {ageSummary}
         </p>
@@ -216,10 +216,10 @@ export function ProductCard({ product, onAdded, onNotice }: ProductCardProps) {
         {isMounted && reviewsCount > 0 ? (
           <>
             <Star
-              className="size-3 sm:size-3.5 fill-[#ffbf00] text-[#ffbf00] shrink-0"
+              className="size-3 sm:size-3.5 fill-tef-ochre text-tef-ochre shrink-0"
               aria-hidden="true"
             />
-            <span className="font-bold text-[#1A3C34] tabular-nums">
+            <span className="font-bold text-tef-ink tabular-nums">
               {rating.toFixed(1)}
             </span>
             <span className="text-slate-500 tabular-nums">({reviewsCount})</span>
@@ -255,7 +255,7 @@ export function ProductCard({ product, onAdded, onNotice }: ProductCardProps) {
         disabled={!isAvailable || adding}
         aria-label={`${isAr ? "أضف إلى السلة" : "Ajouter au panier"} : ${localized.title}`}
         onClick={(e) => void handleAdd(e)}
-        className="mt-auto w-full py-2 px-2.5 sm:py-3 sm:px-5 rounded-full bg-brand-orange hover:bg-brand-orange-hover active:scale-[0.98] text-white font-display font-bold text-xs sm:text-sm tracking-wide shadow-[0_6px_16px_-4px_rgba(250,114,82,0.38)] transition-all duration-200 flex items-center justify-center gap-1 sm:gap-2 whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        className="mt-auto w-full py-2 px-2.5 sm:py-3 sm:px-5 rounded-full bg-brand-orange hover:bg-brand-orange-hover active:scale-[0.98] text-white font-display font-bold text-xs sm:text-sm tracking-wide shadow-[0_6px_16px_-4px_rgba(200,93,62,0.38)] transition-all duration-200 flex items-center justify-center gap-1 sm:gap-2 whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {adding ? (
           <LoaderCircle className="size-3.5 sm:size-4 animate-spin shrink-0" />

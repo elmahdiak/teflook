@@ -5,65 +5,75 @@
   --font-sans: var(--font-dm-sans), var(--font-ibm-arabic), sans-serif;
   --font-display: var(--font-bricolage), var(--font-cairo), sans-serif;
 
-  /* Exact color hierarchy extracted from new TefLook logo */
-  --color-brand-teal: #4C9A9C;
-  --color-brand-teal-hover: #3E8688;
-  --color-brand-teal-dark: #2C6466;
-  --color-brand-forest: #2C6466;
-  --color-brand-forest-hover: #214F50;
-  --color-brand-forest-dark: #193E3F;
-  
-  --color-brand-orange: #FA7252;
-  --color-brand-orange-hover: #E55C3C;
-  --color-brand-orange-deep: #D95335;
-  --color-brand-terracotta: #FA7252;
-  
-  --color-brand-amber: #FEC748;
-  --color-brand-amber-hover: #EDB330;
-  
-  --color-brand-cream: #FBF9F5;
-  --color-brand-sand: #F3EFE9;
-  --color-brand-mist: #EBF5F5;
-  --color-brand-warm-tint: #FDF2EE;
+  /* ── Official TefLook Brand Color Palette ───────── */
+  --color-tef-teal: #266867;
+  --color-tef-teal-dark: #1A4D4C;
+  --color-tef-ochre: #D99528;
+  --color-tef-ochre-dark: #7A4F08;
+  --color-tef-terracotta: #C85D3E;
+  --color-tef-terracotta-dark: #8A351D;
+  --color-tef-limestone: #F3EFE6;
+  --color-tef-ink: #1C2625;
+
+  /* Mapped legacy brand tokens to official palette */
+  --color-brand-teal: #266867;
+  --color-brand-teal-hover: #1A4D4C;
+  --color-brand-teal-dark: #1A4D4C;
+  --color-brand-forest: #1A4D4C;
+  --color-brand-forest-hover: #143B3A;
+  --color-brand-forest-dark: #10302F;
+
+  --color-brand-orange: #C85D3E;
+  --color-brand-orange-hover: #8A351D;
+  --color-brand-orange-deep: #8A351D;
+  --color-brand-terracotta: #C85D3E;
+
+  --color-brand-amber: #D99528;
+  --color-brand-amber-hover: #7A4F08;
+
+  --color-brand-cream: #F3EFE6;
+  --color-brand-sand: #F3EFE6;
+  --color-brand-mist: #E9F0F0;
+  --color-brand-warm-tint: #F9EFEA;
 }
 
 :root {
-  --background: #FBF9F5;
-  --foreground: #1C2A2B;
-  
-  --primary: #4C9A9C;
-  --primary-hover: #3E8688;
+  --background: #F3EFE6;
+  --foreground: #1C2625;
+
+  --primary: #266867;
+  --primary-hover: #1A4D4C;
   --primary-foreground: #FFFFFF;
-  
-  --secondary: #F3EFE9;
-  --secondary-foreground: #1C2A2B;
-  
+
+  --secondary: #F3EFE6;
+  --secondary-foreground: #1C2625;
+
   --card: #FFFFFF;
-  --card-foreground: #1C2A2B;
-  
-  --muted: #EDE8DF;
-  --muted-foreground: #5C6F70;
-  
-  --border: #E6E1D8;
-  --input: #E6E1D8;
-  --ring: #4C9A9C;
-  
-  --destructive: #EF4444;
+  --card-foreground: #1C2625;
+
+  --muted: #E8E2D5;
+  --muted-foreground: #4F5E5C;
+
+  --border: #E2DDD2;
+  --input: #E2DDD2;
+  --ring: #266867;
+
+  --destructive: #C85D3E;
   --destructive-foreground: #FFFFFF;
-  
-  /* Brand specific colors matching new logo */
-  --brand-teal: #4C9A9C;
-  --brand-teal-hover: #3E8688;
-  --brand-forest: #2C6466;
-  --brand-forest-hover: #214F50;
-  --brand-orange: #FA7252;
-  --brand-orange-deep: #D95335;
-  --brand-terracotta: #FA7252;
-  --brand-amber: #FEC748;
-  --brand-cream: #FBF9F5;
-  --brand-sand: #F3EFE9;
-  --brand-mist: #EBF5F5;
-  --brand-warm-tint: #FDF2EE;
+
+  /* Official Brand Colors */
+  --brand-teal: #266867;
+  --brand-teal-hover: #1A4D4C;
+  --brand-forest: #1A4D4C;
+  --brand-forest-hover: #143B3A;
+  --brand-orange: #C85D3E;
+  --brand-orange-deep: #8A351D;
+  --brand-terracotta: #C85D3E;
+  --brand-amber: #D99528;
+  --brand-cream: #F3EFE6;
+  --brand-sand: #F3EFE6;
+  --brand-mist: #E9F0F0;
+  --brand-warm-tint: #F9EFEA;
   --accent-foreground: #FFFFFF;
 }
 
