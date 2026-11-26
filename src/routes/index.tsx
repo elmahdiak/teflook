@@ -243,7 +243,7 @@ function TefLookStorefront() {
               { key: "home", label: t("nav.home"), href: "/" },
               { key: "collections", label: t("nav.collections"), href: "#boutique" },
               { key: "about", label: t("nav.about"), href: "#univers" },
-              { key: "contact", label: t("nav.contact"), href: "#contact" },
+              { key: "contact", label: t("nav.contact"), href: "/contact" },
             ].map((item) => (
               <a
                 key={item.key}
@@ -316,7 +316,7 @@ function TefLookStorefront() {
               { key: "home", label: t("nav.home"), href: "/" },
               { key: "collections", label: t("nav.collections"), href: "#boutique" },
               { key: "about", label: t("nav.about"), href: "#univers" },
-              { key: "contact", label: t("nav.contact"), href: "#contact" },
+              { key: "contact", label: t("nav.contact"), href: "/contact" },
             ].map((item) => (
               <a
                 key={item.key}

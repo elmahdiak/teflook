@@ -136,7 +136,7 @@ export function Header({
     { key: "home", label: t("nav.home"), href: "/" },
     { key: "collections", label: t("nav.collections"), href: "/#boutique" },
     { key: "about", label: t("nav.about"), href: "/#univers" },
-    { key: "contact", label: t("nav.contact"), href: "/#contact" },
+    { key: "contact", label: t("nav.contact"), href: "/contact" },
   ] as const;
 
   function handleQueryUpdate(value: string) {
