@@ -1,4 +1,5 @@
 import { PRODUCTS, type ProductItem } from "@/data/teflookData";
+import { normalizeProductImages } from "./cod-service";
 import type { ChildStoreCategory } from "./teflook-categories";
 import { PRODUCT_TRANSLATIONS_AR } from "./product-localization";
 
@@ -82,12 +83,7 @@ const slugToCategoryMap: Record<string, ChildStoreCategory> = {
 export function mapItemToShopifyProduct(item: any): ShopifyProduct {
   const category = slugToCategoryMap[item.categorySlug] || "discipline";
 
-  const rawImages: string[] =
-    Array.isArray(item.images) && item.images.length > 0
-      ? item.images.filter((url: any) => typeof url === "string" && url.trim().length > 0)
-      : item.image && typeof item.image === "string" && item.image.trim().length > 0
-      ? [item.image.trim()]
-      : [];
+  const rawImages = normalizeProductImages(item);
 
   const finalImages: string[] =
     rawImages.length > 0 ? rawImages : ["/images/Untitled Design.png"];
@@ -294,12 +290,7 @@ export async function fetchProducts(): Promise<ShopifyProduct[]> {
             skills: Array.isArray(row.skills) ? row.skills : typeof row.skills === "string" ? row.skills.split(",").map((s: string) => s.trim()).filter(Boolean) : undefined,
             sku: row.sku || row.reference || rowId,
             reference: row.reference || row.sku,
-            images:
-              Array.isArray(row.images) && row.images.length > 0
-                ? row.images
-                : row.image
-                ? [row.image]
-                : [],
+            images: normalizeProductImages(row),
             description: row.description || "",
             material: row.material,
             origin: row.origin,

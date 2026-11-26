@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   Check,
   ChevronDown,
+  ChevronLeft,
   ChevronRight,
   Heart,
   LoaderCircle,
@@ -66,6 +67,14 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
   const { direction, locale, t } = useTefLookLanguage();
   const images = product.images.edges.map((e) => e.node);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+  useEffect(() => {
+    setSelectedImageIndex(0);
+  }, [product.id]);
+
+  const safeImageIndex =
+    images.length > 0 ? Math.min(selectedImageIndex, images.length - 1) : 0;
+  const activeImage = images[safeImageIndex];
   const [quantity, setQuantity] = useState(1);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCODModalOpen, setIsCODModalOpen] = useState(false);
@@ -171,38 +180,91 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
         <div className="grid gap-8 lg:grid-cols-12 lg:gap-12">
           {/* Left Column: Product Media Gallery */}
           <div className="lg:col-span-7 flex flex-col gap-4">
-            {/* Main Featured Image */}
+            {/* Main Preview Image */}
             <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-border/80 bg-white shadow-xs group">
               <img
-                src={images[selectedImageIndex]?.url || "/images/Untitled Design.png"}
-                alt={images[selectedImageIndex]?.altText || localized.title}
-                className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+                key={activeImage?.url || "fallback-product-img"}
+                src={activeImage?.url || "/images/Untitled Design.png"}
+                alt={activeImage?.altText || localized.title}
+                className="size-full object-cover animate-in fade-in duration-300 transition-transform group-hover:scale-105"
               />
               {discountPercent && (
-                <span className="absolute top-4 left-4 rounded-full bg-brand-orange px-3 py-1 text-xs font-black uppercase tracking-wider text-white shadow-sm">
+                <span className="absolute top-4 start-4 rounded-full bg-brand-orange px-3 py-1 text-xs font-black uppercase tracking-wider text-white shadow-sm">
                   -{discountPercent}% Promo
                 </span>
               )}
-            </div>
 
-            {/* Thumbnail Row */}
-            {images.length > 1 && (
-              <div className="flex items-center gap-3 overflow-x-auto pb-2">
-                {images.map((img, index) => (
+              {images.length > 1 && (
+                <>
                   <button
                     type="button"
-                    key={index}
-                    onClick={() => setSelectedImageIndex(index)}
-                    aria-label={`Voir photo ${index + 1}`}
-                    className={`relative aspect-square size-18 sm:size-20 shrink-0 overflow-hidden rounded-xl border-2 transition-all duration-200 cursor-pointer ${
-                      selectedImageIndex === index
-                        ? "border-brand-teal ring-2 ring-brand-teal/30 scale-105"
-                        : "border-border/80 hover:border-brand-teal/60 opacity-70 hover:opacity-100"
-                    }`}
+                    onClick={() =>
+                      setSelectedImageIndex(
+                        (safeImageIndex - 1 + images.length) % images.length
+                      )
+                    }
+                    aria-label={locale === "ar" ? "الصورة السابقة" : "Photo précédente"}
+                    className="absolute start-3 top-1/2 -translate-y-1/2 grid size-9 sm:size-10 place-items-center rounded-full bg-white/90 text-[#1A3C34] border border-slate-200/80 shadow-md opacity-90 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[#4b9797] hover:text-white transition-all cursor-pointer"
                   >
-                    <img src={img.url} alt="" className="size-full object-cover" />
+                    <ChevronLeft
+                      size={18}
+                      className={cn(locale === "ar" && "rotate-180")}
+                    />
                   </button>
-                ))}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSelectedImageIndex((safeImageIndex + 1) % images.length)
+                    }
+                    aria-label={locale === "ar" ? "الصورة التالية" : "Photo suivante"}
+                    className="absolute end-3 top-1/2 -translate-y-1/2 grid size-9 sm:size-10 place-items-center rounded-full bg-white/90 text-[#1A3C34] border border-slate-200/80 shadow-md opacity-90 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[#4b9797] hover:text-white transition-all cursor-pointer"
+                  >
+                    <ChevronRight
+                      size={18}
+                      className={cn(locale === "ar" && "rotate-180")}
+                    />
+                  </button>
+                  <span
+                    dir="ltr"
+                    className="absolute bottom-3 end-3 rounded-full bg-black/55 backdrop-blur-xs px-2.5 py-0.5 text-[11px] font-bold text-white tabular-nums"
+                  >
+                    {safeImageIndex + 1} / {images.length}
+                  </span>
+                </>
+              )}
+            </div>
+
+            {/* Thumbnail Strip */}
+            {images.length > 1 && (
+              <div className="flex items-center gap-3 overflow-x-auto pb-2 pt-0.5">
+                {images.map((img, index) => {
+                  const isActive = safeImageIndex === index;
+                  return (
+                    <button
+                      type="button"
+                      key={`${img.url}-${index}`}
+                      onClick={() => setSelectedImageIndex(index)}
+                      aria-label={
+                        locale === "ar"
+                          ? `عرض الصورة ${index + 1}`
+                          : `Voir photo ${index + 1}`
+                      }
+                      aria-pressed={isActive}
+                      className={cn(
+                        "relative w-16 h-16 sm:w-20 sm:h-20 shrink-0 overflow-hidden rounded-xl border-2 transition-all cursor-pointer bg-white",
+                        isActive
+                          ? "border-[#4b9797] ring-2 ring-[#4b9797]/25 opacity-100 shadow-xs"
+                          : "border-slate-200 opacity-70 hover:opacity-100 hover:border-[#4b9797]/50"
+                      )}
+                    >
+                      <img
+                        src={img.url}
+                        alt={`${localized.title} - ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>

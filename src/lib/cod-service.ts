@@ -25,6 +25,66 @@ export interface CODOrder {
   paymentMethod: "COD";
 }
 
+export const MAX_PRODUCT_IMAGES = 6;
+
+/**
+ * Normalizes product image fields (`images` array, `image_url`, `imageUrl`, `image`)
+ * into a clean, deduplicated array of image URLs capped at `maxCount`.
+ */
+export function normalizeProductImages(
+  input:
+    | {
+        images?: unknown;
+        image_url?: unknown;
+        imageUrl?: unknown;
+        image?: unknown;
+      }
+    | null
+    | undefined,
+  maxCount = MAX_PRODUCT_IMAGES
+): string[] {
+  if (!input || typeof input !== "object") return [];
+
+  const collected: string[] = [];
+  const pushUrl = (raw: unknown) => {
+    if (typeof raw !== "string") return;
+    const trimmed = raw.trim();
+    if (!trimmed || collected.includes(trimmed)) return;
+    collected.push(trimmed);
+  };
+
+  if (Array.isArray(input.images)) {
+    for (const entry of input.images) {
+      if (typeof entry === "string") {
+        pushUrl(entry);
+      } else if (entry && typeof entry === "object") {
+        const maybeObj = entry as { url?: unknown; node?: { url?: unknown } };
+        pushUrl(maybeObj.url ?? maybeObj.node?.url);
+      }
+    }
+  } else if (typeof input.images === "string") {
+    const rawStr = input.images.trim();
+    if (rawStr.startsWith("[")) {
+      try {
+        const parsed = JSON.parse(rawStr);
+        if (Array.isArray(parsed)) {
+          for (const entry of parsed) pushUrl(entry);
+        }
+      } catch {
+        pushUrl(rawStr);
+      }
+    } else {
+      pushUrl(rawStr);
+    }
+  }
+
+  pushUrl(input.image_url);
+  pushUrl(input.imageUrl);
+  pushUrl(input.image);
+
+  return collected.slice(0, maxCount);
+}
+
 export interface AdminProduct {
   id: string;
   title: string;
@@ -40,6 +100,8 @@ export interface AdminProduct {
   sku?: string;
   reference?: string;
   images: string[];
+  image?: string;
+  image_url?: string;
   description: string;
   material?: string;
   origin?: string;
@@ -266,7 +328,11 @@ export function getAdminProducts(): AdminProduct[] {
       return [];
     }
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((item) => ({
+      ...item,
+      images: normalizeProductImages(item),
+    }));
   } catch {
     return [];
   }
@@ -291,11 +357,16 @@ export function saveAdminProduct(product: Omit<AdminProduct, "id" | "handle"> & 
   const current = getAdminProducts();
   const id = product.id || `prod-custom-${Date.now()}`;
   const handle = id;
+  const normalizedImages = normalizeProductImages(product);
+  const primaryImage = normalizedImages[0] || "";
 
   const newProduct: AdminProduct = {
     ...product,
     id,
     handle,
+    images: normalizedImages,
+    image: primaryImage || undefined,
+    image_url: primaryImage || undefined,
   };
 
   const existingIndex = current.findIndex((p) => p.id === id);

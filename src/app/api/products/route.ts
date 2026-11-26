@@ -3,7 +3,10 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@supabase/supabase-js";
 import { PRODUCTS, type ProductItem } from "@/data/teflookData";
 import { PRODUCT_TRANSLATIONS_AR } from "@/lib/product-localization";
-import type { AdminProduct } from "@/lib/cod-service";
+import {
+  normalizeProductImages,
+  type AdminProduct,
+} from "@/lib/cod-service";
 import { ADMIN_PRODUCTS_PATH } from "@/lib/admin-config";
 
 export const dynamic = "force-dynamic";
@@ -49,14 +52,7 @@ function getDemoProducts(): AdminProduct[] {
 }
 
 function mapRowToAdminProduct(row: any): AdminProduct {
-  const images =
-    Array.isArray(row.images) && row.images.length > 0
-      ? row.images.filter((img: any) => typeof img === "string" && img.trim().length > 0)
-      : row.image && typeof row.image === "string" && row.image.trim().length > 0
-      ? [row.image.trim()]
-      : typeof row.images === "string" && row.images.trim().length > 0
-      ? [row.images.trim()]
-      : [];
+  const images = normalizeProductImages(row);
 
   const id = String(row.id);
   const title = row.title || row.name || "Produit TefLook";
@@ -224,14 +220,7 @@ export async function POST(req: NextRequest) {
     const priceMadNum = Number(body.priceMad || 0);
     const oldPriceMadNum = body.oldPriceMad ? Number(body.oldPriceMad) : null;
     const categorySlug = body.categorySlug || "discipline-maitrise-de-soi";
-    const imagesList =
-      Array.isArray(body.images) && body.images.length > 0
-        ? body.images.filter((img: any) => typeof img === "string" && img.trim().length > 0)
-        : body.imageUrl && typeof body.imageUrl === "string" && body.imageUrl.trim().length > 0
-        ? [body.imageUrl.trim()]
-        : body.image && typeof body.image === "string" && body.image.trim().length > 0
-        ? [body.image.trim()]
-        : [];
+    const imagesList = normalizeProductImages(body);
     const primaryImage = imagesList[0] || "";
 
     // Attempt upsert with all standard columns
@@ -263,21 +252,37 @@ export async function POST(req: NextRequest) {
 
     let upsertResult = await supabase.from("products").upsert(fullPayload);
 
-    // If schema lacks some columns, retry with minimal baseline columns
+    // If schema lacks some optional columns, retry preserving `images` first, then baseline columns
     if (upsertResult.error) {
-      console.warn("Full payload upsert failed, retrying with baseline columns:", upsertResult.error.message);
+      console.warn("Full payload upsert failed, retrying core+images columns:", upsertResult.error.message);
       const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(productId);
-      const baselinePayload: Record<string, any> = {
+      const coreWithImagesPayload: Record<string, any> = {
         title: body.title,
         price: priceMadNum,
         category: categorySlug,
         image: primaryImage,
+        images: imagesList,
         description: body.description || "",
       };
       if (isUUID) {
-        baselinePayload.id = productId;
+        coreWithImagesPayload.id = productId;
       }
-      upsertResult = await supabase.from("products").upsert(baselinePayload);
+      upsertResult = await supabase.from("products").upsert(coreWithImagesPayload);
+
+      if (upsertResult.error) {
+        console.warn("Core+images upsert failed, retrying with baseline columns:", upsertResult.error.message);
+        const baselinePayload: Record<string, any> = {
+          title: body.title,
+          price: priceMadNum,
+          category: categorySlug,
+          image: primaryImage,
+          description: body.description || "",
+        };
+        if (isUUID) {
+          baselinePayload.id = productId;
+        }
+        upsertResult = await supabase.from("products").upsert(baselinePayload);
+      }
     }
 
     const savedProduct: AdminProduct = {

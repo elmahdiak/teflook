@@ -3,6 +3,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import {
   AlertTriangle,
+  ArrowLeft,
+  ArrowRight,
   Check,
   CheckCircle2,
   Edit2,
@@ -14,16 +16,19 @@ import {
   Plus,
   RotateCcw,
   Search,
+  Star,
   Trash2,
   Upload,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
+  MAX_PRODUCT_IMAGES,
   clearAllAdminProducts,
   deleteAdminProduct,
   getAdminCategories,
   getAdminProducts,
+  normalizeProductImages,
   resetAllAdminProducts,
   saveAdminProduct,
   type AdminProduct,
@@ -53,13 +58,14 @@ export default function AdminProductsPage() {
     ageRange: "6 à 9 ans",
     skills: "",
     sku: "",
-    imageUrl: "",
+    images: [] as string[],
     description: "",
     inStock: true,
   });
 
-  // Dual Image Upload state
+  // Multi-Image Upload / URL Manager state
   const [imageInputTab, setImageInputTab] = useState<"upload" | "url">("upload");
+  const [pendingImageUrl, setPendingImageUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -99,17 +105,18 @@ export default function AdminProductsPage() {
       ageRange: "6 à 9 ans",
       skills: "",
       sku: "",
-      imageUrl: "",
+      images: [],
       description: "",
       inStock: true,
     });
+    setPendingImageUrl("");
     setImageInputTab("upload");
     setModalOpen(true);
   }
 
   function openEditModal(prod: AdminProduct) {
     setEditingProduct(prod);
-    const existingImage = prod.images[0] || "";
+    const existingImages = normalizeProductImages(prod);
     setFormData({
       title: prod.title,
       priceMad: String(prod.priceMad),
@@ -119,44 +126,128 @@ export default function AdminProductsPage() {
       ageRange: prod.ageRange || prod.ageBracket || "6 à 9 ans",
       skills: Array.isArray(prod.skills) ? prod.skills.join(", ") : "",
       sku: prod.sku || prod.reference || "",
-      imageUrl: existingImage,
+      images: existingImages,
       description: prod.description || "",
       inStock: prod.inStock,
     });
-    // If the image is a local upload, default to upload tab; else url
-    setImageInputTab(existingImage.startsWith("/uploads/") ? "upload" : "url");
+    setPendingImageUrl("");
+    setImageInputTab(
+      existingImages.some((url) => url.startsWith("/uploads/")) || existingImages.length === 0
+        ? "upload"
+        : "url"
+    );
     setModalOpen(true);
   }
 
-  // Handle local file upload
+  // Handle multi-file upload (up to MAX_PRODUCT_IMAGES)
   async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const selectedFiles = Array.from(e.target.files || []);
+    e.target.value = "";
+    if (selectedFiles.length === 0) return;
+
+    const remainingSlots = MAX_PRODUCT_IMAGES - formData.images.length;
+    if (remainingSlots <= 0) {
+      showToast(`Maximum ${MAX_PRODUCT_IMAGES} images par produit atteint.`, "error");
+      return;
+    }
+
+    const filesToUpload = selectedFiles.slice(0, remainingSlots);
+    const hitLimit = selectedFiles.length > remainingSlots;
 
     setIsUploading(true);
     try {
-      const uploadData = new FormData();
-      uploadData.append("file", file);
+      const results = await Promise.all(
+        filesToUpload.map(async (file) => {
+          const uploadData = new FormData();
+          uploadData.append("file", file);
+          const res = await fetch("/api/upload", {
+            method: "POST",
+            body: uploadData,
+          });
+          const json = await res.json();
+          if (!res.ok || json.error || !json.url) {
+            throw new Error(json.error || `Échec pour ${file.name}`);
+          }
+          return String(json.url);
+        })
+      );
 
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: uploadData,
-      });
+      setFormData((prev) => ({
+        ...prev,
+        images: normalizeProductImages({ images: [...prev.images, ...results] }),
+      }));
 
-      const json = await res.json();
-      if (!res.ok || json.error) {
-        showToast(json.error || "Échec du téléversement de l'image.", "error");
-        return;
+      if (hitLimit) {
+        showToast(
+          `${results.length} image(s) ajoutée(s) (limite maximale de ${MAX_PRODUCT_IMAGES} images par produit).`
+        );
+      } else {
+        showToast(
+          results.length > 1
+            ? `${results.length} images importées avec succès !`
+            : "Image importée avec succès !"
+        );
       }
-
-      setFormData((prev) => ({ ...prev, imageUrl: json.url }));
-      showToast("Image importée avec succès !");
     } catch (err) {
       console.error(err);
-      showToast("Erreur lors de l'envoi de l'image au serveur.", "error");
+      showToast(
+        err instanceof Error
+          ? err.message
+          : "Erreur lors de l'envoi de l'image au serveur.",
+        "error"
+      );
     } finally {
       setIsUploading(false);
     }
+  }
+
+  function handleAddImageUrl() {
+    const trimmed = pendingImageUrl.trim();
+    if (!trimmed) return;
+
+    if (formData.images.length >= MAX_PRODUCT_IMAGES) {
+      showToast(`Maximum ${MAX_PRODUCT_IMAGES} images par produit atteint.`, "error");
+      return;
+    }
+
+    if (formData.images.includes(trimmed)) {
+      showToast("Cette image est déjà dans la galerie du produit.", "error");
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      images: normalizeProductImages({ images: [...prev.images, trimmed] }),
+    }));
+    setPendingImageUrl("");
+  }
+
+  function handleMoveImage(index: number, delta: -1 | 1) {
+    const targetIndex = index + delta;
+    if (targetIndex < 0 || targetIndex >= formData.images.length) return;
+    setFormData((prev) => {
+      const next = [...prev.images];
+      const [moved] = next.splice(index, 1);
+      next.splice(targetIndex, 0, moved);
+      return { ...prev, images: next };
+    });
+  }
+
+  function handleMakePrimaryImage(index: number) {
+    if (index <= 0 || index >= formData.images.length) return;
+    setFormData((prev) => {
+      const next = [...prev.images];
+      const [selected] = next.splice(index, 1);
+      next.unshift(selected);
+      return { ...prev, images: next };
+    });
+  }
+
+  function handleRemoveImage(index: number) {
+    setFormData((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
   }
 
   function handleSave(e: React.FormEvent) {
@@ -172,7 +263,23 @@ export default function AdminProductsPage() {
           .filter(Boolean)
       : [];
 
+    const finalImages = normalizeProductImages({
+      images: pendingImageUrl.trim()
+        ? [...formData.images, pendingImageUrl.trim()]
+        : formData.images,
+    });
+
     const saved = saveAdminProduct({
+      ...(editingProduct
+        ? {
+            material: editingProduct.material,
+            origin: editingProduct.origin,
+            features: editingProduct.features,
+            title_ar: editingProduct.title_ar,
+            description_ar: editingProduct.description_ar,
+            categoryName_ar: editingProduct.categoryName_ar,
+          }
+        : {}),
       id: editingProduct?.id,
       title: formData.title.trim(),
       categorySlug: formData.categorySlug,
@@ -184,7 +291,7 @@ export default function AdminProductsPage() {
       skills: skillsArray,
       sku: formData.sku.trim() || undefined,
       reference: formData.sku.trim() ? `Référence ${formData.sku.trim()}` : undefined,
-      images: formData.imageUrl.trim() ? [formData.imageUrl.trim()] : [],
+      images: finalImages,
       description: formData.description.trim(),
       inStock: formData.inStock,
     });
@@ -413,11 +520,21 @@ export default function AdminProductsPage() {
                   <tr key={prod.id} className="hover:bg-muted/30 transition-colors">
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
-                        <img
-                          src={prod.images[0] || "/images/teflook-mark.png"}
-                          alt={prod.title}
-                          className="size-12 rounded-xl object-cover border border-border shrink-0 bg-white"
-                        />
+                        <div className="relative shrink-0">
+                          <img
+                            src={prod.images[0] || "/images/teflook-mark.png"}
+                            alt={prod.title}
+                            className="size-12 rounded-xl object-cover border border-border bg-white"
+                          />
+                          {prod.images.length > 1 && (
+                            <span
+                              title={`${prod.images.length} photos`}
+                              className="absolute -bottom-1 -right-1 rounded-full bg-[#4b9797] px-1.5 py-0.2 text-[10px] font-bold text-white shadow-xs"
+                            >
+                              +{prod.images.length - 1}
+                            </span>
+                          )}
+                        </div>
                         <div className="min-w-0">
                           <p className="font-bold text-foreground line-clamp-1">{prod.title}</p>
                           <span className="text-[11px] text-muted-foreground">{prod.ageBracket || "Tous âges"}</span>
@@ -609,12 +726,12 @@ export default function AdminProductsPage() {
                 </div>
               </div>
 
-              {/* DUAL PRODUCT IMAGE INPUT (Local Upload + URL) */}
+              {/* MULTI-IMAGE PRODUCT GALLERY MANAGER (Upload + URL + Reorder/Remove) */}
               <div className="rounded-xl border border-border p-3.5 bg-muted/20 space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <label className="font-bold text-foreground flex items-center gap-1.5">
                     <ImageIcon size={14} className="text-brand-teal" />
-                    Image du produit *
+                    Images du produit ({formData.images.length}/{MAX_PRODUCT_IMAGES})
                   </label>
                   {/* Mode Selector Tabs */}
                   <div className="flex items-center bg-background border border-border rounded-lg p-0.5 text-[11px] font-bold">
@@ -628,7 +745,7 @@ export default function AdminProductsPage() {
                       }`}
                     >
                       <Upload size={12} />
-                      Téléverser fichier
+                      Téléverser
                     </button>
                     <button
                       type="button"
@@ -640,86 +757,172 @@ export default function AdminProductsPage() {
                       }`}
                     >
                       <LinkIcon size={12} />
-                      Lien URL
+                      Ajouter URL
                     </button>
                   </div>
                 </div>
 
-                {/* Option B: Local File Picker */}
+                {/* Option A: Multi-File Upload Picker */}
                 {imageInputTab === "upload" && (
                   <div className="space-y-2">
                     <input
                       type="file"
                       ref={fileInputRef}
+                      multiple
                       accept="image/*"
                       onChange={handleFileUpload}
+                      disabled={isUploading || formData.images.length >= MAX_PRODUCT_IMAGES}
                       className="hidden"
                       id="productImageFile"
                     />
-                    <div
+                    <button
+                      type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="border-2 border-dashed border-border hover:border-brand-teal rounded-xl p-4 text-center cursor-pointer transition-colors bg-background"
+                      disabled={isUploading || formData.images.length >= MAX_PRODUCT_IMAGES}
+                      className="w-full border-2 border-dashed border-border hover:border-brand-teal disabled:opacity-50 disabled:cursor-not-allowed rounded-xl p-4 text-center cursor-pointer transition-colors bg-background"
                     >
                       {isUploading ? (
-                        <div className="flex flex-col items-center justify-center gap-2 py-2">
+                        <div className="flex flex-col items-center justify-center gap-2 py-1">
                           <LoaderCircle size={22} className="animate-spin text-brand-teal" />
                           <span className="text-xs font-semibold text-muted-foreground">
-                            Téléversement de l'image en cours...
+                            Téléversement en cours...
                           </span>
                         </div>
                       ) : (
-                        <div className="flex flex-col items-center justify-center gap-1.5 py-1">
-                          <Upload size={22} className="text-brand-teal" />
+                        <div className="flex flex-col items-center justify-center gap-1 py-0.5">
+                          <Upload size={20} className="text-brand-teal" />
                           <span className="text-xs font-bold text-foreground">
-                            Cliquez pour choisir une image locale
+                            {formData.images.length >= MAX_PRODUCT_IMAGES
+                              ? `Limite de ${MAX_PRODUCT_IMAGES} images atteinte`
+                              : "Cliquez pour sélectionner une ou plusieurs images"}
                           </span>
                           <span className="text-[11px] text-muted-foreground">
-                            PNG, JPG, WebP ou GIF acceptés (jusqu'à 10 Mo)
+                            PNG, JPG, WebP ou GIF (max {MAX_PRODUCT_IMAGES} images, 10 Mo/fichier)
                           </span>
                         </div>
                       )}
-                    </div>
+                    </button>
                   </div>
                 )}
 
-                {/* Option A: Image URL Text Input */}
+                {/* Option B: Add Image URL Input */}
                 {imageInputTab === "url" && (
-                  <div>
+                  <div className="flex items-center gap-2">
                     <input
                       type="url"
-                      value={formData.imageUrl}
-                      onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                      value={pendingImageUrl}
+                      onChange={(e) => setPendingImageUrl(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          handleAddImageUrl();
+                        }
+                      }}
                       placeholder="https://images.unsplash.com/... ou /uploads/..."
-                      className="w-full h-10 px-3 rounded-xl border border-border bg-background text-xs outline-none focus:border-brand-teal"
+                      disabled={formData.images.length >= MAX_PRODUCT_IMAGES}
+                      className="flex-1 h-10 px-3 rounded-xl border border-border bg-background text-xs outline-none focus:border-brand-teal disabled:opacity-50"
                     />
+                    <Button
+                      type="button"
+                      onClick={handleAddImageUrl}
+                      disabled={
+                        !pendingImageUrl.trim() ||
+                        formData.images.length >= MAX_PRODUCT_IMAGES
+                      }
+                      className="h-10 px-3.5 rounded-xl bg-brand-teal hover:bg-brand-teal/90 text-white text-xs font-bold cursor-pointer shrink-0"
+                    >
+                      <Plus size={14} className="mr-1" />
+                      Ajouter
+                    </Button>
                   </div>
                 )}
 
-                {/* Live Image Preview Thumbnail */}
-                {formData.imageUrl && (
-                  <div className="flex items-center gap-3 p-2 bg-background border border-border rounded-xl">
-                    <img
-                      src={formData.imageUrl}
-                      alt="Aperçu"
-                      className="size-12 rounded-lg object-cover border border-border shrink-0 bg-white"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "/images/teflook-mark.png";
-                      }}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[11px] font-bold text-foreground truncate">{formData.imageUrl}</p>
-                      <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
-                        <Check size={11} /> Image prête et liée au produit
-                      </span>
+                {/* Multi-Image Gallery Grid with Reorder & Remove */}
+                {formData.images.length > 0 && (
+                  <div className="space-y-2 pt-1">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                      {formData.images.map((imgUrl, idx) => (
+                        <div
+                          key={`${imgUrl}-${idx}`}
+                          className={`group relative rounded-xl border p-1.5 bg-background transition-all ${
+                            idx === 0
+                              ? "border-[#4b9797] ring-1 ring-[#4b9797]/25"
+                              : "border-border"
+                          }`}
+                        >
+                          <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-white border border-border/60">
+                            <img
+                              src={imgUrl}
+                              alt={`Image ${idx + 1}`}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = "/images/teflook-mark.png";
+                              }}
+                            />
+                            <span
+                              className={`absolute top-1.5 left-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold shadow-xs ${
+                                idx === 0
+                                  ? "bg-[#4b9797] text-white"
+                                  : "bg-black/65 text-white"
+                              }`}
+                            >
+                              {idx === 0 ? "Principale" : `#${idx + 1}`}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveImage(idx)}
+                              className="absolute top-1.5 right-1.5 grid size-6 place-items-center rounded-full bg-white/90 text-rose-600 hover:bg-rose-600 hover:text-white border border-rose-200 shadow-xs transition-colors cursor-pointer"
+                              title="Supprimer cette image"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+
+                          {/* Reorder & Promote Controls */}
+                          <div className="mt-1.5 flex items-center justify-between gap-1">
+                            <div className="flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => handleMoveImage(idx, -1)}
+                                disabled={idx === 0}
+                                className="grid size-6 place-items-center rounded-md border border-border bg-muted/40 text-foreground hover:bg-brand-teal/15 hover:text-brand-teal disabled:opacity-35 disabled:cursor-not-allowed cursor-pointer"
+                                title="Déplacer à gauche"
+                              >
+                                <ArrowLeft size={12} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleMoveImage(idx, 1)}
+                                disabled={idx === formData.images.length - 1}
+                                className="grid size-6 place-items-center rounded-md border border-border bg-muted/40 text-foreground hover:bg-brand-teal/15 hover:text-brand-teal disabled:opacity-35 disabled:cursor-not-allowed cursor-pointer"
+                                title="Déplacer à droite"
+                              >
+                                <ArrowRight size={12} />
+                              </button>
+                            </div>
+
+                            {idx > 0 ? (
+                              <button
+                                type="button"
+                                onClick={() => handleMakePrimaryImage(idx)}
+                                className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold text-[#4b9797] hover:bg-[#4b9797]/10 transition-colors cursor-pointer"
+                                title="Définir comme image principale"
+                              >
+                                <Star size={11} />
+                                <span>Principale</span>
+                              </button>
+                            ) : (
+                              <span className="text-[10px] font-semibold text-emerald-700 flex items-center gap-0.5 pr-1">
+                                <Check size={11} /> Couverture
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, imageUrl: "" })}
-                      className="text-muted-foreground hover:text-rose-600 p-1 cursor-pointer"
-                      title="Retirer l'image"
-                    >
-                      <X size={14} />
-                    </button>
+                    <p className="text-[10px] text-muted-foreground">
+                      La première image (« Principale ») s'affiche sur les cartes boutique. Utilisez les flèches pour réorganiser l'ordre de la galerie.
+                    </p>
                   </div>
                 )}
               </div>
