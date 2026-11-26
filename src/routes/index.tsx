@@ -214,9 +214,13 @@ function TefLookStorefront() {
         className="overflow-hidden bg-primary py-2 text-primary-foreground"
         aria-label={t("a11y.promises")}
       >
-        <div lang={locale} className="announcement-track flex gap-12 text-[11px] font-semibold uppercase tracking-[0.13em]">
+        <div lang={locale} className="announcement-track flex text-[11px] font-semibold uppercase tracking-[0.13em]">
           {[0, 1].map((copy) => (
-            <div key={copy} aria-hidden={copy === 1} className="flex gap-12">
+            <div
+              key={copy}
+              aria-hidden={copy === 1}
+              className="flex shrink-0 items-center gap-6 sm:gap-10 pe-6 sm:pe-10 whitespace-nowrap"
+            >
               <span>{t("announcement.one")}</span>
               <span>{t("announcement.two")}</span>
               <span>{t("announcement.three")}</span>

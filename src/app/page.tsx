@@ -238,16 +238,12 @@ function TefLookStorefront() {
             <div
               key={copy}
               aria-hidden={copy === 1}
-              className="flex shrink-0 min-w-full items-center justify-around gap-8 sm:gap-12 px-4 sm:px-6 whitespace-nowrap"
+              className="flex shrink-0 items-center gap-6 sm:gap-10 pe-6 sm:pe-10 whitespace-nowrap"
             >
               <span>{t("announcement.one")}</span>
-              <span aria-hidden="true" className="opacity-50">•</span>
               <span>{t("announcement.two")}</span>
-              <span aria-hidden="true" className="opacity-50">•</span>
               <span>{t("announcement.three")}</span>
-              <span aria-hidden="true" className="opacity-50">•</span>
               <span>{t("announcement.four")}</span>
-              <span aria-hidden="true" className="opacity-50">•</span>
             </div>
           ))}
         </div>
