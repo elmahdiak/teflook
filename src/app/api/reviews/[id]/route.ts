@@ -117,7 +117,7 @@ async function handleUpdateReview(
       return NextResponse.json(
         {
           error:
-            "Le délai de modification (1 min 30 s) est expiré. / انتهت مهلة التعديل (دقيقة و30 ثانية).",
+            "Le délai de modification (30 secondes) est expiré. / انتهت مهلة التعديل (30 ثانية).",
           code: "EDIT_WINDOW_EXPIRED",
         },
         { status: 403 }

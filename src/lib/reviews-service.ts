@@ -13,7 +13,7 @@ export interface ProductReview {
 }
 
 const REVIEW_TOKENS_STORAGE_KEY = "teflook_review_tokens";
-export const REVIEW_EDIT_WINDOW_MS = 90_000; // 1 minute 30 seconds
+export const REVIEW_EDIT_WINDOW_MS = 30_000; // 30 seconds
 
 export interface StoredReviewOwnership {
   token: string;
