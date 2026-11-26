@@ -17,7 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { ProductReview } from "@/lib/reviews-service";
+import { getReviewImages, type ProductReview } from "@/lib/reviews-service";
 import type { AdminProduct } from "@/lib/cod-service";
 
 export default function AdminReviewsPage() {
@@ -30,7 +30,10 @@ export default function AdminReviewsPage() {
 
   // Modal State
   const [modalOpen, setModalOpen] = useState(false);
-  const [lightboxImageUrl, setLightboxImageUrl] = useState<string | null>(null);
+  const [lightboxState, setLightboxState] = useState<{
+    images: string[];
+    index: number;
+  } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
@@ -425,25 +428,34 @@ export default function AdminReviewsPage() {
                     « {rev.comment} »
                   </p>
 
-                  {/* Customer Review Photo Thumbnail */}
-                  {rev.image_url && (
-                    <div className="mt-3">
-                      <button
-                        type="button"
-                        onClick={() => setLightboxImageUrl(rev.image_url!)}
-                        aria-label={`Voir la photo de ${rev.author_name}`}
-                        className="group/thumb rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal cursor-zoom-in"
-                      >
-                        <img
-                          src={rev.image_url}
-                          alt={`Photo de l'avis de ${rev.author_name}`}
-                          loading="lazy"
-                          decoding="async"
-                          className="w-16 h-16 rounded-xl object-cover border border-border shadow-2xs transition-transform duration-200 group-hover/thumb:scale-105"
-                        />
-                      </button>
-                    </div>
-                  )}
+                  {/* Customer Review Photo Thumbnails */}
+                  {(() => {
+                    const reviewImages = getReviewImages(rev);
+                    if (reviewImages.length === 0) return null;
+                    return (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {reviewImages.map((imgUrl, idx) => (
+                          <button
+                            key={`${rev.id}-admin-img-${idx}`}
+                            type="button"
+                            onClick={() =>
+                              setLightboxState({ images: reviewImages, index: idx })
+                            }
+                            aria-label={`Voir la photo ${idx + 1} de ${rev.author_name}`}
+                            className="group/thumb rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal cursor-zoom-in"
+                          >
+                            <img
+                              src={imgUrl}
+                              alt={`Photo ${idx + 1} de l'avis de ${rev.author_name}`}
+                              loading="lazy"
+                              decoding="async"
+                              className="w-16 h-16 rounded-xl object-cover border border-border shadow-2xs transition-transform duration-200 group-hover/thumb:scale-105"
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Bottom Actions */}
@@ -478,27 +490,69 @@ export default function AdminReviewsPage() {
       )}
 
       {/* LIGHTBOX PREVIEW MODAL */}
-      {lightboxImageUrl && (
+      {lightboxState && lightboxState.images.length > 0 && (
         <div
           role="dialog"
           aria-modal="true"
-          onClick={() => setLightboxImageUrl(null)}
+          onClick={() => setLightboxState(null)}
           className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4"
         >
           <button
             type="button"
-            onClick={() => setLightboxImageUrl(null)}
+            onClick={() => setLightboxState(null)}
             aria-label="Fermer l'aperçu"
             className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center cursor-pointer"
           >
             <X size={20} />
           </button>
-          <img
-            src={lightboxImageUrl}
-            alt="Photo de l'avis client"
+          <div
+            className="flex flex-col items-center gap-3"
             onClick={(e) => e.stopPropagation()}
-            className="max-h-[85vh] max-w-[92vw] rounded-2xl object-contain shadow-2xl"
-          />
+          >
+            <img
+              src={lightboxState.images[lightboxState.index]}
+              alt="Photo de l'avis client"
+              className="max-h-[82vh] max-w-[92vw] rounded-2xl object-contain shadow-2xl"
+            />
+            {lightboxState.images.length > 1 && (
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setLightboxState((prev) =>
+                      prev
+                        ? {
+                            ...prev,
+                            index:
+                              (prev.index - 1 + prev.images.length) %
+                              prev.images.length,
+                          }
+                        : null
+                    )
+                  }
+                  className="px-3 py-1 rounded-full bg-white/15 hover:bg-white/25 text-xs font-bold text-white cursor-pointer"
+                >
+                  Précédent
+                </button>
+                <span className="text-xs font-bold text-white tabular-nums">
+                  {lightboxState.index + 1} / {lightboxState.images.length}
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setLightboxState((prev) =>
+                      prev
+                        ? { ...prev, index: (prev.index + 1) % prev.images.length }
+                        : null
+                    )
+                  }
+                  className="px-3 py-1 rounded-full bg-white/15 hover:bg-white/25 text-xs font-bold text-white cursor-pointer"
+                >
+                  Suivant
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

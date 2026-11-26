@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@supabase/supabase-js";
+import { getReviewImages } from "@/lib/reviews-service";
 import { ADMIN_PRODUCTS_PATH, ADMIN_REVIEWS_PATH } from "@/lib/admin-config";
 
 export const dynamic = "force-dynamic";
@@ -8,7 +9,8 @@ export const revalidate = 0;
 
 const REVIEW_IMAGES_BUCKET = "review-images";
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
-const MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB safety limit after client compression
+const MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB safety limit per compressed file
+const MAX_REVIEW_IMAGES = 3;
 
 function getSupabaseAdmin() {
   const supabaseUrl =
@@ -26,19 +28,20 @@ function getSupabaseAdmin() {
 async function uploadReviewImage(
   supabase: ReturnType<typeof getSupabaseAdmin>,
   file: File,
-  productHandle: string
+  productHandle: string,
+  index: number
 ): Promise<{ url?: string; error?: string }> {
   if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
     return { error: "Format d'image non supporté (JPG, PNG ou WebP uniquement)." };
   }
 
   if (file.size > MAX_UPLOAD_SIZE_BYTES) {
-    return { error: "L'image compressée dépasse la limite autorisée (5 Mo)." };
+    return { error: "Une image compressée dépasse la limite autorisée (5 Mo)." };
   }
 
   const ext = file.type === "image/webp" ? "webp" : file.type === "image/png" ? "png" : "jpg";
   const safeHandle = productHandle.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 40) || "product";
-  const storagePath = `${safeHandle}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const storagePath = `${safeHandle}/${Date.now()}-${index}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
 
   let uploadResult = await supabase.storage
@@ -49,7 +52,6 @@ async function uploadReviewImage(
       upsert: false,
     });
 
-  // Attempt auto-creating public bucket if missing and service role is configured
   if (
     uploadResult.error &&
     /bucket/i.test(uploadResult.error.message) &&
@@ -82,6 +84,21 @@ async function uploadReviewImage(
   return { url: publicUrlData.publicUrl };
 }
 
+function normalizeUrlList(rawUrls: unknown, singleUrl?: unknown): string[] {
+  const result: string[] = [];
+  if (Array.isArray(rawUrls)) {
+    for (const item of rawUrls) {
+      if (typeof item === "string" && item.trim() && !result.includes(item.trim())) {
+        result.push(item.trim());
+      }
+    }
+  }
+  if (typeof singleUrl === "string" && singleUrl.trim() && !result.includes(singleUrl.trim())) {
+    result.push(singleUrl.trim());
+  }
+  return result.slice(0, MAX_REVIEW_IMAGES);
+}
+
 export async function GET(req: NextRequest) {
   try {
     const supabase = getSupabaseAdmin();
@@ -109,7 +126,12 @@ export async function GET(req: NextRequest) {
       return NextResponse.json([]);
     }
 
-    return NextResponse.json(data || []);
+    const normalized = (data || []).map((row) => ({
+      ...row,
+      image_urls: getReviewImages(row),
+    }));
+
+    return NextResponse.json(normalized);
   } catch (error) {
     console.error("GET /api/reviews error:", error);
     return NextResponse.json([]);
@@ -128,8 +150,8 @@ export async function POST(req: NextRequest) {
     let comment = "";
     let rating = 5;
     let isVerified = true;
-    let imageUrl: string | null = null;
-    let imageFile: File | null = null;
+    let imageUrls: string[] = [];
+    let imageFiles: File[] = [];
 
     if (contentType.includes("multipart/form-data")) {
       const formData = await req.formData();
@@ -144,14 +166,21 @@ export async function POST(req: NextRequest) {
       rating = Math.max(1, Math.min(5, Math.round(Number(formData.get("rating")) || 5)));
       const verifiedRaw = formData.get("isVerified");
       isVerified = verifiedRaw !== null ? verifiedRaw !== "false" : true;
-      const maybeFile = formData.get("image");
-      if (maybeFile instanceof File && maybeFile.size > 0) {
-        imageFile = maybeFile;
+
+      const rawFiles = [...formData.getAll("images"), ...formData.getAll("image")];
+      imageFiles = rawFiles.filter(
+        (entry): entry is File => entry instanceof File && entry.size > 0
+      );
+
+      if (imageFiles.length > MAX_REVIEW_IMAGES) {
+        return NextResponse.json(
+          { error: `Maximum ${MAX_REVIEW_IMAGES} photos par avis.` },
+          { status: 400 }
+        );
       }
+
       const existingUrl = formData.get("imageUrl");
-      if (typeof existingUrl === "string" && existingUrl.trim()) {
-        imageUrl = existingUrl.trim();
-      }
+      imageUrls = normalizeUrlList(formData.getAll("imageUrls"), existingUrl);
     } else {
       const body = await req.json();
       productId = String(body.productId || body.product_id || "").trim();
@@ -162,10 +191,10 @@ export async function POST(req: NextRequest) {
       comment = String(body.comment || "").trim();
       rating = Math.max(1, Math.min(5, Math.round(Number(body.rating) || 5)));
       isVerified = body.isVerified !== undefined ? Boolean(body.isVerified) : true;
-      const rawImageUrl = body.imageUrl ?? body.image_url;
-      if (typeof rawImageUrl === "string" && rawImageUrl.trim()) {
-        imageUrl = rawImageUrl.trim();
-      }
+      imageUrls = normalizeUrlList(
+        body.imageUrls ?? body.image_urls,
+        body.imageUrl ?? body.image_url
+      );
     }
 
     if (!productId || !authorName || !comment) {
@@ -175,12 +204,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (imageFile) {
-      const uploadRes = await uploadReviewImage(supabase, imageFile, productHandle || productId);
-      if (uploadRes.error) {
-        return NextResponse.json({ error: uploadRes.error }, { status: 500 });
+    if (imageFiles.length > 0) {
+      const uploaded = await Promise.all(
+        imageFiles.map((file, idx) =>
+          uploadReviewImage(supabase, file, productHandle || productId, idx)
+        )
+      );
+      const failed = uploaded.find((res) => res.error);
+      if (failed?.error) {
+        return NextResponse.json({ error: failed.error }, { status: 500 });
       }
-      imageUrl = uploadRes.url ?? null;
+      const uploadedUrls = uploaded
+        .map((res) => res.url)
+        .filter((u): u is string => Boolean(u));
+      imageUrls = [...imageUrls, ...uploadedUrls].slice(0, MAX_REVIEW_IMAGES);
     }
 
     const payload: Record<string, unknown> = {
@@ -193,8 +230,9 @@ export async function POST(req: NextRequest) {
       is_verified: isVerified,
     };
 
-    if (imageUrl) {
-      payload.image_url = imageUrl;
+    if (imageUrls.length > 0) {
+      payload.image_urls = imageUrls;
+      payload.image_url = imageUrls[0];
     }
 
     const { data, error } = await supabase
@@ -227,7 +265,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      review: data,
+      review: {
+        ...data,
+        image_urls: getReviewImages(data),
+      },
     });
   } catch (error) {
     console.error("POST /api/reviews error:", error);

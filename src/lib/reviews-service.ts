@@ -7,8 +7,30 @@ export interface ProductReview {
   rating: number; // 1 to 5
   comment: string;
   image_url?: string | null;
+  image_urls?: string[] | null;
   is_verified?: boolean;
   created_at: string;
+}
+
+export function getReviewImages(
+  review: Pick<ProductReview, "image_url" | "image_urls">
+): string[] {
+  const collected: string[] = [];
+  if (Array.isArray(review.image_urls)) {
+    for (const url of review.image_urls) {
+      if (typeof url === "string" && url.trim() && !collected.includes(url.trim())) {
+        collected.push(url.trim());
+      }
+    }
+  }
+  if (
+    typeof review.image_url === "string" &&
+    review.image_url.trim() &&
+    !collected.includes(review.image_url.trim())
+  ) {
+    collected.push(review.image_url.trim());
+  }
+  return collected.slice(0, 3);
 }
 
 export interface ProductRatingSummary {
@@ -103,13 +125,21 @@ export async function submitProductReview(payload: {
   authorRole?: string;
   rating: number;
   comment: string;
+  imageFiles?: File[];
   imageFile?: File | null;
+  imageUrls?: string[];
   imageUrl?: string;
 }): Promise<{ success: boolean; review?: ProductReview; error?: string }> {
   try {
     let res: Response;
+    const filesToSend =
+      payload.imageFiles && payload.imageFiles.length > 0
+        ? payload.imageFiles.slice(0, 3)
+        : payload.imageFile
+        ? [payload.imageFile]
+        : [];
 
-    if (payload.imageFile) {
+    if (filesToSend.length > 0) {
       const formData = new FormData();
       formData.append("productId", payload.productId);
       if (payload.productHandle) formData.append("productHandle", payload.productHandle);
@@ -117,7 +147,9 @@ export async function submitProductReview(payload: {
       if (payload.authorRole) formData.append("authorRole", payload.authorRole);
       formData.append("rating", String(payload.rating));
       formData.append("comment", payload.comment);
-      formData.append("image", payload.imageFile);
+      for (const file of filesToSend) {
+        formData.append("images", file);
+      }
 
       res = await fetch("/api/reviews", {
         method: "POST",
