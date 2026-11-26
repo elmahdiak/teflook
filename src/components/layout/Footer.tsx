@@ -111,12 +111,12 @@ export function Footer() {
           preserveAspectRatio="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <polygon points="0,120 1440,0 1440,120" fill="#4b9797" />
+          <polygon points="0,120 1440,0 1440,120" fill="#4B9393" />
         </svg>
       </div>
 
       {/* Main Teal Footer Body */}
-      <div className="bg-[#4b9797]">
+      <div className="bg-[#4B9393]">
         <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-10 pt-10 sm:pt-14 pb-2">
           {/* 3-Column Airy Grid (12-column layout on desktop: 5 / 3 / 4) */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-8 lg:gap-12 items-start">
@@ -171,7 +171,7 @@ export function Footer() {
                 <button
                   type="submit"
                   className={cn(
-                    "mt-3 w-full rounded-2xl bg-white hover:bg-[#FAF8F5] active:scale-[0.99] py-3.5 px-6 font-display font-semibold text-[#4b9797] text-[15px] shadow-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#4b9797] focus-visible:ring-white cursor-pointer",
+                    "mt-3 w-full rounded-2xl bg-[#F67D56] hover:bg-[#E06740] active:scale-[0.99] py-3.5 px-6 font-display font-semibold text-white text-[15px] shadow-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#4B9393] focus-visible:ring-white cursor-pointer",
                     isAr && "font-sans"
                   )}
                 >

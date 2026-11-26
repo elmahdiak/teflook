@@ -5,75 +5,83 @@
   --font-sans: var(--font-dm-sans), var(--font-ibm-arabic), sans-serif;
   --font-display: var(--font-bricolage), var(--font-cairo), sans-serif;
 
-  /* ── Official TefLook Brand Color Palette ───────── */
-  --color-tef-teal: #266867;
-  --color-tef-teal-dark: #1A4D4C;
-  --color-tef-ochre: #D99528;
-  --color-tef-ochre-dark: #7A4F08;
-  --color-tef-terracotta: #C85D3E;
-  --color-tef-terracotta-dark: #8A351D;
-  --color-tef-limestone: #F3EFE6;
-  --color-tef-ink: #1C2625;
+  /* ── Strict 3-Color TefLook Brand Palette ──────── */
+  --color-teal: #4B9393;
+  --color-coral: #F67D56;
+  --color-orange: #F67D56;
+  --color-gold: #FCC846;
+  --color-ochre: #FCC846;
+  --color-amber: #FCC846;
 
-  /* Mapped legacy brand tokens to official palette */
-  --color-brand-teal: #266867;
-  --color-brand-teal-hover: #1A4D4C;
-  --color-brand-teal-dark: #1A4D4C;
-  --color-brand-forest: #1A4D4C;
-  --color-brand-forest-hover: #143B3A;
-  --color-brand-forest-dark: #10302F;
+  --color-tef-teal: #4B9393;
+  --color-tef-teal-dark: #1A3C34;
+  --color-tef-ochre: #FCC846;
+  --color-tef-ochre-dark: #9A6E04;
+  --color-tef-terracotta: #F67D56;
+  --color-tef-terracotta-dark: #D65A32;
+  --color-tef-limestone: #F7FAFA;
+  --color-tef-ink: #1A3C34;
 
-  --color-brand-orange: #C85D3E;
-  --color-brand-orange-hover: #8A351D;
-  --color-brand-orange-deep: #8A351D;
-  --color-brand-terracotta: #C85D3E;
+  /* Mapped legacy brand tokens to strict 3-color palette */
+  --color-brand-teal: #4B9393;
+  --color-brand-teal-hover: #3D7B7B;
+  --color-brand-teal-dark: #1A3C34;
+  --color-brand-forest: #1A3C34;
+  --color-brand-forest-hover: #132E27;
+  --color-brand-forest-dark: #0E231E;
 
-  --color-brand-amber: #D99528;
-  --color-brand-amber-hover: #7A4F08;
+  --color-brand-orange: #F67D56;
+  --color-brand-orange-hover: #E06740;
+  --color-brand-orange-deep: #D65A32;
+  --color-brand-terracotta: #F67D56;
 
-  --color-brand-cream: #F3EFE6;
-  --color-brand-sand: #F3EFE6;
-  --color-brand-mist: #E9F0F0;
-  --color-brand-warm-tint: #F9EFEA;
+  --color-brand-amber: #FCC846;
+  --color-brand-amber-hover: #E4B232;
+
+  --color-brand-cream: #F7FAFA;
+  --color-brand-sand: #F2F7F7;
+  --color-brand-mist: #EDF5F5;
+  --color-brand-warm-tint: #FEF2EE;
 }
 
 :root {
-  --background: #F3EFE6;
-  --foreground: #1C2625;
+  --background: #F7FAFA;
+  --foreground: #1A3C34;
 
-  --primary: #266867;
-  --primary-hover: #1A4D4C;
+  --primary: #4B9393;
+  --primary-hover: #3D7B7B;
   --primary-foreground: #FFFFFF;
 
-  --secondary: #F3EFE6;
-  --secondary-foreground: #1C2625;
+  --secondary: #F2F7F7;
+  --secondary-foreground: #1A3C34;
 
   --card: #FFFFFF;
-  --card-foreground: #1C2625;
+  --card-foreground: #1A3C34;
 
-  --muted: #E8E2D5;
-  --muted-foreground: #4F5E5C;
+  --muted: #EBF2F2;
+  --muted-foreground: #4A6360;
 
-  --border: #E2DDD2;
-  --input: #E2DDD2;
-  --ring: #266867;
+  --border: #E2ECEC;
+  --input: #E2ECEC;
+  --ring: #4B9393;
 
-  --destructive: #C85D3E;
+  --destructive: #F67D56;
   --destructive-foreground: #FFFFFF;
 
-  /* Official Brand Colors */
-  --brand-teal: #266867;
-  --brand-teal-hover: #1A4D4C;
-  --brand-forest: #1A4D4C;
-  --brand-forest-hover: #143B3A;
-  --brand-orange: #C85D3E;
-  --brand-orange-deep: #8A351D;
-  --brand-terracotta: #C85D3E;
-  --brand-amber: #D99528;
-  --brand-cream: #F3EFE6;
-  --brand-sand: #F3EFE6;
-  --brand-mist: #E9F0F0;
-  --brand-warm-tint: #F9EFEA;
+  /* Strict 3-Color Brand Tokens */
+  --brand-teal: #4B9393;
+  --brand-teal-hover: #3D7B7B;
+  --brand-forest: #1A3C34;
+  --brand-forest-hover: #132E27;
+  --brand-orange: #F67D56;
+  --brand-orange-hover: #E06740;
+  --brand-orange-deep: #D65A32;
+  --brand-terracotta: #F67D56;
+  --brand-amber: #FCC846;
+  --brand-cream: #F7FAFA;
+  --brand-sand: #F2F7F7;
+  --brand-mist: #EDF5F5;
+  --brand-warm-tint: #FEF2EE;
   --accent-foreground: #FFFFFF;
 }
 

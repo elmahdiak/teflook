@@ -187,7 +187,7 @@ export function Header({
       {/* 1. Main 3-Zone TefLook Navigation Bar */}
       <nav
         aria-label={t("a11y.navigation")}
-        className="w-full bg-[#FAF8F5]/95 backdrop-blur-md border-b border-[#E8E2D9]"
+        className="w-full bg-[#F7FAFA]/95 backdrop-blur-md border-b border-[#4B9393]/15"
       >
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-20 sm:h-22 md:h-24 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
           {/* Start Zone: Menu Trigger + Minimalist Language Dropdown */}
@@ -199,10 +199,10 @@ export function Header({
               aria-controls="teflook-navigation-menu"
               onClick={() => setMenuOpen((open) => !open)}
               className={cn(
-                "inline-flex items-center justify-center gap-1.5 h-10 px-2.5 sm:px-3 rounded-xl text-[#1A4D4B] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797] cursor-pointer shrink-0",
+                "inline-flex items-center justify-center gap-1.5 h-10 px-2.5 sm:px-3 rounded-xl text-[#1A3C34] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4B9393] cursor-pointer shrink-0",
                 menuOpen
-                  ? "bg-white border border-[#4b9797] ring-2 ring-[#4b9797]/20"
-                  : "border border-transparent hover:bg-white hover:border-[#E8E2D9] hover:text-[#4b9797]"
+                  ? "bg-white border border-[#4B9393] ring-2 ring-[#4B9393]/20"
+                  : "border border-transparent hover:bg-white hover:border-[#4B9393]/20 hover:text-[#4B9393]"
               )}
             >
               {menuOpen ? <HeaderCloseIcon /> : <HeaderMenuIcon />}
@@ -223,7 +223,7 @@ export function Header({
           <Link
             href="/"
             aria-label={isAr ? "الصفحة الرئيسية تيفلوك" : "Accueil TefLook"}
-            className="justify-self-center flex items-center justify-center rounded-xl transition-transform duration-200 hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797]"
+            className="justify-self-center flex items-center justify-center rounded-xl transition-transform duration-200 hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4B9393]"
           >
             <Image
               src="/images/teflook-stacked-logo.png"
@@ -247,10 +247,10 @@ export function Header({
               aria-label={t("a11y.search")}
               title={isAr ? "بحث (اضغط /)" : "Rechercher (touche /)"}
               className={cn(
-                "relative w-10 h-10 rounded-xl flex items-center justify-center text-[#1A4D4B] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797] cursor-pointer",
+                "relative w-10 h-10 rounded-xl flex items-center justify-center text-[#1A3C34] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4B9393] cursor-pointer",
                 isSearchOpen
-                  ? "bg-white border border-[#4b9797] ring-2 ring-[#4b9797]/25"
-                  : "border border-transparent hover:bg-white hover:border-[#E8E2D9] hover:text-[#4b9797]"
+                  ? "bg-white border border-[#4B9393] ring-2 ring-[#4B9393]/25"
+                  : "border border-transparent hover:bg-white hover:border-[#4B9393]/20 hover:text-[#4B9393]"
               )}
             >
               <HeaderSearchIcon />
@@ -261,11 +261,11 @@ export function Header({
               type="button"
               onClick={onOpenCart}
               aria-label={`${t("a11y.cart")}, ${count}`}
-              className="relative w-10 h-10 rounded-xl flex items-center justify-center text-[#1A4D4B] hover:bg-white hover:text-[#E86F51] border border-transparent hover:border-[#E8E2D9] transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797] cursor-pointer"
+              className="relative w-10 h-10 rounded-xl flex items-center justify-center text-[#1A3C34] hover:bg-white hover:text-[#F67D56] border border-transparent hover:border-[#4B9393]/20 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4B9393] cursor-pointer"
             >
               <HeaderBagIcon />
               {count > 0 && (
-                <span className="absolute top-1 end-1 min-w-[16px] h-4 px-1 rounded-full bg-[#E86F51] text-white font-brand-logo text-[10px] font-bold flex items-center justify-center ring-2 ring-[#FAF8F5]">
+                <span className="absolute top-1 end-1 min-w-[16px] h-4 px-1 rounded-full bg-[#F67D56] text-white font-brand-logo text-[10px] font-bold flex items-center justify-center ring-2 ring-[#F7FAFA]">
                   {count > 9 ? "9+" : count}
                 </span>
               )}
@@ -277,7 +277,7 @@ export function Header({
         {menuOpen && (
           <div
             id="teflook-navigation-menu"
-            className="border-t border-[#E8E2D9] bg-[#FAF8F5] px-4 sm:px-6 lg:px-8 py-3 shadow-sm"
+            className="border-t border-[#4B9393]/15 bg-[#F7FAFA] px-4 sm:px-6 lg:px-8 py-3 shadow-sm"
           >
             <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1 sm:gap-2">
               {navLinks.map((item) => (
@@ -286,7 +286,7 @@ export function Header({
                   href={item.href}
                   onClick={() => setMenuOpen(false)}
                   className={cn(
-                    "flex items-center justify-between w-full px-3 py-2.5 rounded-xl text-start text-sm font-bold text-[#1A4D4B] hover:bg-white hover:text-[#E86F51] transition-colors",
+                    "flex items-center justify-between w-full px-3 py-2.5 rounded-xl text-start text-sm font-bold text-[#1A3C34] hover:bg-white hover:text-[#4B9393] transition-colors",
                     isAr && "font-sans"
                   )}
                 >
@@ -304,7 +304,7 @@ export function Header({
         role="search"
         aria-label={t("a11y.search")}
         className={cn(
-          "grid transition-all duration-200 ease-out bg-[#FAF8F5]/95 backdrop-blur-md border-[#E8E2D9]",
+          "grid transition-all duration-200 ease-out bg-[#F7FAFA]/95 backdrop-blur-md border-[#4B9393]/15",
           isSearchOpen
             ? "grid-rows-[1fr] opacity-100 border-b shadow-xs"
             : "grid-rows-[0fr] opacity-0 border-b-0 pointer-events-none"
@@ -315,13 +315,13 @@ export function Header({
             <form
               onSubmit={handleSearchSubmit}
               noValidate
-              className="flex items-center gap-2 sm:gap-2.5 px-3 sm:px-4 h-11 sm:h-12 rounded-xl bg-white border border-[#E8E2D9] shadow-xs hover:border-[#4b9797]/50 focus-within:border-[#4b9797] focus-within:ring-2 focus-within:ring-[#4b9797]/20 transition-all duration-200"
+              className="flex items-center gap-2 sm:gap-2.5 px-3 sm:px-4 h-11 sm:h-12 rounded-xl bg-white border border-[#4B9393]/20 shadow-xs hover:border-[#4B9393]/50 focus-within:border-[#4B9393] focus-within:ring-2 focus-within:ring-[#4B9393]/20 transition-all duration-200"
             >
               {/* Search Submit Icon */}
               <button
                 type="submit"
                 aria-label={t("a11y.search")}
-                className="w-9 h-9 rounded-xl text-[#4b9797] hover:text-[#1A4D4B] hover:bg-[#FAF8F5] flex items-center justify-center shrink-0 transition-colors cursor-pointer"
+                className="w-9 h-9 rounded-xl text-[#4B9393] hover:text-[#1A3C34] hover:bg-[#F7FAFA] flex items-center justify-center shrink-0 transition-colors cursor-pointer"
               >
                 <HeaderSearchIcon />
               </button>
@@ -353,7 +353,7 @@ export function Header({
                   }}
                   aria-label={t("a11y.clearSearch")}
                   className={cn(
-                    "px-2.5 py-1 rounded-lg text-xs font-semibold text-[#1A3C34]/65 hover:text-[#E86F51] hover:bg-[#FAF8F5] transition-colors shrink-0 cursor-pointer",
+                    "px-2.5 py-1 rounded-lg text-xs font-semibold text-[#1A3C34]/65 hover:text-[#F67D56] hover:bg-[#F7FAFA] transition-colors shrink-0 cursor-pointer",
                     isAr && "font-sans"
                   )}
                 >
@@ -367,7 +367,7 @@ export function Header({
                 onClick={handleCloseSearch}
                 aria-label={isAr ? "إغلاق البحث" : "Fermer la recherche"}
                 title={isAr ? "إغلاق" : "Fermer"}
-                className="w-9 h-9 rounded-xl bg-[#FAF8F5] hover:bg-[#E86F51]/15 text-[#1A4D4B] hover:text-[#E86F51] border border-transparent hover:border-[#E8E2D9] flex items-center justify-center transition-colors duration-200 shrink-0 cursor-pointer"
+                className="w-9 h-9 rounded-xl bg-[#F7FAFA] hover:bg-[#F67D56]/15 text-[#1A3C34] hover:text-[#F67D56] border border-transparent hover:border-[#4B9393]/20 flex items-center justify-center transition-colors duration-200 shrink-0 cursor-pointer"
               >
                 <HeaderCloseIcon />
               </button>

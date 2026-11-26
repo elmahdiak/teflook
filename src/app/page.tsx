@@ -74,45 +74,45 @@ interface CategoryPillarTheme {
 const CATEGORY_THEMES: Record<ChildStoreCategory, CategoryPillarTheme> = {
   discipline: {
     icon: Target,
-    bgTint: "bg-[#4b9797]/10 group-hover:bg-[#4b9797]/20",
-    iconColor: "text-[#4b9797]",
-    badgeBg: "bg-[#4b9797]/10",
-    badgeText: "text-[#4b9797]",
+    bgTint: "bg-[#4B9393]/10 group-hover:bg-[#4B9393]/20",
+    iconColor: "text-[#4B9393]",
+    badgeBg: "bg-[#4B9393]/10",
+    badgeText: "text-[#4B9393]",
   },
   emotionalIntelligence: {
     icon: Heart,
-    bgTint: "bg-[#ff3500]/10 group-hover:bg-[#ff3500]/20",
-    iconColor: "text-[#ff3500]",
-    badgeBg: "bg-[#ff3500]/10",
-    badgeText: "text-[#ff3500]",
+    bgTint: "bg-[#F67D56]/10 group-hover:bg-[#F67D56]/20",
+    iconColor: "text-[#F67D56]",
+    badgeBg: "bg-[#F67D56]/10",
+    badgeText: "text-[#F67D56]",
   },
   independence: {
     icon: Sprout,
-    bgTint: "bg-[#2B6E73]/10 group-hover:bg-[#2B6E73]/20",
-    iconColor: "text-[#2B6E73]",
-    badgeBg: "bg-[#2B6E73]/10",
-    badgeText: "text-[#2B6E73]",
+    bgTint: "bg-[#4B9393]/12 group-hover:bg-[#4B9393]/20",
+    iconColor: "text-[#4B9393]",
+    badgeBg: "bg-[#FCC846]/20",
+    badgeText: "text-[#9A6E04]",
   },
   confidence: {
     icon: UsersRound,
-    bgTint: "bg-[#ff3500]/10 group-hover:bg-[#ff3500]/20",
-    iconColor: "text-[#ff3500]",
-    badgeBg: "bg-[#ff3500]/10",
-    badgeText: "text-[#ff3500]",
+    bgTint: "bg-[#F67D56]/10 group-hover:bg-[#F67D56]/20",
+    iconColor: "text-[#F67D56]",
+    badgeBg: "bg-[#F67D56]/10",
+    badgeText: "text-[#F67D56]",
   },
   creativity: {
     icon: Palette,
-    bgTint: "bg-[#ffbf00]/15 group-hover:bg-[#ffbf00]/25",
-    iconColor: "text-[#d99000]",
-    badgeBg: "bg-[#ffbf00]/15",
-    badgeText: "text-[#b47b00]",
+    bgTint: "bg-[#FCC846]/20 group-hover:bg-[#FCC846]/30",
+    iconColor: "text-[#9A6E04]",
+    badgeBg: "bg-[#FCC846]/20",
+    badgeText: "text-[#9A6E04]",
   },
   criticalThinking: {
     icon: Puzzle,
-    bgTint: "bg-[#4b9797]/10 group-hover:bg-[#4b9797]/20",
-    iconColor: "text-[#4b9797]",
-    badgeBg: "bg-[#4b9797]/10",
-    badgeText: "text-[#4b9797]",
+    bgTint: "bg-[#4B9393]/10 group-hover:bg-[#4B9393]/20",
+    iconColor: "text-[#4B9393]",
+    badgeBg: "bg-[#4B9393]/10",
+    badgeText: "text-[#4B9393]",
   },
 };
 
@@ -290,7 +290,7 @@ function TefLookStorefront() {
       />
 
       {/* 3. Hero Section - Pure Full-Width Unobstructed Visual Display */}
-      <section className="relative w-full overflow-hidden bg-[#FBF9F5]" aria-label="Bannière principale">
+      <section className="relative w-full overflow-hidden bg-[#F7FAFA]" aria-label="Bannière principale">
         <div className="relative w-full h-[420px] sm:h-[520px] md:h-[620px] lg:h-[680px] overflow-hidden">
           <img
             src="/Gemini_Generated_Gif_frnpcwfrnpcwfrnp.gif"
@@ -305,10 +305,10 @@ function TefLookStorefront() {
       <section className="store-shell pb-12 pt-10 sm:pt-14" aria-label={t("category.heading")}>
         <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#ff3500]">
+            <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#F67D56]">
               {t("category.eyebrow")}
             </p>
-            <h2 className="mt-2 font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#1A2D2A] tracking-tight">
+            <h2 className="mt-2 font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#1A3C34] tracking-tight">
               {t("category.heading")}
             </h2>
           </div>
@@ -316,7 +316,7 @@ function TefLookStorefront() {
             <button
               type="button"
               onClick={() => setActiveCategory("all")}
-              className="self-start sm:self-auto text-xs font-bold text-[#4b9797] hover:text-[#ff3500] transition-colors underline cursor-pointer"
+              className="self-start sm:self-auto text-xs font-bold text-[#4B9393] hover:text-[#F67D56] transition-colors underline cursor-pointer"
             >
               Afficher tous les univers
             </button>
@@ -342,8 +342,8 @@ function TefLookStorefront() {
                 }}
                 className={`group relative flex min-h-[140px] sm:min-h-[225px] flex-col items-center justify-between rounded-2xl sm:rounded-3xl p-2 sm:p-5 text-center transition-all duration-300 cursor-pointer ${
                   isSelected
-                    ? "border-2 border-[#4b9797] bg-[#F4F9F9] shadow-md ring-2 sm:ring-4 ring-[#4b9797]/15 scale-[1.02]"
-                    : "border border-[#EAE7DF] bg-white text-card-foreground shadow-xs hover:border-[#4b9797]/50 hover:bg-[#FAF9F6] hover:shadow-md hover:-translate-y-1"
+                    ? "border-2 border-[#4B9393] bg-[#F4F9F9] shadow-md ring-2 sm:ring-4 ring-[#4B9393]/15 scale-[1.02]"
+                    : "border border-[#4B9393]/15 bg-white text-card-foreground shadow-xs hover:border-[#4B9393]/50 hover:bg-[#F7FAFA] hover:shadow-md hover:-translate-y-1"
                 }`}
               >
                 {/* 2D Vector Graphic Icon in Soft Rounded Container */}
@@ -356,7 +356,7 @@ function TefLookStorefront() {
                     <Icon className={`size-5 sm:size-8 ${theme.iconColor} stroke-[2.2] transition-transform duration-300`} />
                   </div>
                   {isSelected && (
-                    <span className="absolute -top-1 -right-1 grid size-4 sm:size-5 place-items-center rounded-full bg-[#4b9797] text-white shadow-xs">
+                    <span className="absolute -top-1 -right-1 grid size-4 sm:size-5 place-items-center rounded-full bg-[#4B9393] text-white shadow-xs">
                       <Check size={9} strokeWidth={3} className="sm:hidden" />
                       <Check size={11} strokeWidth={3} className="hidden sm:block" />
                     </span>
@@ -370,7 +370,7 @@ function TefLookStorefront() {
                   >
                     {category.subtitle}
                   </span>
-                  <span className="text-[11px] sm:text-[14px] font-bold text-[#1E293B] group-hover:text-[#4b9797] transition-colors leading-[1.25] sm:leading-snug line-clamp-2 max-w-[17ch]">
+                  <span className="text-[11px] sm:text-[14px] font-bold text-[#1A3C34] group-hover:text-[#4B9393] transition-colors leading-[1.25] sm:leading-snug line-clamp-2 max-w-[17ch]">
                     {category.label}
                   </span>
                 </div>
@@ -419,7 +419,7 @@ function TefLookStorefront() {
                     </span>
                   )}
                   {activeAge !== "all" && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#4b9797]/10 px-3 py-0.5 text-xs font-semibold text-[#4b9797]">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#4B9393]/10 px-3 py-0.5 text-xs font-semibold text-[#4B9393]">
                       <span>{formatAgeBracketLabel(activeAge, locale)}</span>
                       <button
                         type="button"
@@ -475,8 +475,8 @@ function TefLookStorefront() {
               className={cn(
                 "whitespace-nowrap shrink-0 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-display font-semibold transition-all cursor-pointer border",
                 activeAge === "all"
-                  ? "bg-[#4b9797] text-white shadow-[0_4px_12px_-2px_rgba(75,151,151,0.4)] border-[#4b9797]"
-                  : "bg-white text-[#1A3C34] border-slate-200/90 hover:border-[#4b9797] hover:text-[#4b9797]",
+                  ? "bg-[#4B9393] text-white shadow-[0_4px_12px_-2px_rgba(75,147,147,0.4)] border-[#4B9393]"
+                  : "bg-white text-[#1A3C34] border-slate-200/90 hover:border-[#4B9393] hover:text-[#4B9393]",
                 locale === "ar" && "font-sans"
               )}
             >
@@ -493,8 +493,8 @@ function TefLookStorefront() {
                   className={cn(
                     "whitespace-nowrap shrink-0 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-display font-semibold transition-all cursor-pointer border",
                     isSelected
-                      ? "bg-[#4b9797] text-white shadow-[0_4px_12px_-2px_rgba(75,151,151,0.4)] border-[#4b9797]"
-                      : "bg-white text-[#1A3C34] border-slate-200/90 hover:border-[#4b9797] hover:text-[#4b9797]",
+                      ? "bg-[#4B9393] text-white shadow-[0_4px_12px_-2px_rgba(75,147,147,0.4)] border-[#4B9393]"
+                      : "bg-white text-[#1A3C34] border-slate-200/90 hover:border-[#4B9393] hover:text-[#4B9393]",
                     locale === "ar" && "font-sans"
                   )}
                 >

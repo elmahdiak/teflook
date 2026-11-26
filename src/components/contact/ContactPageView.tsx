@@ -281,7 +281,7 @@ export function ContactPageView() {
                 type="submit"
                 disabled={isSubmitting}
                 className={cn(
-                  "w-full py-3.5 px-6 rounded-full bg-[#4b9797] hover:bg-[#3a7d7d] active:scale-[0.99] text-white font-display font-bold text-sm sm:text-base shadow-[0_8px_20px_-6px_rgba(75,151,151,0.45)] transition-all duration-200 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2",
+                  "w-full py-3.5 px-6 rounded-full bg-[#F67D56] hover:bg-[#E06740] active:scale-[0.99] text-white font-display font-bold text-sm sm:text-base shadow-[0_8px_20px_-6px_rgba(246,125,86,0.45)] transition-all duration-200 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2",
                   isAr && "font-sans"
                 )}
               >

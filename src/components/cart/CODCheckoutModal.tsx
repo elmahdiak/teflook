@@ -138,7 +138,7 @@ export function CODCheckoutModal({
       {/* Modal Dialog */}
       <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl bg-card border border-border shadow-2xl my-auto animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-border px-5 py-4 bg-[#FBF9F5]">
+        <div className="flex items-center justify-between border-b border-border px-5 py-4 bg-[#F7FAFA]">
           <div className="flex items-center gap-2.5">
             <div className="grid size-9 place-items-center rounded-xl bg-brand-orange text-white">
               <Truck size={18} />

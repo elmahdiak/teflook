@@ -255,7 +255,7 @@ export function ProductCard({ product, onAdded, onNotice }: ProductCardProps) {
         disabled={!isAvailable || adding}
         aria-label={`${isAr ? "أضف إلى السلة" : "Ajouter au panier"} : ${localized.title}`}
         onClick={(e) => void handleAdd(e)}
-        className="mt-auto w-full py-2 px-2.5 sm:py-3 sm:px-5 rounded-full bg-brand-orange hover:bg-brand-orange-hover active:scale-[0.98] text-white font-display font-bold text-xs sm:text-sm tracking-wide shadow-[0_6px_16px_-4px_rgba(200,93,62,0.38)] transition-all duration-200 flex items-center justify-center gap-1 sm:gap-2 whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        className="mt-auto w-full py-2 px-2.5 sm:py-3 sm:px-5 rounded-full bg-[#F67D56] hover:bg-[#E06740] active:scale-[0.98] text-white font-display font-bold text-xs sm:text-sm tracking-wide shadow-[0_6px_16px_-4px_rgba(246,125,86,0.38)] transition-all duration-200 flex items-center justify-center gap-1 sm:gap-2 whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {adding ? (
           <LoaderCircle className="size-3.5 sm:size-4 animate-spin shrink-0" />

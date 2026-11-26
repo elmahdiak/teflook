@@ -39,9 +39,9 @@ const COLLECTION_CARDS: CollectionCardConfig[] = [
   {
     value: "discipline",
     icon: Target,
-    iconColorClass: "text-[#4b9797]",
-    iconInnerBgClass: "bg-[#4b9797]/10",
-    pillClass: "bg-[#4b9797]/10 text-[#4b9797]",
+    iconColorClass: "text-[#4B9393]",
+    iconInnerBgClass: "bg-[#4B9393]/10",
+    pillClass: "bg-[#4B9393]/10 text-[#4B9393]",
     tagFr: "MAÎTRISE",
     tagAr: "الانضباط",
     titleFr: "Discipline & gestion de soi",
@@ -52,9 +52,9 @@ const COLLECTION_CARDS: CollectionCardConfig[] = [
   {
     value: "emotionalIntelligence",
     icon: Heart,
-    iconColorClass: "text-[#ff3500]",
-    iconInnerBgClass: "bg-[#ff3500]/10",
-    pillClass: "bg-[#ff3500]/10 text-[#ff3500]",
+    iconColorClass: "text-[#F67D56]",
+    iconInnerBgClass: "bg-[#F67D56]/10",
+    pillClass: "bg-[#F67D56]/10 text-[#F67D56]",
     tagFr: "EMPATHIE",
     tagAr: "التعاطف",
     titleFr: "Intelligence émotionnelle",
@@ -65,9 +65,9 @@ const COLLECTION_CARDS: CollectionCardConfig[] = [
   {
     value: "independence",
     icon: Sprout,
-    iconColorClass: "text-[#1A3C34]",
-    iconInnerBgClass: "bg-[#4b9797]/12",
-    pillClass: "bg-[#1A3C34]/10 text-[#1A3C34]",
+    iconColorClass: "text-[#4B9393]",
+    iconInnerBgClass: "bg-[#4B9393]/12",
+    pillClass: "bg-[#FCC846]/20 text-[#9A6E04]",
     tagFr: "AUTONOMIE",
     tagAr: "الاستقلالية",
     titleFr: "Autonomie & compétences de vie",
@@ -78,9 +78,9 @@ const COLLECTION_CARDS: CollectionCardConfig[] = [
   {
     value: "confidence",
     icon: UsersRound,
-    iconColorClass: "text-[#ff3500]",
-    iconInnerBgClass: "bg-[#ff3500]/10",
-    pillClass: "bg-[#ff3500]/10 text-[#ff3500]",
+    iconColorClass: "text-[#F67D56]",
+    iconInnerBgClass: "bg-[#F67D56]/10",
+    pillClass: "bg-[#F67D56]/10 text-[#F67D56]",
     tagFr: "SOCIAL",
     tagAr: "التواصل",
     titleFr: "Confiance & compétences sociales",
@@ -91,9 +91,9 @@ const COLLECTION_CARDS: CollectionCardConfig[] = [
   {
     value: "creativity",
     icon: Palette,
-    iconColorClass: "text-[#d99000]",
-    iconInnerBgClass: "bg-[#ffbf00]/15",
-    pillClass: "bg-[#ffbf00]/15 text-[#b47b00]",
+    iconColorClass: "text-[#9A6E04]",
+    iconInnerBgClass: "bg-[#FCC846]/20",
+    pillClass: "bg-[#FCC846]/20 text-[#9A6E04]",
     tagFr: "IMAGINATION",
     tagAr: "الإبداع",
     titleFr: "Créativité & imagination",
@@ -104,9 +104,9 @@ const COLLECTION_CARDS: CollectionCardConfig[] = [
   {
     value: "criticalThinking",
     icon: Puzzle,
-    iconColorClass: "text-[#4b9797]",
-    iconInnerBgClass: "bg-[#4b9797]/10",
-    pillClass: "bg-[#4b9797]/10 text-[#4b9797]",
+    iconColorClass: "text-[#4B9393]",
+    iconInnerBgClass: "bg-[#4B9393]/10",
+    pillClass: "bg-[#4B9393]/10 text-[#4B9393]",
     tagFr: "LOGIQUE",
     tagAr: "المنطق",
     titleFr: "Pensée critique & résolution de problèmes",
@@ -179,7 +179,7 @@ export function CollectionsPageView() {
                 <Link
                   key={card.value}
                   href={`/?category=${encodeURIComponent(card.value)}#boutique`}
-                  className="bg-white border border-slate-100 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-[0_10px_30px_-6px_rgba(26,60,52,0.06)] hover:shadow-[0_20px_40px_-10px_rgba(75,151,151,0.15)] hover:border-[#4b9797]/30 transition-all duration-300 flex flex-col items-center text-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797]"
+                  className="bg-white border border-[#4B9393]/15 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-[0_10px_30px_-6px_rgba(26,60,52,0.06)] hover:shadow-[0_20px_40px_-10px_rgba(75,147,147,0.18)] hover:border-[#4B9393]/40 transition-all duration-300 flex flex-col items-center text-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4B9393]"
                 >
                   {/* Sleek Rounded Visual Box — smaller on mobile */}
                   <div className="w-14 h-14 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-105 transition-transform duration-300">
@@ -210,7 +210,7 @@ export function CollectionsPageView() {
                   {/* Category Title — xs on mobile, scales up */}
                   <h2
                     className={cn(
-                      "font-display font-bold text-xs sm:text-lg lg:text-xl text-[#1A3C34] leading-snug group-hover:text-[#4b9797] transition-colors",
+                      "font-display font-bold text-xs sm:text-lg lg:text-xl text-[#1A3C34] leading-snug group-hover:text-[#4B9393] transition-colors",
                       isAr && "font-sans"
                     )}
                   >
@@ -230,7 +230,7 @@ export function CollectionsPageView() {
                   {/* Action Indicator — hidden on mobile, visible sm+ */}
                   <span
                     className={cn(
-                      "mt-auto pt-3 sm:pt-5 hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-[#4b9797] group-hover:text-[#ff3500] transition-colors",
+                      "mt-auto pt-3 sm:pt-5 hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-[#4B9393] group-hover:text-[#F67D56] transition-colors",
                       isAr && "font-sans"
                     )}
                   >

@@ -263,14 +263,14 @@ export function ProductFilterSortBar({
                 )
               }
               className={cn(
-                "inline-flex items-center gap-1 sm:gap-1.5 py-1 font-medium transition-colors cursor-pointer hover:text-[#4b9797]",
+                "inline-flex items-center gap-1 sm:gap-1.5 py-1 font-medium transition-colors cursor-pointer hover:text-[#4B9393]",
                 (openPopover === "availability" || hasAvailabilityFilter) &&
-                  "text-[#4b9797] font-semibold"
+                  "text-[#4B9393] font-semibold"
               )}
             >
               <span>{isAr ? "التوفر" : "Disponibilité"}</span>
               {hasAvailabilityFilter && (
-                <span className="inline-flex size-4 items-center justify-center rounded-full bg-[#4b9797] text-[10px] font-bold text-white tabular-nums">
+                <span className="inline-flex size-4 items-center justify-center rounded-full bg-[#4B9393] text-[10px] font-bold text-white tabular-nums">
                   {filterState.availability.length}
                 </span>
               )}
@@ -278,7 +278,7 @@ export function ProductFilterSortBar({
                 size={14}
                 className={cn(
                   "text-slate-400 transition-transform duration-200 shrink-0",
-                  openPopover === "availability" && "rotate-180 text-[#4b9797]"
+                  openPopover === "availability" && "rotate-180 text-[#4B9393]"
                 )}
               />
             </button>
@@ -299,7 +299,7 @@ export function ProductFilterSortBar({
                     onClick={() =>
                       onFilterChange({ ...filterState, availability: [] })
                     }
-                    className="font-semibold text-[#4b9797] hover:text-[#ff3500] underline underline-offset-2 disabled:opacity-40 disabled:no-underline cursor-pointer disabled:cursor-default"
+                    className="font-semibold text-[#4B9393] hover:text-[#F67D56] underline underline-offset-2 disabled:opacity-40 disabled:no-underline cursor-pointer disabled:cursor-default"
                   >
                     {isAr ? "إعادة ضبط" : "Réinitialiser"}
                   </button>
@@ -319,15 +319,15 @@ export function ProductFilterSortBar({
                         className={cn(
                           "grid size-4 place-items-center rounded border transition-colors",
                           filterState.availability.includes("in_stock")
-                            ? "bg-[#4b9797] border-[#4b9797] text-white"
-                            : "bg-white border-slate-300 group-hover:border-[#4b9797]"
+                            ? "bg-[#4B9393] border-[#4B9393] text-white"
+                            : "bg-white border-slate-300 group-hover:border-[#4B9393]"
                         )}
                       >
                         {filterState.availability.includes("in_stock") && (
                           <Check size={11} strokeWidth={3} />
                         )}
                       </span>
-                      <span className="text-[13px] font-medium text-[#1A3C34] group-hover:text-[#4b9797]">
+                      <span className="text-[13px] font-medium text-[#1A3C34] group-hover:text-[#4B9393]">
                         {isAr ? "متوفر" : "En stock"}
                       </span>
                     </span>
@@ -349,15 +349,15 @@ export function ProductFilterSortBar({
                         className={cn(
                           "grid size-4 place-items-center rounded border transition-colors",
                           filterState.availability.includes("out_of_stock")
-                            ? "bg-[#4b9797] border-[#4b9797] text-white"
-                            : "bg-white border-slate-300 group-hover:border-[#4b9797]"
+                            ? "bg-[#4B9393] border-[#4B9393] text-white"
+                            : "bg-white border-slate-300 group-hover:border-[#4B9393]"
                         )}
                       >
                         {filterState.availability.includes("out_of_stock") && (
                           <Check size={11} strokeWidth={3} />
                         )}
                       </span>
-                      <span className="text-[13px] font-medium text-[#1A3C34] group-hover:text-[#4b9797]">
+                      <span className="text-[13px] font-medium text-[#1A3C34] group-hover:text-[#4B9393]">
                         {isAr ? "نفذت الكمية" : "Épuisé"}
                       </span>
                     </span>
@@ -379,20 +379,20 @@ export function ProductFilterSortBar({
                 setOpenPopover((cur) => (cur === "price" ? null : "price"))
               }
               className={cn(
-                "inline-flex items-center gap-1 sm:gap-1.5 py-1 font-medium transition-colors cursor-pointer hover:text-[#4b9797]",
+                "inline-flex items-center gap-1 sm:gap-1.5 py-1 font-medium transition-colors cursor-pointer hover:text-[#4B9393]",
                 (openPopover === "price" || hasPriceFilter) &&
-                  "text-[#4b9797] font-semibold"
+                  "text-[#4B9393] font-semibold"
               )}
             >
               <span>{isAr ? "السعر" : "Prix"}</span>
               {hasPriceFilter && (
-                <span className="size-1.5 rounded-full bg-[#ff3500]" />
+                <span className="size-1.5 rounded-full bg-[#F67D56]" />
               )}
               <ChevronDown
                 size={14}
                 className={cn(
                   "text-slate-400 transition-transform duration-200 shrink-0",
-                  openPopover === "price" && "rotate-180 text-[#4b9797]"
+                  openPopover === "price" && "rotate-180 text-[#4B9393]"
                 )}
               />
             </button>
@@ -415,7 +415,7 @@ export function ProductFilterSortBar({
                         maxPrice: "",
                       })
                     }
-                    className="shrink-0 font-semibold text-[#4b9797] hover:text-[#ff3500] underline underline-offset-2 disabled:opacity-40 disabled:no-underline cursor-pointer disabled:cursor-default"
+                    className="shrink-0 font-semibold text-[#4B9393] hover:text-[#F67D56] underline underline-offset-2 disabled:opacity-40 disabled:no-underline cursor-pointer disabled:cursor-default"
                   >
                     {isAr ? "إعادة ضبط" : "Réinitialiser"}
                   </button>
@@ -439,7 +439,7 @@ export function ProductFilterSortBar({
                           })
                         }
                         placeholder="0"
-                        className="w-full h-9 rounded-xl border border-slate-200 bg-slate-50/60 ps-3 pe-8 text-xs font-medium text-[#1A3C34] outline-none focus:border-[#4b9797] focus:bg-white tabular-nums"
+                        className="w-full h-9 rounded-xl border border-slate-200 bg-slate-50/60 ps-3 pe-8 text-xs font-medium text-[#1A3C34] outline-none focus:border-[#4B9393] focus:bg-white tabular-nums"
                       />
                       <span className="pointer-events-none absolute end-2.5 text-[10px] font-bold text-slate-400">
                         {isAr ? "د.م" : "DH"}
@@ -464,7 +464,7 @@ export function ProductFilterSortBar({
                           })
                         }
                         placeholder={String(highestPrice || 500)}
-                        className="w-full h-9 rounded-xl border border-slate-200 bg-slate-50/60 ps-3 pe-8 text-xs font-medium text-[#1A3C34] outline-none focus:border-[#4b9797] focus:bg-white tabular-nums"
+                        className="w-full h-9 rounded-xl border border-slate-200 bg-slate-50/60 ps-3 pe-8 text-xs font-medium text-[#1A3C34] outline-none focus:border-[#4B9393] focus:bg-white tabular-nums"
                       />
                       <span className="pointer-events-none absolute end-2.5 text-[10px] font-bold text-slate-400">
                         {isAr ? "د.م" : "DH"}
@@ -491,8 +491,8 @@ export function ProductFilterSortBar({
                 setOpenPopover((cur) => (cur === "sort" ? null : "sort"))
               }
               className={cn(
-                "inline-flex items-center gap-1 sm:gap-1.5 py-1 font-medium text-[#1A3C34] hover:text-[#4b9797] transition-colors cursor-pointer max-w-full",
-                openPopover === "sort" && "text-[#4b9797]"
+                "inline-flex items-center gap-1 sm:gap-1.5 py-1 font-medium text-[#1A3C34] hover:text-[#4B9393] transition-colors cursor-pointer max-w-full",
+                openPopover === "sort" && "text-[#4B9393]"
               )}
             >
               <span className="truncate max-w-[105px] sm:max-w-none">
@@ -502,7 +502,7 @@ export function ProductFilterSortBar({
                 size={14}
                 className={cn(
                   "text-slate-400 transition-transform duration-200 shrink-0",
-                  openPopover === "sort" && "rotate-180 text-[#4b9797]"
+                  openPopover === "sort" && "rotate-180 text-[#4B9393]"
                 )}
               />
             </button>
@@ -528,7 +528,7 @@ export function ProductFilterSortBar({
                       className={cn(
                         "w-full flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-start text-xs font-medium transition-colors cursor-pointer",
                         isSelected
-                          ? "bg-[#4b9797]/10 text-[#4b9797] font-bold"
+                          ? "bg-[#4B9393]/10 text-[#4B9393] font-bold"
                           : "text-[#1A3C34] hover:bg-slate-50"
                       )}
                     >
@@ -563,7 +563,7 @@ export function ProductFilterSortBar({
             <button
               type="button"
               onClick={() => toggleAvailability("in_stock")}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[#4b9797]/30 bg-[#4b9797]/10 px-3 py-1 font-semibold text-[#4b9797] hover:bg-[#4b9797]/20 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#4B9393]/30 bg-[#4B9393]/10 px-3 py-1 font-semibold text-[#4B9393] hover:bg-[#4B9393]/20 transition-colors cursor-pointer"
             >
               <span>{isAr ? "متوفر" : "En stock"}</span>
               <X size={12} />
@@ -574,7 +574,7 @@ export function ProductFilterSortBar({
             <button
               type="button"
               onClick={() => toggleAvailability("out_of_stock")}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[#4b9797]/30 bg-[#4b9797]/10 px-3 py-1 font-semibold text-[#4b9797] hover:bg-[#4b9797]/20 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#4B9393]/30 bg-[#4B9393]/10 px-3 py-1 font-semibold text-[#4B9393] hover:bg-[#4B9393]/20 transition-colors cursor-pointer"
             >
               <span>{isAr ? "نفذت الكمية" : "Épuisé"}</span>
               <X size={12} />
@@ -587,7 +587,7 @@ export function ProductFilterSortBar({
               onClick={() =>
                 onFilterChange({ ...filterState, minPrice: "", maxPrice: "" })
               }
-              className="inline-flex items-center gap-1.5 rounded-full border border-[#4b9797]/30 bg-[#4b9797]/10 px-3 py-1 font-semibold text-[#4b9797] hover:bg-[#4b9797]/20 transition-colors cursor-pointer tabular-nums"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#4B9393]/30 bg-[#4B9393]/10 px-3 py-1 font-semibold text-[#4B9393] hover:bg-[#4B9393]/20 transition-colors cursor-pointer tabular-nums"
             >
               <span>
                 {isAr ? "السعر :" : "Prix :"}{" "}
@@ -611,7 +611,7 @@ export function ProductFilterSortBar({
                 });
                 if (onClearAll) onClearAll();
               }}
-              className="font-semibold text-[#ff3500] hover:underline underline-offset-2 px-1.5 py-1 cursor-pointer"
+              className="font-semibold text-[#F67D56] hover:underline underline-offset-2 px-1.5 py-1 cursor-pointer"
             >
               {isAr ? "مسح الكل" : "Tout effacer"}
             </button>

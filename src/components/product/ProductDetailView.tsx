@@ -206,7 +206,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                       )
                     }
                     aria-label={locale === "ar" ? "الصورة السابقة" : "Photo précédente"}
-                    className="absolute start-3 top-1/2 -translate-y-1/2 grid size-9 sm:size-10 place-items-center rounded-full bg-white/90 text-[#1A3C34] border border-slate-200/80 shadow-md opacity-90 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[#4b9797] hover:text-white transition-all cursor-pointer"
+                    className="absolute start-3 top-1/2 -translate-y-1/2 grid size-9 sm:size-10 place-items-center rounded-full bg-white/90 text-[#1A3C34] border border-slate-200/80 shadow-md opacity-90 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[#4B9393] hover:text-white transition-all cursor-pointer"
                   >
                     <ChevronLeft
                       size={18}
@@ -219,7 +219,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                       setSelectedImageIndex((safeImageIndex + 1) % images.length)
                     }
                     aria-label={locale === "ar" ? "الصورة التالية" : "Photo suivante"}
-                    className="absolute end-3 top-1/2 -translate-y-1/2 grid size-9 sm:size-10 place-items-center rounded-full bg-white/90 text-[#1A3C34] border border-slate-200/80 shadow-md opacity-90 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[#4b9797] hover:text-white transition-all cursor-pointer"
+                    className="absolute end-3 top-1/2 -translate-y-1/2 grid size-9 sm:size-10 place-items-center rounded-full bg-white/90 text-[#1A3C34] border border-slate-200/80 shadow-md opacity-90 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[#4B9393] hover:text-white transition-all cursor-pointer"
                   >
                     <ChevronRight
                       size={18}
@@ -255,8 +255,8 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                       className={cn(
                         "relative w-16 h-16 sm:w-20 sm:h-20 shrink-0 overflow-hidden rounded-xl border-2 transition-all cursor-pointer bg-white",
                         isActive
-                          ? "border-[#4b9797] ring-2 ring-[#4b9797]/25 opacity-100 shadow-xs"
-                          : "border-slate-200 opacity-70 hover:opacity-100 hover:border-[#4b9797]/50"
+                          ? "border-[#4B9393] ring-2 ring-[#4B9393]/25 opacity-100 shadow-xs"
+                          : "border-slate-200 opacity-70 hover:opacity-100 hover:border-[#4B9393]/50"
                       )}
                     >
                       <img
@@ -291,14 +291,14 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
               <div className="mt-3 flex items-center gap-2 text-xs font-medium text-muted-foreground min-h-[1.5rem]">
                 {isMounted && liveRatingSummary.reviewsCount > 0 ? (
                   <>
-                    <div className="flex items-center text-amber-500">
+                    <div className="flex items-center text-[#FCC846]">
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
                           size={15}
                           className={cn(
                             i < Math.round(liveRatingSummary.rating)
-                              ? "fill-amber-500 text-amber-500"
+                              ? "fill-[#FCC846] text-[#FCC846]"
                               : "text-muted-foreground/30 fill-none"
                           )}
                         />
@@ -506,16 +506,16 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
           <section className="mt-16 sm:mt-24 border-t border-border pt-12 sm:pt-16">
             <div className="mb-8 flex items-end justify-between">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#ff3500]">
+                <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#F67D56]">
                   {locale === "ar" ? "أكمل تشكيلتك المختارة" : "Complétez votre sélection"}
                 </p>
-                <h2 className="mt-2 font-display text-2xl sm:text-3xl font-extrabold text-[#1E293B]">
+                <h2 className="mt-2 font-display text-2xl sm:text-3xl font-extrabold text-[#1A3C34]">
                   {locale === "ar" ? "قد يعجبك أيضاً" : "Vous aimerez aussi"}
                 </h2>
               </div>
               <Link
                 href="/#boutique"
-                className="text-xs font-bold text-[#4b9797] hover:text-[#ff3500] transition-colors"
+                className="text-xs font-bold text-[#4B9393] hover:text-[#F67D56] transition-colors"
               >
                 {locale === "ar" ? "استكشف كامل المتجر ←" : "Explorer toute la boutique →"}
               </Link>

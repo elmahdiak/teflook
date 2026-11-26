@@ -516,14 +516,14 @@ export function ProductReviewsSection({
       <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="grid size-7 place-items-center rounded-lg bg-[#ffbf00]/15 text-[#ffbf00]">
+            <span className="grid size-7 place-items-center rounded-lg bg-[#FCC846]/20 text-[#FCC846]">
               <Star size={15} fill="currentColor" />
             </span>
-            <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#ff3500]">
+            <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-[#F67D56]">
               {t("reviews.subtitle")}
             </p>
           </div>
-          <h2 className="mt-2 font-display text-2xl sm:text-3xl font-extrabold text-[#1A2D2A]">
+          <h2 className="mt-2 font-display text-2xl sm:text-3xl font-extrabold text-[#1A3C34]">
             {t("reviews.title")}
           </h2>
         </div>
@@ -532,7 +532,7 @@ export function ProductReviewsSection({
         <button
           type="button"
           onClick={() => setIsFormOpen((prev) => !prev)}
-          className="inline-flex items-center justify-center gap-2 self-start sm:self-auto px-5 py-2.5 rounded-full bg-[#ff3500] hover:bg-[#e03000] text-white text-xs sm:text-sm font-bold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all active:scale-95 cursor-pointer"
+          className="inline-flex items-center justify-center gap-2 self-start sm:self-auto px-5 py-2.5 rounded-full bg-[#F67D56] hover:bg-[#E06740] text-white text-xs sm:text-sm font-bold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all active:scale-95 cursor-pointer"
         >
           <PenLine size={15} className="shrink-0" />
           <span>{t("reviews.write")}</span>
@@ -601,7 +601,7 @@ export function ProductReviewsSection({
                           size={28}
                           className={cn(
                             "transition-colors",
-                            isActive ? "text-[#ffbf00] fill-[#ffbf00]" : "text-border fill-transparent"
+                            isActive ? "text-[#FCC846] fill-[#FCC846]" : "text-border fill-transparent"
                           )}
                         />
                       </button>
@@ -750,7 +750,7 @@ export function ProductReviewsSection({
                 <Button
                   type="submit"
                   disabled={isSubmitting || isCompressingImages}
-                  className="px-5 py-2.5 rounded-xl bg-[#ff3500] hover:bg-[#e03000] text-white text-xs sm:text-sm font-bold shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl bg-[#F67D56] hover:bg-[#E06740] text-white text-xs sm:text-sm font-bold shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50"
                 >
                   {isSubmitting ? (
                     <>
@@ -780,14 +780,14 @@ export function ProductReviewsSection({
             </div>
 
             {/* Stars */}
-            <div className="mt-2.5 flex items-center gap-1 text-[#ffbf00]">
+            <div className="mt-2.5 flex items-center gap-1 text-[#FCC846]">
               {[1, 2, 3, 4, 5].map((i) => (
                 <Star
                   key={i}
                   size={20}
                   className={cn(
                     i <= Math.round(summary.averageRating)
-                      ? "fill-[#ffbf00] text-[#ffbf00]"
+                      ? "fill-[#FCC846] text-[#FCC846]"
                       : "fill-slate-100 text-slate-200"
                   )}
                 />
@@ -808,8 +808,8 @@ export function ProductReviewsSection({
             </p>
 
             {summary.totalReviews > 0 && (
-              <div className="mt-3.5 inline-flex items-center gap-1.5 rounded-full bg-[#4b9797]/10 border border-[#4b9797]/20 px-3 py-1 text-xs font-bold text-[#2C6466]">
-                <Sparkles size={13} className="text-[#4b9797] shrink-0" />
+              <div className="mt-3.5 inline-flex items-center gap-1.5 rounded-full bg-[#4B9393]/10 border border-[#4B9393]/20 px-3 py-1 text-xs font-bold text-[#1A3C34]">
+                <Sparkles size={13} className="text-[#4B9393] shrink-0" />
                 <span>{summary.recommendPercentage}% {t("reviews.recommended")}</span>
               </div>
             )}
@@ -825,13 +825,13 @@ export function ProductReviewsSection({
                 <div key={starNum} className="flex items-center gap-3 text-xs">
                   <div className="flex items-center justify-end gap-1 w-10 shrink-0 font-bold text-slate-700 tabular-nums">
                     <span>{starNum}</span>
-                    <Star size={13} fill="currentColor" className="text-[#ffbf00] shrink-0" />
+                    <Star size={13} fill="currentColor" className="text-[#FCC846] shrink-0" />
                   </div>
 
                   {/* Progress Bar Track */}
                   <div className="flex-1 h-2.5 bg-slate-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-[#ffbf00] to-[#f59e0b] rounded-full transition-all duration-500"
+                      className="h-full bg-[#FCC846] rounded-full transition-all duration-500"
                       style={{ width: `${pct}%` }}
                     />
                   </div>
@@ -871,7 +871,7 @@ export function ProductReviewsSection({
           <button
             type="button"
             onClick={() => setIsFormOpen(true)}
-            className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#ff3500] hover:bg-[#e03000] text-white text-xs sm:text-sm font-bold shadow-sm hover:shadow-md transition-all cursor-pointer"
+            className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#F67D56] hover:bg-[#E06740] text-white text-xs sm:text-sm font-bold shadow-sm hover:shadow-md transition-all cursor-pointer"
           >
             <PenLine size={14} />
             <span>{t("reviews.write")}</span>
@@ -910,7 +910,7 @@ export function ProductReviewsSection({
                 <span
                   aria-hidden="true"
                   className={cn(
-                    "absolute -top-3 sm:-top-3.5 w-10 h-10 rounded-full bg-[#4b9797] text-white flex items-center justify-center shadow-md",
+                    "absolute -top-3 sm:-top-3.5 w-10 h-10 rounded-full bg-[#4B9393] text-white flex items-center justify-center shadow-md",
                     isAr ? "-left-3 sm:-left-3.5" : "-right-3 sm:-right-3.5"
                   )}
                 >
@@ -969,7 +969,7 @@ export function ProductReviewsSection({
                                 className={cn(
                                   "transition-colors",
                                   isActive
-                                    ? "text-[#ffbf00] fill-[#ffbf00]"
+                                    ? "text-[#FCC846] fill-[#FCC846]"
                                     : "text-slate-300 fill-transparent"
                                 )}
                               />
@@ -1142,7 +1142,7 @@ export function ProductReviewsSection({
                   <>
                     {/* Centered 5-Star Rating Row */}
                     <div
-                      className="text-[#ffbf00] flex items-center justify-center gap-1 mb-3"
+                      className="text-[#FCC846] flex items-center justify-center gap-1 mb-3"
                       aria-label={`${rev.rating} / 5`}
                     >
                       {[...Array(5)].map((_, i) => (
@@ -1151,7 +1151,7 @@ export function ProductReviewsSection({
                           size={16}
                           className={cn(
                             i < rev.rating
-                              ? "fill-[#ffbf00] text-[#ffbf00]"
+                              ? "fill-[#FCC846] text-[#FCC846]"
                               : "fill-slate-200/70 text-slate-200"
                           )}
                         />
@@ -1230,7 +1230,7 @@ export function ProductReviewsSection({
                           {rev.is_verified && (
                             <BadgeCheck
                               size={15}
-                              className="text-[#4b9797] shrink-0"
+                              className="text-[#4B9393] shrink-0"
                               aria-label={t("reviews.verified")}
                             />
                           )}
@@ -1241,7 +1241,7 @@ export function ProductReviewsSection({
                           <button
                             type="button"
                             onClick={() => startEditingReview(rev)}
-                            className="inline-flex items-center gap-1 rounded-full border border-[#4b9797]/30 bg-white px-2.5 py-0.5 text-[11px] font-bold text-[#4b9797] hover:bg-[#4b9797] hover:text-white transition-colors cursor-pointer tabular-nums"
+                            className="inline-flex items-center gap-1 rounded-full border border-[#4B9393]/30 bg-white px-2.5 py-0.5 text-[11px] font-bold text-[#4B9393] hover:bg-[#4B9393] hover:text-white transition-colors cursor-pointer tabular-nums"
                           >
                             <Pencil size={11} aria-hidden="true" />
                             <span>

@@ -90,7 +90,7 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/images/Untitled Design.png" />
       </head>
-      <body className="min-h-full flex flex-col bg-[#F3EFE6] text-[#1C2625] antialiased selection:bg-[#C85D3E] selection:text-white">
+      <body className="min-h-full flex flex-col bg-[#F7FAFA] text-[#1A3C34] antialiased selection:bg-[#F67D56] selection:text-white">
         <CookieConsentProvider>
           {children}
           {/* Floating WhatsApp Contact Button (Active across all pages) */}
