@@ -88,7 +88,7 @@ export function ProductCard({ product, onAdded, onNotice }: ProductCardProps) {
     if (hasDiscount && discountPercent > 0) {
       return {
         text: isAr ? `وفّر ${discountPercent}%` : `ÉCONOMISEZ ${discountPercent}%`,
-        bgClass: "bg-[#ff3500]",
+        bgClass: "bg-brand-orange",
         showTagIcon: true,
       };
     }
@@ -98,7 +98,7 @@ export function ProductCard({ product, onAdded, onNotice }: ProductCardProps) {
       const isBestseller = upper.includes("BEST") || upper.includes("TOP");
       return {
         text: isAr && isBestseller ? "الأكثر طلباً" : upper,
-        bgClass: isBestseller ? "bg-[#ff3500]" : "bg-[#4b9797]",
+        bgClass: isBestseller ? "bg-brand-orange" : "bg-[#4b9797]",
         showTagIcon: false,
       };
     }
@@ -106,7 +106,7 @@ export function ProductCard({ product, onAdded, onNotice }: ProductCardProps) {
     if (reviewsCount > 0) {
       return {
         text: isAr ? "الأكثر طلباً" : "BESTSELLER",
-        bgClass: "bg-[#ff3500]",
+        bgClass: "bg-brand-orange",
         showTagIcon: false,
       };
     }
@@ -239,7 +239,7 @@ export function ProductCard({ product, onAdded, onNotice }: ProductCardProps) {
 
       {/* 5. Centered Pricing (Sale Price + Crossed-Out Compare-At Price) */}
       <div className="flex items-baseline justify-center gap-1.5 sm:gap-2.5 mb-3 sm:mb-4 flex-wrap" dir="ltr">
-        <span className="text-sm sm:text-lg md:text-xl font-extrabold text-[#ff3500] tabular-nums whitespace-nowrap">
+        <span className="text-sm sm:text-lg md:text-xl font-extrabold text-brand-orange tabular-nums whitespace-nowrap">
           {formattedPrice}
         </span>
         {formattedComparePrice && (
@@ -255,7 +255,7 @@ export function ProductCard({ product, onAdded, onNotice }: ProductCardProps) {
         disabled={!isAvailable || adding}
         aria-label={`${isAr ? "أضف إلى السلة" : "Ajouter au panier"} : ${localized.title}`}
         onClick={(e) => void handleAdd(e)}
-        className="mt-auto w-full py-2 px-2.5 sm:py-3 sm:px-5 rounded-full bg-[#ff3500] hover:bg-[#e02e00] active:scale-[0.98] text-white font-display font-bold text-xs sm:text-sm tracking-wide shadow-[0_6px_16px_-4px_rgba(255,53,0,0.4)] transition-all duration-200 flex items-center justify-center gap-1 sm:gap-2 whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        className="mt-auto w-full py-2 px-2.5 sm:py-3 sm:px-5 rounded-full bg-brand-orange hover:bg-brand-orange-hover active:scale-[0.98] text-white font-display font-bold text-xs sm:text-sm tracking-wide shadow-[0_6px_16px_-4px_rgba(250,114,82,0.38)] transition-all duration-200 flex items-center justify-center gap-1 sm:gap-2 whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {adding ? (
           <LoaderCircle className="size-3.5 sm:size-4 animate-spin shrink-0" />
