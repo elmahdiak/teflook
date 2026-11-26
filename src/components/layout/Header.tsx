@@ -232,7 +232,7 @@ export function Header({
               height={220}
               quality={100}
               priority
-              className="h-14 sm:h-16 md:h-20 w-auto object-contain mix-blend-multiply"
+              className="h-14 sm:h-16 md:h-20 w-auto object-contain"
             />
           </Link>
 
