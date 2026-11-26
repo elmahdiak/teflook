@@ -206,6 +206,14 @@ export function Footer() {
               <ul className="space-y-3.5">
                 <li>
                   <Link
+                    href="/collections"
+                    className="inline-block text-[15px] text-white/90 hover:text-white hover:translate-x-0.5 transition-all duration-200"
+                  >
+                    {messages["nav.collections"]}
+                  </Link>
+                </li>
+                <li>
+                  <Link
                     href="/#boutique"
                     className="inline-block text-[15px] text-white/90 hover:text-white hover:translate-x-0.5 transition-all duration-200"
                   >
