@@ -167,8 +167,8 @@ export function CollectionsPageView() {
             </p>
           </div>
 
-          {/* 6-Category Modern Card Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4 sm:px-6 py-8">
+          {/* 6-Category Modern Card Grid — 2 cols on mobile, 2 on sm, 3 on lg */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 max-w-6xl mx-auto px-4 sm:px-6 py-8">
             {COLLECTION_CARDS.map((card) => {
               const Icon = card.icon;
               const tag = isAr ? card.tagAr : card.tagFr;
@@ -179,27 +179,27 @@ export function CollectionsPageView() {
                 <Link
                   key={card.value}
                   href={`/?category=${encodeURIComponent(card.value)}#boutique`}
-                  className="bg-white border border-slate-100 rounded-3xl p-6 sm:p-8 shadow-[0_10px_30px_-6px_rgba(26,60,52,0.06)] hover:shadow-[0_20px_40px_-10px_rgba(75,151,151,0.15)] hover:border-[#4b9797]/30 transition-all duration-300 flex flex-col items-center text-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797]"
+                  className="bg-white border border-slate-100 rounded-3xl p-3.5 sm:p-6 lg:p-8 shadow-[0_10px_30px_-6px_rgba(26,60,52,0.06)] hover:shadow-[0_20px_40px_-10px_rgba(75,151,151,0.15)] hover:border-[#4b9797]/30 transition-all duration-300 flex flex-col items-center text-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4b9797]"
                 >
-                  {/* Sleek Rounded Top Visual Box */}
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-6 group-hover:scale-105 transition-transform duration-300">
+                  {/* Sleek Rounded Visual Box — smaller on mobile */}
+                  <div className="w-14 h-14 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-105 transition-transform duration-300">
                     <div
                       className={cn(
-                        "size-12 sm:size-14 rounded-xl flex items-center justify-center transition-transform duration-300",
+                        "size-8 sm:size-12 lg:size-14 rounded-lg sm:rounded-xl flex items-center justify-center transition-transform duration-300",
                         card.iconInnerBgClass
                       )}
                     >
                       <Icon
-                        className={cn("size-6 sm:size-7 stroke-[2.1]", card.iconColorClass)}
+                        className={cn("size-4 sm:size-6 lg:size-7 stroke-[2.1]", card.iconColorClass)}
                         aria-hidden="true"
                       />
                     </div>
                   </div>
 
-                  {/* Category Tag Pill */}
+                  {/* Category Tag Pill — tighter on mobile */}
                   <span
                     className={cn(
-                      "px-3 py-1 rounded-full text-xs font-display font-bold mb-3",
+                      "px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-[10px] sm:text-xs font-display font-bold mb-2 sm:mb-3",
                       isAr ? "font-sans tracking-normal" : "uppercase tracking-wider",
                       card.pillClass
                     )}
@@ -207,30 +207,30 @@ export function CollectionsPageView() {
                     {tag}
                   </span>
 
-                  {/* Category Title */}
+                  {/* Category Title — xs on mobile, scales up */}
                   <h2
                     className={cn(
-                      "font-display font-bold text-lg sm:text-xl text-[#1A3C34] leading-snug group-hover:text-[#4b9797] transition-colors",
+                      "font-display font-bold text-xs sm:text-lg lg:text-xl text-[#1A3C34] leading-snug group-hover:text-[#4b9797] transition-colors",
                       isAr && "font-sans"
                     )}
                   >
                     {title}
                   </h2>
 
-                  {/* Concise Subtitle */}
+                  {/* Concise Subtitle — hidden on mobile to keep 2-col cards compact */}
                   <p
                     className={cn(
-                      "mt-2.5 text-xs sm:text-sm text-slate-500 leading-relaxed max-w-xs",
+                      "mt-1.5 sm:mt-2.5 hidden sm:block text-xs sm:text-sm text-slate-500 leading-relaxed max-w-xs",
                       isAr && "font-sans leading-loose"
                     )}
                   >
                     {desc}
                   </p>
 
-                  {/* Action Indicator */}
+                  {/* Action Indicator — hidden on mobile, visible sm+ */}
                   <span
                     className={cn(
-                      "mt-auto pt-5 inline-flex items-center gap-1.5 text-xs font-bold text-[#4b9797] group-hover:text-[#ff3500] transition-colors",
+                      "mt-auto pt-3 sm:pt-5 hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-[#4b9797] group-hover:text-[#ff3500] transition-colors",
                       isAr && "font-sans"
                     )}
                   >
