@@ -1,16 +1,41 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond } from "next/font/google";
+import {
+  Bricolage_Grotesque,
+  DM_Sans,
+  Cairo,
+  IBM_Plex_Sans_Arabic,
+} from "next/font/google";
 import "./globals.css";
 import { WhatsAppButton } from "@/components/whatsapp/WhatsAppButton";
 import { BackToTopButton } from "@/components/ui/BackToTopButton";
 import { CookieConsentProvider } from "@/lib/cookies";
 import { ConsentScriptLoader } from "@/components/cookies/ConsentScriptLoader";
 
-const cormorantGaramond = Cormorant_Garamond({
+const bricolageGrotesque = Bricolage_Grotesque({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  variable: "--font-cormorant",
+  weight: ["600", "700"],
+  variable: "--font-bricolage",
+  display: "swap",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-dm-sans",
+  display: "swap",
+});
+
+const cairo = Cairo({
+  subsets: ["arabic", "latin"],
+  weight: ["700", "800"],
+  variable: "--font-cairo",
+  display: "swap",
+});
+
+const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
+  subsets: ["arabic", "latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-ibm-arabic",
   display: "swap",
 });
 
@@ -59,21 +84,13 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`h-full scroll-smooth ${cormorantGaramond.className} ${cormorantGaramond.variable}`}
+      className={`h-full scroll-smooth ${bricolageGrotesque.variable} ${dmSans.variable} ${cairo.variable} ${ibmPlexSansArabic.variable}`}
       suppressHydrationWarning
     >
       <head>
         <link rel="icon" href="/images/Untitled Design.png" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap"
-          rel="stylesheet"
-        />
       </head>
-      <body
-        className={`min-h-full flex flex-col bg-[#FBF9F5] text-[#1C2A2B] font-medium text-[15px] sm:text-base antialiased selection:bg-[#FE7C58] selection:text-white ${cormorantGaramond.className} ${cormorantGaramond.variable}`}
-      >
+      <body className="min-h-full flex flex-col bg-[#FBF9F5] text-[#1C2A2B] antialiased selection:bg-[#FE7C58] selection:text-white">
         <CookieConsentProvider>
           {children}
           {/* Floating WhatsApp Contact Button (Active across all pages) */}
