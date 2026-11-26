@@ -98,6 +98,22 @@ export function formatEditCountdown(remainingMs: number): string {
   return `${mins}:${secs}`;
 }
 
+export function formatReviewDate(
+  createdAt: string | undefined,
+  locale: "fr" | "ar" | string
+): string | null {
+  if (!createdAt) return null;
+  const date = new Date(createdAt);
+  if (Number.isNaN(date.getTime())) return null;
+
+  const intlLocale = locale === "ar" ? "ar-MA" : "fr-FR";
+  return new Intl.DateTimeFormat(intlLocale, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
 export function getReviewImages(
   review: Pick<ProductReview, "image_url" | "image_urls">
 ): string[] {

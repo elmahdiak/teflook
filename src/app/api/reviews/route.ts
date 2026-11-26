@@ -42,6 +42,7 @@ export async function GET(req: NextRequest) {
 
     const normalized = (data || []).map((row) => ({
       ...row,
+      created_at: row.created_at ?? "",
       image_urls: getReviewImages(row),
     }));
 
@@ -184,6 +185,7 @@ export async function POST(req: NextRequest) {
       editToken,
       review: {
         ...data,
+        created_at: data.created_at || new Date().toISOString(),
         image_urls: getReviewImages(data),
       },
     });

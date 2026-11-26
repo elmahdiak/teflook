@@ -26,6 +26,7 @@ import {
   calculateRatingSummary,
   fetchReviewsByProduct,
   formatEditCountdown,
+  formatReviewDate,
   getRemainingEditMs,
   getReviewImages,
   getStoredReviewTokens,
@@ -887,6 +888,7 @@ export function ProductReviewsSection({
               : 0;
             const canEdit = Boolean(ownership?.token && nowMs > 0 && remainingEditMs > 0);
             const countdownLabel = formatEditCountdown(remainingEditMs);
+            const formattedDate = formatReviewDate(rev.created_at, locale);
             const isEditing = editingReviewId === rev.id;
             const bottomTag = rev.author_role
               ? `${rev.author_role} • ${productTitle}`
@@ -1216,37 +1218,48 @@ export function ProductReviewsSection({
                     {/* Subtle Horizontal Separator */}
                     <div className="w-full border-t border-slate-200/80 mb-4 mt-auto" />
 
-                    {/* Bottom Product Reference / Verified Author Tag + Owner Edit Action */}
+                    {/* Bottom Product Reference / Verified Author Tag + Date + Owner Edit Action */}
                     <div
                       className={cn(
-                        "font-sans text-xs sm:text-sm text-slate-500 font-medium flex items-center justify-center gap-2 flex-wrap",
+                        "font-sans text-xs sm:text-sm text-slate-500 font-medium flex flex-col items-center justify-center gap-1.5",
                         isAr && "font-sans"
                       )}
                     >
-                      <span className="inline-flex items-center gap-1.5">
-                        {rev.is_verified && (
-                          <BadgeCheck
-                            size={15}
-                            className="text-[#4b9797] shrink-0"
-                            aria-label={t("reviews.verified")}
-                          />
-                        )}
-                        <span>{bottomTag}</span>
-                      </span>
+                      <div className="flex items-center justify-center gap-2 flex-wrap">
+                        <span className="inline-flex items-center gap-1.5">
+                          {rev.is_verified && (
+                            <BadgeCheck
+                              size={15}
+                              className="text-[#4b9797] shrink-0"
+                              aria-label={t("reviews.verified")}
+                            />
+                          )}
+                          <span>{bottomTag}</span>
+                        </span>
 
-                      {canEdit && (
-                        <button
-                          type="button"
-                          onClick={() => startEditingReview(rev)}
-                          className="inline-flex items-center gap-1 rounded-full border border-[#4b9797]/30 bg-white px-2.5 py-0.5 text-[11px] font-bold text-[#4b9797] hover:bg-[#4b9797] hover:text-white transition-colors cursor-pointer tabular-nums"
+                        {canEdit && (
+                          <button
+                            type="button"
+                            onClick={() => startEditingReview(rev)}
+                            className="inline-flex items-center gap-1 rounded-full border border-[#4b9797]/30 bg-white px-2.5 py-0.5 text-[11px] font-bold text-[#4b9797] hover:bg-[#4b9797] hover:text-white transition-colors cursor-pointer tabular-nums"
+                          >
+                            <Pencil size={11} aria-hidden="true" />
+                            <span>
+                              {isAr
+                                ? `تعديل (${countdownLabel})`
+                                : `Modifier (${countdownLabel})`}
+                            </span>
+                          </button>
+                        )}
+                      </div>
+
+                      {formattedDate && (
+                        <time
+                          dateTime={rev.created_at}
+                          className="text-xs text-slate-400 font-normal"
                         >
-                          <Pencil size={11} aria-hidden="true" />
-                          <span>
-                            {isAr
-                              ? `تعديل (${countdownLabel})`
-                              : `Modifier (${countdownLabel})`}
-                          </span>
-                        </button>
+                          {formattedDate}
+                        </time>
                       )}
                     </div>
                   </>
