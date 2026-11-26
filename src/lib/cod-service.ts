@@ -221,6 +221,7 @@ export interface AdminProduct {
   age_ranges?: string[];
   ageRange?: string;
   ageGroup?: string;
+  createdAt?: string;
   skills?: string[];
   sku?: string;
   reference?: string;

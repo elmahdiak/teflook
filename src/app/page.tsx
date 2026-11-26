@@ -32,6 +32,12 @@ import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ProductCard } from "@/components/product/ProductCard";
+import {
+  DEFAULT_PRODUCT_FILTER_STATE,
+  ProductFilterSortBar,
+  applyProductFilterAndSort,
+  type ProductFilterState,
+} from "@/components/product/ProductFilterSortBar";
 import { CODCheckoutModal } from "@/components/cart/CODCheckoutModal";
 import { FAQAccordion } from "@/components/faq/FAQAccordion";
 import {
@@ -155,6 +161,9 @@ function TefLookStorefront() {
   const { direction, locale, t } = useTefLookLanguage();
   const [activeCategory, setActiveCategory] = useState<ChildStoreCategory | "all">("all");
   const [activeAge, setActiveAge] = useState<string>("all");
+  const [filterState, setFilterState] = useState<ProductFilterState>(
+    DEFAULT_PRODUCT_FILTER_STATE
+  );
   const [searchTerm, setSearchTerm] = useState("");
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCODModalOpen, setIsCODModalOpen] = useState(false);
@@ -210,7 +219,7 @@ function TefLookStorefront() {
     };
   }, [queryClient]);
 
-  const filteredProducts = useMemo(() => {
+  const baseCategoryAgeProducts = useMemo(() => {
     const normalizedQuery = searchTerm.trim().toLocaleLowerCase("fr");
     return products.filter((product) => {
       const matchesCategory =
@@ -224,6 +233,11 @@ function TefLookStorefront() {
       return matchesCategory && matchesAge && matchesQuery;
     });
   }, [products, activeCategory, activeAge, searchTerm]);
+
+  const filteredProducts = useMemo(
+    () => applyProductFilterAndSort(baseCategoryAgeProducts, filterState),
+    [baseCategoryAgeProducts, filterState]
+  );
 
   const categories = CHILD_STORE_CATEGORIES.map((category) => ({
     ...category,
@@ -450,7 +464,7 @@ function TefLookStorefront() {
 
           {/* Age Bracket Filter Pills */}
           <div
-            className="mb-6 flex flex-wrap items-center gap-2"
+            className="mb-3 flex flex-wrap items-center gap-2"
             role="group"
             aria-label={locale === "ar" ? "تصفية حسب الفئة العمرية" : "Filtrer par tranche d'âge"}
           >
@@ -488,6 +502,22 @@ function TefLookStorefront() {
             })}
           </div>
 
+          {/* Minimalist Availability, Price & Sort Toolbar */}
+          <ProductFilterSortBar
+            products={baseCategoryAgeProducts}
+            filteredCount={filteredProducts.length}
+            filterState={filterState}
+            onFilterChange={setFilterState}
+            hasExternalFilters={
+              activeCategory !== "all" || activeAge !== "all" || searchTerm.trim() !== ""
+            }
+            onClearAll={() => {
+              setSearchTerm("");
+              setActiveCategory("all");
+              setActiveAge("all");
+            }}
+          />
+
           {filteredProducts.length === 0 ? (
             <div className="border-y border-border py-14 text-center" id="product-grid">
               <ShoppingBag size={30} className="mx-auto text-primary" aria-hidden="true" />
@@ -495,7 +525,12 @@ function TefLookStorefront() {
               <p className="mt-2 text-sm text-muted-foreground">
                 {products.length === 0 ? t("shop.empty") : t("shop.emptyCategory")}
               </p>
-              {(searchTerm || activeCategory !== "all" || activeAge !== "all") && (
+              {(searchTerm ||
+                activeCategory !== "all" ||
+                activeAge !== "all" ||
+                filterState.availability.length > 0 ||
+                filterState.minPrice.trim() !== "" ||
+                filterState.maxPrice.trim() !== "") && (
                 <Button
                   type="button"
                   variant="outline"
@@ -504,6 +539,7 @@ function TefLookStorefront() {
                     setSearchTerm("");
                     setActiveCategory("all");
                     setActiveAge("all");
+                    setFilterState(DEFAULT_PRODUCT_FILTER_STATE);
                   }}
                 >
                   {t("shop.reset")}

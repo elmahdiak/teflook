@@ -55,6 +55,7 @@ export interface ShopifyProduct {
   origin_ar?: string;
   rating?: number;
   reviewsCount?: number;
+  createdAt?: string;
   badge?: string;
   features?: string[];
   features_ar?: string[];
@@ -137,6 +138,7 @@ export function mapItemToShopifyProduct(item: any): ShopifyProduct {
     origin_ar: item.origin_ar || trAr?.origin || item.origin,
     rating: item.rating != null ? Number(item.rating) : 0,
     reviewsCount: item.reviewsCount != null ? Number(item.reviewsCount) : 0,
+    createdAt: item.createdAt || item.created_at,
     badge: typeof item.badge === "string" && item.badge.trim() ? item.badge.trim() : undefined,
     features: item.features || [],
     features_ar: item.features_ar || trAr?.features || item.features || [],
@@ -305,6 +307,7 @@ export async function fetchProducts(): Promise<ShopifyProduct[]> {
             features: Array.isArray(row.features) ? row.features : [],
             rating: realRating,
             reviewsCount: realCount,
+            createdAt: row.created_at || row.createdAt,
           });
         });
       }

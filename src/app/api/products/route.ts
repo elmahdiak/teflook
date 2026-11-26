@@ -88,6 +88,7 @@ function mapRowToAdminProduct(row: any): AdminProduct {
     ageRanges,
     age_ranges: ageRanges,
     ageRange: row.age_range || row.ageRange || ageRanges.join(", "),
+    createdAt: row.created_at || row.createdAt,
     skills: Array.isArray(row.skills)
       ? row.skills
       : typeof row.skills === "string" && row.skills.trim().length > 0
