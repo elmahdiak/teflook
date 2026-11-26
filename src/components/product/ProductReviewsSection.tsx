@@ -9,6 +9,7 @@ import {
   MessageSquare,
   MessageSquarePlus,
   PenLine,
+  Quote,
   Sparkles,
   Star,
   X,
@@ -431,94 +432,88 @@ export function ProductReviewsSection({
           </button>
         </div>
       ) : (
-        /* 2-Column Enterprise Review Cards Grid */
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        /* 2-Column Centered Editorial Review Cards Grid */
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8 pt-4">
           {reviews.map((rev) => {
-            const initial = (rev.author_name || "P").trim().charAt(0).toUpperCase();
-            const dateStr = rev.created_at
-              ? new Date(rev.created_at).toLocaleDateString(
-                  locale === "ar" ? "ar-MA-u-nu-latn" : "fr-FR",
-                  {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  }
-                )
-              : "";
+            const isAr = locale === "ar";
+            const bottomTag = rev.author_role
+              ? `${rev.author_role} • ${productTitle}`
+              : productTitle;
 
             return (
               <article
                 key={rev.id}
-                className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col gap-4"
+                dir={direction}
+                className="relative bg-slate-50/80 border border-slate-100 rounded-2xl p-6 sm:p-8 shadow-[0_4px_20px_-4px_rgba(26,60,52,0.06)] flex flex-col items-center text-center"
               >
-                {/* Header Row (Author & Rating) */}
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-                  {/* Start: Avatar + Name + Verified Badge + Role */}
-                  <div className="flex items-start gap-3.5 min-w-0">
-                    {/* Circular Gradient Brand Teal Avatar */}
-                    <div className="size-11 rounded-full bg-gradient-to-br from-[#4b9797] to-[#2C6466] text-white flex items-center justify-center font-bold text-base shadow-xs shrink-0 select-none">
-                      {initial}
-                    </div>
+                {/* Floating Teal Circular Quote Badge */}
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "absolute -top-3 sm:-top-3.5 w-10 h-10 rounded-full bg-[#4b9797] text-white flex items-center justify-center shadow-md",
+                    isAr ? "-left-3 sm:-left-3.5" : "-right-3 sm:-right-3.5"
+                  )}
+                >
+                  <Quote className="w-4 h-4 fill-current" />
+                </span>
 
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h4 className="font-bold text-slate-900 text-sm sm:text-base leading-snug">
-                          {rev.author_name}
-                        </h4>
-                        {rev.is_verified && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-[#4b9797]/10 border border-[#4b9797]/20 px-2 py-0.5 text-[11px] font-semibold text-[#2C6466]">
-                            <BadgeCheck size={12} className="text-[#4b9797] shrink-0" />
-                            <span>{t("reviews.verified")}</span>
-                          </span>
-                        )}
-                      </div>
-
-                      {rev.author_role && (
-                        <p className="mt-0.5 text-xs font-medium text-slate-500 truncate">
-                          {rev.author_role}
-                        </p>
+                {/* Centered 5-Star Rating Row */}
+                <div
+                  className="text-[#ffbf00] flex items-center justify-center gap-1 mb-3"
+                  aria-label={`${rev.rating} / 5`}
+                >
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      size={16}
+                      className={cn(
+                        i < rev.rating
+                          ? "fill-[#ffbf00] text-[#ffbf00]"
+                          : "fill-slate-200/70 text-slate-200"
                       )}
-                    </div>
-                  </div>
-
-                  {/* End (Right in LTR, Left in RTL): 5-Star Rating & Date */}
-                  <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-1.5 shrink-0 ps-14 sm:ps-0">
-                    <div
-                      className="flex items-center gap-0.5 text-[#ffbf00]"
-                      aria-label={`${rev.rating} / 5`}
-                    >
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          size={14}
-                          className={cn(
-                            i < rev.rating
-                              ? "fill-[#ffbf00] text-[#ffbf00]"
-                              : "fill-slate-100 text-slate-200"
-                          )}
-                        />
-                      ))}
-                    </div>
-                    {dateStr && (
-                      <time
-                        dateTime={rev.created_at}
-                        className="text-[11px] font-medium text-slate-400 whitespace-nowrap"
-                      >
-                        {dateStr}
-                      </time>
-                    )}
-                  </div>
+                    />
+                  ))}
                 </div>
 
-                {/* Clean Natural Review Typography (No Awkward Inner Box) */}
+                {/* Centered Reviewer Name */}
+                <h4
+                  className={cn(
+                    "font-display font-bold text-lg sm:text-xl text-[#1A3C34] mb-3",
+                    isAr && "font-sans"
+                  )}
+                >
+                  {rev.author_name}
+                </h4>
+
+                {/* Centered Review Comment */}
                 <p
                   className={cn(
-                    "text-slate-700 text-sm leading-relaxed font-normal text-start",
-                    locale === "ar" && "font-sans leading-loose"
+                    "font-sans text-sm sm:text-base text-[#3D524D] leading-relaxed mb-6 max-w-xl",
+                    isAr && "leading-loose"
                   )}
                 >
                   {rev.comment}
                 </p>
+
+                {/* Subtle Horizontal Separator */}
+                <div className="w-full border-t border-slate-200/80 mb-4 mt-auto" />
+
+                {/* Bottom Product Reference / Verified Author Tag */}
+                <div
+                  className={cn(
+                    "font-sans text-xs sm:text-sm text-slate-500 font-medium flex items-center justify-center gap-1.5 flex-wrap",
+                    isAr && "font-sans"
+                  )}
+                >
+                  {rev.is_verified && (
+                    <BadgeCheck
+                      size={15}
+                      className="text-[#4b9797] shrink-0"
+                      aria-label={t("reviews.verified")}
+                    />
+                  )}
+                  <span>{bottomTag}</span>
+                </div>
               </article>
             );
           })}

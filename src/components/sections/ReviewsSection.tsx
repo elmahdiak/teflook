@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import { Star, Heart, Quote, BadgeCheck } from "lucide-react";
 import { REVIEWS } from "@/data/teflookData";
 
@@ -64,69 +63,61 @@ export function ReviewsSection() {
         </div>
 
         {/* Reviews Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-8 pt-4">
           {filteredReviews.map((rev) => (
-            <div
+            <article
               key={rev.id}
-              className="rounded-3xl bg-white border border-[#E8E5DF] p-6 sm:p-7 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative group"
+              className="relative bg-slate-50/80 border border-slate-100 rounded-2xl p-6 sm:p-8 shadow-[0_4px_20px_-4px_rgba(26,60,52,0.06)] flex flex-col items-center text-center"
             >
-              {/* Subtle top quote emblem */}
-              <Quote className="w-8 h-8 text-[#FBF9F5] absolute top-6 right-6 group-hover:text-[#EBF5F5] transition-colors" />
+              {/* Floating Teal Circular Quote Badge */}
+              <span
+                aria-hidden="true"
+                className="absolute -top-3 -right-3 sm:-top-3.5 sm:-right-3.5 w-10 h-10 rounded-full bg-[#4b9797] text-white flex items-center justify-center shadow-md"
+              >
+                <Quote className="w-4 h-4 fill-current" />
+              </span>
 
-              <div className="space-y-4">
-                {/* Product preview pill */}
-                <div className="flex items-center gap-3 pb-3 border-b border-[#F1F5F9]">
-                  <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-[#FBF9F5] shrink-0 border border-[#E8E5DF]">
-                    <Image
-                      src={rev.productImage}
-                      alt={rev.productName}
-                      fill
-                      sizes="48px"
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                    <span className="text-[10px] text-[#64748B] uppercase tracking-wider block">
-                      Article commandé
-                    </span>
-                    <h5 className="font-serif-brand font-semibold text-xs text-[#1E293B] line-clamp-1">
-                      {rev.productName}
-                    </h5>
-                  </div>
-                </div>
-
-                {/* Stars */}
-                <div className="flex items-center gap-1.5">
-                  <div className="flex text-[#FEC748]">
-                    {[...Array(rev.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-[#FEC748]" />
-                    ))}
-                  </div>
-                  {rev.verified && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-300/80 px-2.5 py-0.5 text-[11px] font-bold text-emerald-800 shadow-xs">
-                      <BadgeCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                      <span>Acheteur vérifié</span>
-                    </span>
-                  )}
-                </div>
-
-                {/* Comment */}
-                <p className="text-sm text-[#334155] leading-relaxed italic">
-                  &quot;{rev.comment}&quot;
-                </p>
+              {/* Centered Star Rating Row */}
+              <div
+                className="text-[#ffbf00] flex items-center justify-center gap-1 mb-3"
+                aria-label={`${rev.rating} / 5`}
+              >
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    size={16}
+                    className={
+                      i < rev.rating
+                        ? "fill-[#ffbf00] text-[#ffbf00]"
+                        : "fill-slate-200/70 text-slate-200"
+                    }
+                  />
+                ))}
               </div>
 
-              {/* Author & City */}
-              <div className="pt-5 mt-4 border-t border-[#F1F5F9] flex items-center justify-between">
-                <div>
-                  <h6 className="font-serif-brand font-bold text-sm text-[#1E293B]">
-                    {rev.authorName}
-                  </h6>
-                  <p className="text-xs text-[#4C9A9C] font-medium">{rev.city}</p>
-                </div>
-                <span className="text-[11px] text-[#94A3B8]">{rev.date}</span>
+              {/* Centered Reviewer Name */}
+              <h3 className="font-display font-bold text-lg sm:text-xl text-[#1A3C34] mb-3">
+                {rev.authorName}
+              </h3>
+
+              {/* Centered Comment */}
+              <p className="font-sans text-sm sm:text-base text-[#3D524D] leading-relaxed mb-6 max-w-xl">
+                {rev.comment}
+              </p>
+
+              {/* Divider Line */}
+              <div className="w-full border-t border-slate-200/80 mb-4 mt-auto" />
+
+              {/* Bottom Product Reference / City */}
+              <div className="font-sans text-xs sm:text-sm text-slate-500 font-medium flex items-center justify-center gap-1.5 flex-wrap">
+                {rev.verified && (
+                  <BadgeCheck className="w-4 h-4 text-[#4b9797] shrink-0" aria-hidden="true" />
+                )}
+                <span>
+                  {rev.productName} • {rev.city}
+                </span>
               </div>
-            </div>
+            </article>
           ))}
         </div>
 
