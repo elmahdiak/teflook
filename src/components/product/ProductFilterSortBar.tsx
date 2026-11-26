@@ -245,10 +245,10 @@ export function ProductFilterSortBar({
   return (
     <div ref={containerRef} dir={currentDirection} className={cn("relative", className)}>
       {/* Main Minimalist Horizontal Filter & Sort Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-y-2.5 gap-x-3 py-3 sm:py-4 mb-5 border-b border-slate-100 text-xs sm:text-sm text-[#1A3C34]">
+      <div className="flex flex-nowrap items-center justify-between gap-2 py-3 sm:py-4 mb-5 border-b border-slate-100 text-[11px] sm:text-sm text-[#1A3C34] whitespace-nowrap">
         {/* Left Side: Filtre : Disponibilité v  Prix v */}
-        <div className="relative sm:static flex flex-wrap items-center gap-3 sm:gap-6">
-          <span className="text-slate-500 font-normal">
+        <div className="relative sm:static flex items-center gap-2.5 sm:gap-5 min-w-0">
+          <span className="hidden sm:inline text-slate-500 font-normal">
             {isAr ? "تصفية :" : "Filtre :"}
           </span>
 
@@ -263,7 +263,7 @@ export function ProductFilterSortBar({
                 )
               }
               className={cn(
-                "inline-flex items-center gap-1.5 py-1 font-medium transition-colors cursor-pointer hover:text-[#4b9797]",
+                "inline-flex items-center gap-1 sm:gap-1.5 py-1 font-medium transition-colors cursor-pointer hover:text-[#4b9797]",
                 (openPopover === "availability" || hasAvailabilityFilter) &&
                   "text-[#4b9797] font-semibold"
               )}
@@ -275,16 +275,16 @@ export function ProductFilterSortBar({
                 </span>
               )}
               <ChevronDown
-                size={15}
+                size={14}
                 className={cn(
-                  "text-slate-400 transition-transform duration-200",
+                  "text-slate-400 transition-transform duration-200 shrink-0",
                   openPopover === "availability" && "rotate-180 text-[#4b9797]"
                 )}
               />
             </button>
 
             {openPopover === "availability" && (
-              <div className="absolute start-0 top-full mt-2 min-w-[230px] max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200/90 bg-white p-4 shadow-[0_12px_30px_-8px_rgba(26,60,52,0.12)] z-30 animate-in fade-in zoom-in-95 duration-150">
+              <div className="absolute start-0 top-full mt-2 min-w-[230px] max-w-[calc(100vw-2rem)] whitespace-normal rounded-2xl border border-slate-200/90 bg-white p-4 shadow-[0_12px_30px_-8px_rgba(26,60,52,0.12)] z-30 animate-in fade-in zoom-in-95 duration-150">
                 <div className="flex items-center justify-between gap-3 pb-3 mb-3 border-b border-slate-100 text-xs">
                   <span className="text-slate-500 font-medium tabular-nums">
                     {isAr
@@ -379,7 +379,7 @@ export function ProductFilterSortBar({
                 setOpenPopover((cur) => (cur === "price" ? null : "price"))
               }
               className={cn(
-                "inline-flex items-center gap-1.5 py-1 font-medium transition-colors cursor-pointer hover:text-[#4b9797]",
+                "inline-flex items-center gap-1 sm:gap-1.5 py-1 font-medium transition-colors cursor-pointer hover:text-[#4b9797]",
                 (openPopover === "price" || hasPriceFilter) &&
                   "text-[#4b9797] font-semibold"
               )}
@@ -389,16 +389,16 @@ export function ProductFilterSortBar({
                 <span className="size-1.5 rounded-full bg-[#ff3500]" />
               )}
               <ChevronDown
-                size={15}
+                size={14}
                 className={cn(
-                  "text-slate-400 transition-transform duration-200",
+                  "text-slate-400 transition-transform duration-200 shrink-0",
                   openPopover === "price" && "rotate-180 text-[#4b9797]"
                 )}
               />
             </button>
 
             {openPopover === "price" && (
-              <div className="absolute start-0 top-full mt-2 min-w-[260px] max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200/90 bg-white p-4 shadow-[0_12px_30px_-8px_rgba(26,60,52,0.12)] z-30 animate-in fade-in zoom-in-95 duration-150">
+              <div className="absolute start-0 top-full mt-2 min-w-[260px] max-w-[calc(100vw-2rem)] whitespace-normal rounded-2xl border border-slate-200/90 bg-white p-4 shadow-[0_12px_30px_-8px_rgba(26,60,52,0.12)] z-30 animate-in fade-in zoom-in-95 duration-150">
                 <div className="flex items-start justify-between gap-3 pb-3 mb-3 border-b border-slate-100 text-xs">
                   <span className="text-slate-500 leading-snug">
                     {isAr
@@ -477,13 +477,13 @@ export function ProductFilterSortBar({
           </div>
         </div>
 
-        {/* Right Side: Trier par : En vedette v */}
-        <div className="relative sm:static flex flex-wrap items-center gap-2 sm:gap-3 ms-auto">
-          <span className="text-slate-500 font-normal">
+        {/* Right Side: Trier par : En vedette v | X prod. */}
+        <div className="relative sm:static flex items-center gap-2 sm:gap-3 ms-auto min-w-0">
+          <span className="hidden sm:inline text-slate-500 font-normal">
             {isAr ? "ترتيب حسب :" : "Trier par :"}
           </span>
 
-          <div className="sm:relative">
+          <div className="sm:relative min-w-0">
             <button
               type="button"
               aria-expanded={openPopover === "sort"}
@@ -491,17 +491,17 @@ export function ProductFilterSortBar({
                 setOpenPopover((cur) => (cur === "sort" ? null : "sort"))
               }
               className={cn(
-                "inline-flex items-center gap-1.5 py-1 font-medium text-[#1A3C34] hover:text-[#4b9797] transition-colors cursor-pointer",
+                "inline-flex items-center gap-1 sm:gap-1.5 py-1 font-medium text-[#1A3C34] hover:text-[#4b9797] transition-colors cursor-pointer max-w-full",
                 openPopover === "sort" && "text-[#4b9797]"
               )}
             >
-              <span>
+              <span className="truncate max-w-[105px] sm:max-w-none">
                 {isAr ? activeSortOption.labelAr : activeSortOption.labelFr}
               </span>
               <ChevronDown
-                size={15}
+                size={14}
                 className={cn(
-                  "text-slate-400 transition-transform duration-200",
+                  "text-slate-400 transition-transform duration-200 shrink-0",
                   openPopover === "sort" && "rotate-180 text-[#4b9797]"
                 )}
               />
@@ -511,7 +511,7 @@ export function ProductFilterSortBar({
               <div
                 role="listbox"
                 aria-label={isAr ? "خيارات الترتيب" : "Options de tri"}
-                className="absolute end-0 top-full mt-2 min-w-[225px] max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200/90 bg-white p-1.5 shadow-[0_12px_30px_-8px_rgba(26,60,52,0.12)] z-30 animate-in fade-in zoom-in-95 duration-150"
+                className="absolute end-0 top-full mt-2 min-w-[225px] max-w-[calc(100vw-2rem)] whitespace-normal rounded-2xl border border-slate-200/90 bg-white p-1.5 shadow-[0_12px_30px_-8px_rgba(26,60,52,0.12)] z-30 animate-in fade-in zoom-in-95 duration-150"
               >
                 {sortOptions.map((opt) => {
                   const isSelected = filterState.sortBy === opt.value;
@@ -541,10 +541,17 @@ export function ProductFilterSortBar({
             )}
           </div>
 
-          <span className="inline-block text-xs text-slate-400 tabular-nums border-s border-slate-200 ps-2.5 whitespace-nowrap">
-            {isAr
-              ? `${filteredCount} منتج`
-              : `${filteredCount} produit${filteredCount > 1 ? "s" : ""}`}
+          <span className="inline-block text-[11px] sm:text-xs text-slate-400 tabular-nums border-s border-slate-200 ps-2 sm:ps-2.5 whitespace-nowrap shrink-0">
+            {isAr ? (
+              `${filteredCount} منتج`
+            ) : (
+              <>
+                <span className="sm:hidden">{filteredCount} prod.</span>
+                <span className="hidden sm:inline">
+                  {filteredCount} produit{filteredCount > 1 ? "s" : ""}
+                </span>
+              </>
+            )}
           </span>
         </div>
       </div>

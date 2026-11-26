@@ -464,7 +464,7 @@ function TefLookStorefront() {
 
           {/* Age Bracket Filter Pills */}
           <div
-            className="mb-3 flex flex-wrap items-center gap-2"
+            className="mb-3 flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-center"
             role="group"
             aria-label={locale === "ar" ? "تصفية حسب الفئة العمرية" : "Filtrer par tranche d'âge"}
           >
@@ -473,10 +473,11 @@ function TefLookStorefront() {
               onClick={() => setActiveAge("all")}
               aria-pressed={activeAge === "all"}
               className={cn(
-                "rounded-full border px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer",
+                "whitespace-nowrap shrink-0 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-display font-semibold transition-all cursor-pointer border",
                 activeAge === "all"
-                  ? "bg-[#4b9797] text-white border-[#4b9797] shadow-xs"
-                  : "bg-white text-[#1A3C34] border-slate-200 hover:border-[#4b9797] hover:text-[#4b9797]"
+                  ? "bg-[#4b9797] text-white shadow-[0_4px_12px_-2px_rgba(75,151,151,0.4)] border-[#4b9797]"
+                  : "bg-white text-[#1A3C34] border-slate-200/90 hover:border-[#4b9797] hover:text-[#4b9797]",
+                locale === "ar" && "font-sans"
               )}
             >
               {locale === "ar" ? "جميع الأعمار" : "Tous les âges"}
@@ -490,10 +491,11 @@ function TefLookStorefront() {
                   onClick={() => setActiveAge((cur) => (cur === bracket ? "all" : bracket))}
                   aria-pressed={isSelected}
                   className={cn(
-                    "rounded-full border px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer",
+                    "whitespace-nowrap shrink-0 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-display font-semibold transition-all cursor-pointer border",
                     isSelected
-                      ? "bg-[#4b9797] text-white border-[#4b9797] shadow-xs"
-                      : "bg-white text-[#1A3C34] border-slate-200 hover:border-[#4b9797] hover:text-[#4b9797]"
+                      ? "bg-[#4b9797] text-white shadow-[0_4px_12px_-2px_rgba(75,151,151,0.4)] border-[#4b9797]"
+                      : "bg-white text-[#1A3C34] border-slate-200/90 hover:border-[#4b9797] hover:text-[#4b9797]",
+                    locale === "ar" && "font-sans"
                   )}
                 >
                   {formatAgeBracketLabel(bracket, locale)}

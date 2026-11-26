@@ -272,3 +272,12 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #4C9A9C;
 }
+
+/* Hidden scrollbar helper for sleek horizontal pill strips */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
