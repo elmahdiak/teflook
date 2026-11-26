@@ -25,7 +25,7 @@ export interface FAQAccordionProps {
 export function FAQAccordion({ product, className }: FAQAccordionProps) {
   const { locale, direction } = useTefLookLanguage();
   const [isMounted, setIsMounted] = useState(false);
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [whatsappPhone, setWhatsappPhone] = useState<string>("212600000000");
 
   useEffect(() => {
