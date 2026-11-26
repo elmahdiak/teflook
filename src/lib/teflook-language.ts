@@ -307,10 +307,11 @@ export const useLanguageStore = create<LanguageStore>()(
     (set) => ({
       locale: "fr",
       setLocale: (locale) => {
-        set({ locale });
+        const safeLocale: Locale = locale === "ar" ? "ar" : "fr";
+        set({ locale: safeLocale });
         if (typeof document !== "undefined") {
-          document.documentElement.lang = locale;
-          document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
+          document.documentElement.lang = safeLocale;
+          document.documentElement.dir = safeLocale === "ar" ? "rtl" : "ltr";
         }
       },
     }),
