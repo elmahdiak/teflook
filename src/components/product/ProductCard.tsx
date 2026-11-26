@@ -7,6 +7,7 @@ import { useCartStore } from "@/lib/shopify-cart";
 import type { ShopifyProduct } from "@/lib/shopify-storefront";
 import { useTefLookLanguage } from "@/lib/teflook-language";
 import { getLocalizedProduct } from "@/lib/product-localization";
+import { formatAgeBracketLabel, normalizeProductAgeRanges } from "@/lib/cod-service";
 import { cn } from "@/lib/utils";
 
 export interface ProductCardProps {
@@ -37,6 +38,10 @@ export function ProductCard({ product, onAdded, onNotice }: ProductCardProps) {
 
   const image = product.images.edges[0]?.node;
   const localized = getLocalizedProduct(product, currentLocale);
+  const ageLabels = normalizeProductAgeRanges(product).map((a) =>
+    formatAgeBracketLabel(a, currentLocale)
+  );
+  const ageSummary = ageLabels.join(" • ");
 
   // Pricing & Discount Calculation
   const currentPrice = displayVariant
@@ -196,6 +201,15 @@ export function ProductCard({ product, onAdded, onNotice }: ProductCardProps) {
       >
         {localized.title}
       </Link>
+
+      {ageSummary && (
+        <p
+          title={ageSummary}
+          className="text-[10px] sm:text-[11px] font-semibold text-[#4b9797] mb-1.5 line-clamp-1 max-w-full"
+        >
+          {ageSummary}
+        </p>
+      )}
 
       {/* 4. Centered Real Supabase Rating Row */}
       <div className="flex items-center justify-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs mb-2 sm:mb-2.5 min-h-[1.25rem]">

@@ -48,6 +48,11 @@ import {
   getChildStoreCategory,
   type ChildStoreCategory,
 } from "@/lib/teflook-categories";
+import {
+  PRODUCT_AGE_BRACKETS,
+  formatAgeBracketLabel,
+  matchesProductAgeFilter,
+} from "@/lib/cod-service";
 import { CHILD_STORE_CATEGORY_MESSAGE_KEYS, useTefLookLanguage } from "@/lib/teflook-language";
 import { getLocalizedProduct } from "@/lib/product-localization";
 import { cn } from "@/lib/utils";
@@ -149,6 +154,7 @@ function TefLookStorefront() {
   });
   const { direction, locale, t } = useTefLookLanguage();
   const [activeCategory, setActiveCategory] = useState<ChildStoreCategory | "all">("all");
+  const [activeAge, setActiveAge] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCODModalOpen, setIsCODModalOpen] = useState(false);
@@ -160,17 +166,26 @@ function TefLookStorefront() {
     setIsMounted(true);
     void useCartStore.persist.rehydrate();
 
-    // Support URL search/category params when navigating from product pages
+    // Support URL search/category/age params when navigating from product pages
     try {
       const params = new URLSearchParams(window.location.search);
       const qParam = params.get("q");
       const catParam = params.get("category") as ChildStoreCategory | null;
+      const ageParam = params.get("age");
       if (qParam) setSearchTerm(qParam);
       if (
         catParam &&
         CHILD_STORE_CATEGORIES.some((c) => c.value === catParam)
       ) {
         setActiveCategory(catParam);
+      }
+      if (
+        ageParam &&
+        PRODUCT_AGE_BRACKETS.some(
+          (b) => b.toLowerCase() === ageParam.trim().toLowerCase()
+        )
+      ) {
+        setActiveAge(ageParam.trim());
       }
     } catch {}
 
@@ -200,14 +215,15 @@ function TefLookStorefront() {
     return products.filter((product) => {
       const matchesCategory =
         activeCategory === "all" || getChildStoreCategory(product) === activeCategory;
+      const matchesAge = matchesProductAgeFilter(product, activeAge);
       const matchesQuery =
         !normalizedQuery ||
         `${product.title} ${product.description} ${product.productType} ${product.vendor}`
           .toLocaleLowerCase("fr")
           .includes(normalizedQuery);
-      return matchesCategory && matchesQuery;
+      return matchesCategory && matchesAge && matchesQuery;
     });
-  }, [products, activeCategory, searchTerm]);
+  }, [products, activeCategory, activeAge, searchTerm]);
 
   const categories = CHILD_STORE_CATEGORIES.map((category) => ({
     ...category,
@@ -380,9 +396,25 @@ function TefLookStorefront() {
                           e.stopPropagation();
                           setActiveCategory("all");
                         }}
-                        className="ml-1 text-sm font-bold leading-none hover:text-brand-orange"
+                        className="ml-1 text-sm font-bold leading-none hover:text-brand-orange cursor-pointer"
                         aria-label="Effacer le filtre"
                         title="Effacer le filtre"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )}
+                  {activeAge !== "all" && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#4b9797]/10 px-3 py-0.5 text-xs font-semibold text-[#4b9797]">
+                      <span>{formatAgeBracketLabel(activeAge, locale)}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveAge("all");
+                        }}
+                        className="ml-1 text-sm font-bold leading-none hover:text-brand-orange cursor-pointer"
+                        aria-label={locale === "ar" ? "إزالة فلتر العمر" : "Effacer le filtre d'âge"}
                       >
                         ×
                       </button>
@@ -392,18 +424,21 @@ function TefLookStorefront() {
               )}
             </div>
             <div className="flex items-center gap-3">
-              {activeCategory !== "all" && (
+              {(activeCategory !== "all" || activeAge !== "all") && (
                 <button
                   type="button"
-                  onClick={() => setActiveCategory("all")}
-                  className="text-xs font-medium text-brand-teal underline hover:text-brand-orange transition-colors"
+                  onClick={() => {
+                    setActiveCategory("all");
+                    setActiveAge("all");
+                  }}
+                  className="text-xs font-medium text-brand-teal underline hover:text-brand-orange transition-colors cursor-pointer"
                 >
                   {t("shop.reset")}
                 </button>
               )}
               <button
                 type="button"
-                className="inline-flex items-center gap-2 text-[13px] font-semibold text-primary hover:text-brand-orange"
+                className="inline-flex items-center gap-2 text-[13px] font-semibold text-primary hover:text-brand-orange cursor-pointer"
                 onClick={() =>
                   document.getElementById("product-grid")?.scrollIntoView({ behavior: "smooth" })
                 }
@@ -413,6 +448,46 @@ function TefLookStorefront() {
             </div>
           </div>
 
+          {/* Age Bracket Filter Pills */}
+          <div
+            className="mb-6 flex flex-wrap items-center gap-2"
+            role="group"
+            aria-label={locale === "ar" ? "تصفية حسب الفئة العمرية" : "Filtrer par tranche d'âge"}
+          >
+            <button
+              type="button"
+              onClick={() => setActiveAge("all")}
+              aria-pressed={activeAge === "all"}
+              className={cn(
+                "rounded-full border px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer",
+                activeAge === "all"
+                  ? "bg-[#4b9797] text-white border-[#4b9797] shadow-xs"
+                  : "bg-white text-[#1A3C34] border-slate-200 hover:border-[#4b9797] hover:text-[#4b9797]"
+              )}
+            >
+              {locale === "ar" ? "جميع الأعمار" : "Tous les âges"}
+            </button>
+            {PRODUCT_AGE_BRACKETS.filter((b) => b !== "Tous âges").map((bracket) => {
+              const isSelected = activeAge === bracket;
+              return (
+                <button
+                  key={bracket}
+                  type="button"
+                  onClick={() => setActiveAge((cur) => (cur === bracket ? "all" : bracket))}
+                  aria-pressed={isSelected}
+                  className={cn(
+                    "rounded-full border px-3.5 py-1.5 text-xs font-bold transition-all cursor-pointer",
+                    isSelected
+                      ? "bg-[#4b9797] text-white border-[#4b9797] shadow-xs"
+                      : "bg-white text-[#1A3C34] border-slate-200 hover:border-[#4b9797] hover:text-[#4b9797]"
+                  )}
+                >
+                  {formatAgeBracketLabel(bracket, locale)}
+                </button>
+              );
+            })}
+          </div>
+
           {filteredProducts.length === 0 ? (
             <div className="border-y border-border py-14 text-center" id="product-grid">
               <ShoppingBag size={30} className="mx-auto text-primary" aria-hidden="true" />
@@ -420,14 +495,15 @@ function TefLookStorefront() {
               <p className="mt-2 text-sm text-muted-foreground">
                 {products.length === 0 ? t("shop.empty") : t("shop.emptyCategory")}
               </p>
-              {(searchTerm || activeCategory !== "all") && (
+              {(searchTerm || activeCategory !== "all" || activeAge !== "all") && (
                 <Button
                   type="button"
                   variant="outline"
-                  className="mt-5 rounded-[3px]"
+                  className="mt-5 rounded-[3px] cursor-pointer"
                   onClick={() => {
                     setSearchTerm("");
                     setActiveCategory("all");
+                    setActiveAge("all");
                   }}
                 >
                   {t("shop.reset")}

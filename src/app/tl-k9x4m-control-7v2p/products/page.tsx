@@ -24,10 +24,12 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   MAX_PRODUCT_IMAGES,
+  PRODUCT_AGE_BRACKETS,
   clearAllAdminProducts,
   deleteAdminProduct,
   getAdminCategories,
   getAdminProducts,
+  normalizeProductAgeRanges,
   normalizeProductImages,
   resetAllAdminProducts,
   saveAdminProduct,
@@ -54,8 +56,8 @@ export default function AdminProductsPage() {
     priceMad: "",
     oldPriceMad: "",
     categorySlug: "discipline-maitrise-de-soi",
-    ageBracket: "7 - 10 ans",
-    ageRange: "6 à 9 ans",
+    ageRanges: ["7 - 10 ans"] as string[],
+    ageRange: "",
     skills: "",
     sku: "",
     images: [] as string[],
@@ -64,6 +66,7 @@ export default function AdminProductsPage() {
   });
 
   // Multi-Image Upload / URL Manager state
+  const [ageError, setAgeError] = useState<string | null>(null);
   const [imageInputTab, setImageInputTab] = useState<"upload" | "url">("upload");
   const [pendingImageUrl, setPendingImageUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
@@ -101,14 +104,15 @@ export default function AdminProductsPage() {
       priceMad: "",
       oldPriceMad: "",
       categorySlug: categories[0]?.slug || "discipline-maitrise-de-soi",
-      ageBracket: "7 - 10 ans",
-      ageRange: "6 à 9 ans",
+      ageRanges: ["7 - 10 ans"],
+      ageRange: "",
       skills: "",
       sku: "",
       images: [],
       description: "",
       inStock: true,
     });
+    setAgeError(null);
     setPendingImageUrl("");
     setImageInputTab("upload");
     setModalOpen(true);
@@ -117,19 +121,21 @@ export default function AdminProductsPage() {
   function openEditModal(prod: AdminProduct) {
     setEditingProduct(prod);
     const existingImages = normalizeProductImages(prod);
+    const existingAgeRanges = normalizeProductAgeRanges(prod);
     setFormData({
       title: prod.title,
       priceMad: String(prod.priceMad),
       oldPriceMad: prod.oldPriceMad ? String(prod.oldPriceMad) : "",
       categorySlug: prod.categorySlug,
-      ageBracket: prod.ageBracket || "7 - 10 ans",
-      ageRange: prod.ageRange || prod.ageBracket || "6 à 9 ans",
+      ageRanges: existingAgeRanges.length > 0 ? existingAgeRanges : ["7 - 10 ans"],
+      ageRange: prod.ageRange || existingAgeRanges.join(", "),
       skills: Array.isArray(prod.skills) ? prod.skills.join(", ") : "",
       sku: prod.sku || prod.reference || "",
       images: existingImages,
       description: prod.description || "",
       inStock: prod.inStock,
     });
+    setAgeError(null);
     setPendingImageUrl("");
     setImageInputTab(
       existingImages.some((url) => url.startsWith("/uploads/")) || existingImages.length === 0
@@ -137,6 +143,24 @@ export default function AdminProductsPage() {
         : "url"
     );
     setModalOpen(true);
+  }
+
+  function toggleAgeBracket(bracket: string) {
+    setAgeError(null);
+    setFormData((prev) => {
+      const exists = prev.ageRanges.includes(bracket);
+      if (bracket === "Tous âges") {
+        return {
+          ...prev,
+          ageRanges: exists ? [] : ["Tous âges"],
+        };
+      }
+      const withoutAll = prev.ageRanges.filter((a) => a !== "Tous âges");
+      const next = exists
+        ? withoutAll.filter((a) => a !== bracket)
+        : [...withoutAll, bracket];
+      return { ...prev, ageRanges: next };
+    });
   }
 
   // Handle multi-file upload (up to MAX_PRODUCT_IMAGES)
@@ -254,6 +278,12 @@ export default function AdminProductsPage() {
     e.preventDefault();
     if (!formData.title || !formData.priceMad) return;
 
+    if (formData.ageRanges.length === 0) {
+      setAgeError("Veuillez sélectionner au moins une tranche d'âge.");
+      showToast("Veuillez sélectionner au moins une tranche d'âge.", "error");
+      return;
+    }
+
     const catObj = categories.find((c) => c.slug === formData.categorySlug);
 
     const skillsArray = formData.skills
@@ -268,6 +298,9 @@ export default function AdminProductsPage() {
         ? [...formData.images, pendingImageUrl.trim()]
         : formData.images,
     });
+
+    const selectedAgeRanges = formData.ageRanges;
+    const primaryAgeBracket = selectedAgeRanges[0] || "7 - 10 ans";
 
     const saved = saveAdminProduct({
       ...(editingProduct
@@ -286,8 +319,9 @@ export default function AdminProductsPage() {
       categoryName: catObj?.name || formData.categorySlug,
       priceMad: Number(formData.priceMad),
       oldPriceMad: formData.oldPriceMad ? Number(formData.oldPriceMad) : undefined,
-      ageBracket: formData.ageBracket,
-      ageRange: formData.ageRange.trim() || formData.ageBracket,
+      ageBracket: primaryAgeBracket,
+      ageRanges: selectedAgeRanges,
+      ageRange: formData.ageRange.trim() || selectedAgeRanges.join(", "),
       skills: skillsArray,
       sku: formData.sku.trim() || undefined,
       reference: formData.sku.trim() ? `Référence ${formData.sku.trim()}` : undefined,
@@ -537,7 +571,9 @@ export default function AdminProductsPage() {
                         </div>
                         <div className="min-w-0">
                           <p className="font-bold text-foreground line-clamp-1">{prod.title}</p>
-                          <span className="text-[11px] text-muted-foreground">{prod.ageBracket || "Tous âges"}</span>
+                          <span className="text-[11px] text-muted-foreground">
+                            {normalizeProductAgeRanges(prod).join(" • ") || "Tous âges"}
+                          </span>
                         </div>
                       </div>
                     </td>
@@ -649,36 +685,62 @@ export default function AdminProductsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-foreground mb-1">Catégorie d'éveil *</label>
-                  <select
-                    value={formData.categorySlug}
-                    onChange={(e) => setFormData({ ...formData, categorySlug: e.target.value })}
-                    className="w-full h-10 px-3 rounded-xl border border-border bg-background text-xs font-medium outline-none focus:border-brand-teal"
-                  >
-                    {categories.map((c) => (
-                      <option key={c.slug} value={c.slug}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
+              <div>
+                <label className="block font-bold text-foreground mb-1">Catégorie d&apos;éveil *</label>
+                <select
+                  value={formData.categorySlug}
+                  onChange={(e) => setFormData({ ...formData, categorySlug: e.target.value })}
+                  className="w-full h-10 px-3 rounded-xl border border-border bg-background text-xs font-medium outline-none focus:border-brand-teal"
+                >
+                  {categories.map((c) => (
+                    <option key={c.slug} value={c.slug}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Multi-Select Age Brackets Pill Checkboxes */}
+              <div className="rounded-xl border border-border p-3.5 bg-muted/15 space-y-2.5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <label className="font-bold text-foreground">
+                    Tranches d&apos;âge / الفئات العمرية *
+                  </label>
+                  <span className="text-[10px] font-semibold text-[#4b9797]">
+                    Sélection multiple ({formData.ageRanges.length} sélectionnée{formData.ageRanges.length > 1 ? "s" : ""})
+                  </span>
                 </div>
 
-                <div>
-                  <label className="block font-bold text-foreground mb-1">Tranche d'âge principale</label>
-                  <select
-                    value={formData.ageBracket}
-                    onChange={(e) => setFormData({ ...formData, ageBracket: e.target.value })}
-                    className="w-full h-10 px-3 rounded-xl border border-border bg-background text-xs font-medium outline-none focus:border-brand-teal"
-                  >
-                    <option value="5 - 6 ans">5 - 6 ans</option>
-                    <option value="7 - 10 ans">7 - 10 ans</option>
-                    <option value="11 - 12 ans">11 - 12 ans</option>
-                    <option value="13 - 15 ans">13 - 15 ans</option>
-                    <option value="Tous âges">Tous âges</option>
-                  </select>
+                <div
+                  role="group"
+                  aria-label="Tranches d'âge"
+                  className="flex flex-wrap gap-2"
+                >
+                  {PRODUCT_AGE_BRACKETS.map((bracket) => {
+                    const isSelected = formData.ageRanges.includes(bracket);
+                    return (
+                      <button
+                        key={bracket}
+                        type="button"
+                        role="checkbox"
+                        aria-checked={isSelected}
+                        onClick={() => toggleAgeBracket(bracket)}
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold transition-all cursor-pointer ${
+                          isSelected
+                            ? "bg-[#4b9797] text-white border-[#4b9797] shadow-xs"
+                            : "bg-white text-[#1A3C34] border-slate-200 hover:border-[#4b9797]"
+                        }`}
+                      >
+                        {isSelected && <Check size={12} strokeWidth={3} aria-hidden="true" />}
+                        <span>{bracket}</span>
+                      </button>
+                    );
+                  })}
                 </div>
+
+                {ageError && (
+                  <p className="text-[11px] font-bold text-rose-600">{ageError}</p>
+                )}
               </div>
 
               {/* Extended Specifications (Âge recommandé, Compétences développées, SKU) */}

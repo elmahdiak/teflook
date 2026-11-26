@@ -43,6 +43,7 @@ import { ProductInfoTabs } from "@/components/product/ProductInfoTabs";
 import { ProductCard } from "@/components/product/ProductCard";
 import { FAQAccordion } from "@/components/faq/FAQAccordion";
 import { cleanWhatsAppNumber, fetchSiteSettings } from "@/lib/site-settings";
+import { formatAgeBracketLabel, normalizeProductAgeRanges } from "@/lib/cod-service";
 import { cn } from "@/lib/utils";
 
 interface ProductDetailViewProps {
@@ -124,6 +125,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
   const categoryConfig = CHILD_STORE_CATEGORIES.find((c) => c.value === product.category);
   const localized = getLocalizedProduct(product, locale);
   const categoryLabel = localized.categoryName;
+  const ageBrackets = normalizeProductAgeRanges(product);
 
   async function handleAddToCart() {
     if (!currentVariant || adding) return;
@@ -346,21 +348,31 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                   : "TVA incluse · Paiement en espèces à la livraison partout au Maroc"}
               </p>
 
-              {/* Variant Selector */}
-              {product.variants.edges.length > 0 && currentVariant?.selectedOptions && (
+              {/* Age Brackets / Variant Badges */}
+              {(ageBrackets.length > 0 ||
+                (product.variants.edges.length > 0 && currentVariant?.selectedOptions)) && (
                 <div className="mt-5 border-t border-border/60 pt-4">
                   <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2.5">
-                    {locale === "ar" ? "المرحلة العمرية والمستوى :" : "Tranche d'âge & Niveau :"}
+                    {locale === "ar" ? "الفئات العمرية :" : "Tranches d'âge :"}
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    {product.variants.edges.map(({ node: v }) => (
-                      <span
-                        key={v.id}
-                        className="rounded-lg border border-brand-teal/40 bg-brand-mist/50 px-3.5 py-1.5 text-xs font-bold text-brand-teal"
-                      >
-                        {v.title}
-                      </span>
-                    ))}
+                    {ageBrackets.length > 0
+                      ? ageBrackets.map((age) => (
+                          <span
+                            key={age}
+                            className="rounded-lg border border-brand-teal/40 bg-brand-mist/50 px-3.5 py-1.5 text-xs font-bold text-brand-teal"
+                          >
+                            {formatAgeBracketLabel(age, locale)}
+                          </span>
+                        ))
+                      : product.variants.edges.map(({ node: v }) => (
+                          <span
+                            key={v.id}
+                            className="rounded-lg border border-brand-teal/40 bg-brand-mist/50 px-3.5 py-1.5 text-xs font-bold text-brand-teal"
+                          >
+                            {v.title}
+                          </span>
+                        ))}
                   </div>
                 </div>
               )}

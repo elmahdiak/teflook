@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import { PRODUCTS, type ProductItem } from "@/data/teflookData";
 import { PRODUCT_TRANSLATIONS_AR } from "@/lib/product-localization";
 import {
+  normalizeProductAgeRanges,
   normalizeProductImages,
   type AdminProduct,
 } from "@/lib/cod-service";
@@ -70,6 +71,9 @@ function mapRowToAdminProduct(row: any): AdminProduct {
     row.category_slug || row.category || row.categorySlug || "discipline-maitrise-de-soi";
   const categoryName =
     row.category_name || row.categoryName || categorySlug.replace(/-/g, " ");
+  const rawAgeRanges = normalizeProductAgeRanges(row);
+  const ageRanges = rawAgeRanges.length > 0 ? rawAgeRanges : ["7 - 10 ans"];
+  const primaryAgeBracket = ageRanges[0] || "7 - 10 ans";
 
   return {
     id,
@@ -80,8 +84,10 @@ function mapRowToAdminProduct(row: any): AdminProduct {
     priceMad,
     oldPriceMad,
     inStock: row.in_stock ?? row.inStock ?? true,
-    ageBracket: row.age_bracket || row.ageBracket || "7 - 10 ans",
-    ageRange: row.age_range || row.ageRange || row.age_bracket || row.ageBracket || "7 - 10 ans",
+    ageBracket: primaryAgeBracket,
+    ageRanges,
+    age_ranges: ageRanges,
+    ageRange: row.age_range || row.ageRange || ageRanges.join(", "),
     skills: Array.isArray(row.skills)
       ? row.skills
       : typeof row.skills === "string" && row.skills.trim().length > 0
@@ -222,6 +228,9 @@ export async function POST(req: NextRequest) {
     const categorySlug = body.categorySlug || "discipline-maitrise-de-soi";
     const imagesList = normalizeProductImages(body);
     const primaryImage = imagesList[0] || "";
+    const parsedAgeRanges = normalizeProductAgeRanges(body);
+    const ageRangesList = parsedAgeRanges.length > 0 ? parsedAgeRanges : ["7 - 10 ans"];
+    const primaryAgeBracket = ageRangesList[0] || "7 - 10 ans";
 
     // Attempt upsert with all standard columns
     const fullPayload: Record<string, any> = {
@@ -239,8 +248,9 @@ export async function POST(req: NextRequest) {
       images: imagesList,
       description: body.description || "",
       in_stock: body.inStock ?? true,
-      age_bracket: body.ageBracket || "7 - 10 ans",
-      age_range: body.ageRange || body.ageBracket || "7 - 10 ans",
+      age_bracket: primaryAgeBracket,
+      age_ranges: ageRangesList,
+      age_range: body.ageRange || ageRangesList.join(", "),
       skills: Array.isArray(body.skills)
         ? body.skills
         : typeof body.skills === "string" && body.skills.trim().length > 0
@@ -294,7 +304,10 @@ export async function POST(req: NextRequest) {
       priceMad: priceMadNum,
       oldPriceMad: oldPriceMadNum || undefined,
       inStock: body.inStock ?? true,
-      ageBracket: body.ageBracket || "7 - 10 ans",
+      ageBracket: primaryAgeBracket,
+      ageRanges: ageRangesList,
+      age_ranges: ageRangesList,
+      ageRange: body.ageRange || ageRangesList.join(", "),
       images: imagesList,
       description: body.description || "",
       material: body.material,
@@ -364,6 +377,7 @@ export async function DELETE(req: NextRequest) {
           description: p.description,
           in_stock: p.inStock,
           age_bracket: p.ageBracket,
+          age_ranges: [p.ageBracket],
         }));
         const insertRes = await supabase.from("products").insert(rowsToInsert);
         if (insertRes.error) {

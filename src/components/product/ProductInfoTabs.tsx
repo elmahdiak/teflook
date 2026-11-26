@@ -5,6 +5,7 @@ import type { ShopifyProduct } from "@/lib/shopify-storefront";
 import { useTefLookLanguage } from "@/lib/teflook-language";
 import { getLocalizedProduct } from "@/lib/product-localization";
 import { CHILD_STORE_CATEGORIES, getChildStoreCategory } from "@/lib/teflook-categories";
+import { formatAgeBracketLabel, normalizeProductAgeRanges } from "@/lib/cod-service";
 import { Check, ChevronDown, ChevronUp, Sparkles, Tag, ShieldCheck, Truck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -62,11 +63,13 @@ export function ProductInfoTabs({ product }: ProductInfoTabsProps) {
 
   // Resolve Recommended Age(s)
   const resolvedAgeRanges: string[] = (() => {
-    if (product.ageRange && product.ageRange.trim().length > 0) {
-      return product.ageRange.split(",").map((a) => a.trim()).filter(Boolean);
-    }
-    if (product.ageBracket && product.ageBracket.trim().length > 0) {
-      return [product.ageBracket.trim()];
+    const normalized = normalizeProductAgeRanges({
+      ageRanges: product.ageRanges,
+      ageBracket: product.ageBracket,
+      ageRange: product.ageRange,
+    });
+    if (normalized.length > 0) {
+      return normalized.map((age) => formatAgeBracketLabel(age, locale));
     }
     return [locale === "ar" ? "جميع الأعمار" : "Tous âges"];
   })();

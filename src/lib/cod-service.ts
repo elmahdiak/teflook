@@ -27,6 +27,128 @@ export interface CODOrder {
 
 export const MAX_PRODUCT_IMAGES = 6;
 
+export const PRODUCT_AGE_BRACKETS = [
+  "5 - 6 ans",
+  "7 - 10 ans",
+  "11 - 12 ans",
+  "13 - 15 ans",
+  "Tous âges",
+] as const;
+
+export type ProductAgeBracketOption = (typeof PRODUCT_AGE_BRACKETS)[number];
+
+/**
+ * Normalizes product age range fields (`age_ranges`, `ageRanges`, `age_bracket`,
+ * `ageBracket`, `age_range`, `ageRange`, `ageGroup`) into a clean deduplicated array.
+ */
+export function normalizeProductAgeRanges(
+  input:
+    | {
+        age_ranges?: unknown;
+        ageRanges?: unknown;
+        age_bracket?: unknown;
+        ageBracket?: unknown;
+        age_range?: unknown;
+        ageRange?: unknown;
+        age_group?: unknown;
+        ageGroup?: unknown;
+      }
+    | null
+    | undefined
+): string[] {
+  if (!input || typeof input !== "object") return [];
+
+  const collected: string[] = [];
+  const pushAge = (raw: unknown) => {
+    if (typeof raw !== "string") return;
+    for (const part of raw.split(/[•,]/)) {
+      const trimmed = part.trim();
+      if (!trimmed || collected.includes(trimmed)) continue;
+      collected.push(trimmed);
+    }
+  };
+
+  const rawArray = input.age_ranges ?? input.ageRanges;
+  if (Array.isArray(rawArray)) {
+    for (const entry of rawArray) {
+      pushAge(entry);
+    }
+  } else if (typeof rawArray === "string") {
+    const rawStr = rawArray.trim();
+    if (rawStr.startsWith("[")) {
+      try {
+        const parsed = JSON.parse(rawStr);
+        if (Array.isArray(parsed)) {
+          for (const entry of parsed) pushAge(entry);
+        }
+      } catch {
+        pushAge(rawStr);
+      }
+    } else {
+      pushAge(rawStr);
+    }
+  }
+
+  if (collected.length === 0) {
+    pushAge(input.age_bracket ?? input.ageBracket);
+    pushAge(input.age_group ?? input.ageGroup);
+    if (collected.length === 0) {
+      pushAge(input.age_range ?? input.ageRange);
+    }
+  }
+
+  return collected;
+}
+
+export function formatAgeBracketLabel(
+  bracket: string,
+  locale: "fr" | "ar" | string
+): string {
+  const trimmed = bracket.trim();
+  if (locale !== "ar") return trimmed;
+
+  const arMap: Record<string, string> = {
+    "5 - 6 ans": "5 - 6 سنوات",
+    "7 - 10 ans": "7 - 10 سنوات",
+    "11 - 12 ans": "11 - 12 سنة",
+    "13 - 15 ans": "13 - 15 سنة",
+    "Tous âges": "جميع الأعمار",
+    "Tous ages": "جميع الأعمار",
+  };
+  return arMap[trimmed] || trimmed;
+}
+
+export function matchesProductAgeFilter(
+  product:
+    | {
+        age_ranges?: unknown;
+        ageRanges?: unknown;
+        age_bracket?: unknown;
+        ageBracket?: unknown;
+        age_range?: unknown;
+        ageRange?: unknown;
+        age_group?: unknown;
+        ageGroup?: unknown;
+      }
+    | null
+    | undefined,
+  selectedAge: string
+): boolean {
+  if (!selectedAge || selectedAge === "all") return true;
+  const ranges = normalizeProductAgeRanges(product);
+  if (ranges.length === 0) return false;
+
+  const normalizedSelected = selectedAge.trim().toLowerCase();
+  return ranges.some((r) => {
+    const lower = r.trim().toLowerCase();
+    return (
+      lower === normalizedSelected ||
+      lower === "tous âges" ||
+      lower === "tous ages"
+    );
+  });
+}
+
 /**
  * Normalizes product image fields (`images` array, `image_url`, `imageUrl`, `image`)
  * into a clean, deduplicated array of image URLs capped at `maxCount`.
@@ -95,7 +217,10 @@ export interface AdminProduct {
   oldPriceMad?: number;
   inStock: boolean;
   ageBracket: string;
+  ageRanges?: string[];
+  age_ranges?: string[];
   ageRange?: string;
+  ageGroup?: string;
   skills?: string[];
   sku?: string;
   reference?: string;
@@ -314,6 +439,7 @@ const SEEDED_PRODUCTS: AdminProduct[] = PRODUCTS.map((p) => ({
   oldPriceMad: p.oldPriceMad,
   inStock: p.inStock,
   ageBracket: p.ageBracket,
+  ageRanges: [p.ageBracket],
   images: p.images,
   description: p.description,
   material: p.material,
@@ -329,10 +455,19 @@ export function getAdminProducts(): AdminProduct[] {
     }
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.map((item) => ({
-      ...item,
-      images: normalizeProductImages(item),
-    }));
+    return parsed.map((item) => {
+      const normalizedAgeRanges = normalizeProductAgeRanges(item);
+      const ageRanges =
+        normalizedAgeRanges.length > 0
+          ? normalizedAgeRanges
+          : [item.ageBracket || "7 - 10 ans"];
+      return {
+        ...item,
+        images: normalizeProductImages(item),
+        ageRanges,
+        ageBracket: ageRanges[0] || item.ageBracket || "7 - 10 ans",
+      };
+    });
   } catch {
     return [];
   }
@@ -359,11 +494,19 @@ export function saveAdminProduct(product: Omit<AdminProduct, "id" | "handle"> & 
   const handle = id;
   const normalizedImages = normalizeProductImages(product);
   const primaryImage = normalizedImages[0] || "";
+  const normalizedAges = normalizeProductAgeRanges(product);
+  const ageRanges = normalizedAges.length > 0 ? normalizedAges : ["7 - 10 ans"];
+  const primaryAge = ageRanges[0] || "7 - 10 ans";
 
   const newProduct: AdminProduct = {
     ...product,
     id,
     handle,
+    ageRanges,
+    age_ranges: ageRanges,
+    ageBracket: primaryAge,
+    ageGroup: primaryAge,
+    ageRange: product.ageRange || ageRanges.join(", "),
     images: normalizedImages,
     image: primaryImage || undefined,
     image_url: primaryImage || undefined,

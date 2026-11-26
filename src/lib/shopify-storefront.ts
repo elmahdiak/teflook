@@ -1,5 +1,5 @@
 import { PRODUCTS, type ProductItem } from "@/data/teflookData";
-import { normalizeProductImages } from "./cod-service";
+import { normalizeProductAgeRanges, normalizeProductImages } from "./cod-service";
 import type { ChildStoreCategory } from "./teflook-categories";
 import { PRODUCT_TRANSLATIONS_AR } from "./product-localization";
 
@@ -44,6 +44,7 @@ export interface ShopifyProduct {
   tags?: string[];
   category?: ChildStoreCategory;
   ageBracket?: string;
+  ageRanges?: string[];
   ageRange?: string;
   skills?: string[];
   sku?: string;
@@ -95,7 +96,11 @@ export function mapItemToShopifyProduct(item: any): ShopifyProduct {
 
   const title = item.title || item.name || "Produit TefLook";
   const description = item.description || "";
-  const ageRange = item.ageRange || item.age_range || item.ageBracket || "Tous âges";
+  const normalizedAgeRanges = normalizeProductAgeRanges(item);
+  const ageRanges =
+    normalizedAgeRanges.length > 0 ? normalizedAgeRanges : ["Tous âges"];
+  const ageBracket = ageRanges[0] || "Tous âges";
+  const ageRange = item.ageRange || item.age_range || ageRanges.join(", ");
   const skills = Array.isArray(item.skills)
     ? item.skills
     : typeof item.skills === "string" && item.skills.trim().length > 0
@@ -120,7 +125,8 @@ export function mapItemToShopifyProduct(item: any): ShopifyProduct {
     productType_ar: item.categoryName_ar || trAr?.categoryName || item.categoryName || "النمو والتطوير",
     categoryNameAr: item.categoryName_ar || trAr?.categoryName || item.categoryName || "النمو والتطوير",
     category,
-    ageBracket: item.ageBracket,
+    ageBracket,
+    ageRanges,
     ageRange,
     skills,
     sku,
@@ -134,7 +140,7 @@ export function mapItemToShopifyProduct(item: any): ShopifyProduct {
     badge: typeof item.badge === "string" && item.badge.trim() ? item.badge.trim() : undefined,
     features: item.features || [],
     features_ar: item.features_ar || trAr?.features || item.features || [],
-    tags: [category, item.categorySlug, item.ageBracket, ...(item.features || [])],
+    tags: [category, item.categorySlug, ...ageRanges, ...(item.features || [])],
     images: {
       edges: finalImages.map((url: string) => ({
         node: {
@@ -148,7 +154,7 @@ export function mapItemToShopifyProduct(item: any): ShopifyProduct {
         {
           node: {
             id: `var-${item.id}`,
-            title: item.ageBracket || "Standard",
+            title: ageRanges.join(" • ") || "Standard",
             availableForSale: item.inStock !== false,
             price: {
               amount: priceFormatted,
@@ -162,8 +168,8 @@ export function mapItemToShopifyProduct(item: any): ShopifyProduct {
               : undefined,
             selectedOptions: [
               {
-                name: "Tranche d'âge",
-                value: item.ageBracket || "Tous âges",
+                name: "Tranches d'âge",
+                value: ageRanges.join(", "),
               },
             ],
           },
@@ -286,6 +292,8 @@ export async function fetchProducts(): Promise<ShopifyProduct[]> {
                 : undefined,
             inStock: row.in_stock ?? true,
             ageBracket: row.age_bracket || "7 - 10 ans",
+            ageRanges: normalizeProductAgeRanges(row),
+            age_ranges: row.age_ranges,
             ageRange: row.age_range || row.ageRange || row.age_bracket || "7 - 10 ans",
             skills: Array.isArray(row.skills) ? row.skills : typeof row.skills === "string" ? row.skills.split(",").map((s: string) => s.trim()).filter(Boolean) : undefined,
             sku: row.sku || row.reference || rowId,
