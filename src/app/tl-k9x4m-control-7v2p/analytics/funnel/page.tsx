@@ -134,30 +134,29 @@ export default function AdminFunnelAnalyticsPage() {
     ? [
         {
           number: 1,
-          label: "Impressions",
+          label: "Impressions (Visites totales du site)",
           value: k.impressions.toLocaleString("fr-FR"),
-          subtext: "Affichages publicitaires totaux",
-          tooltip: "Issu de marketing_metrics.impressions",
+          subtext: "Nombre total de visites sur le site",
+          tooltip:
+            "Nombre total de fois où le site web a été visité sur la période sélectionnée.",
           accent: "teal",
         },
         {
           number: 2,
-          label: "Reach / Portée",
+          label: "Reach / Portée (Visiteurs uniques)",
           value: k.reach.toLocaleString("fr-FR"),
-          subtext: "Personnes uniques touchées",
-          tooltip: "Issu de marketing_metrics.reach",
+          subtext: "Appareils / visiteurs uniques",
+          tooltip:
+            "Nombre total d'appareils individuels uniques ayant visité le site.",
           accent: "teal",
         },
         {
           number: 3,
           label: "Frequency / Fréquence",
           value: `${k.frequency.toFixed(2)}x`,
-          subtext:
-            k.frequencySource === "ads"
-              ? "Ratio Impressions / Reach"
-              : "Ratio Sessions / Visiteurs uniques (fallback)",
+          subtext: "Visites moyennes par visiteur unique",
           tooltip:
-            "Impressions ÷ Reach (ou Sessions ÷ Visiteurs uniques si Reach = 0)",
+            "Nombre moyen de fois où chaque visiteur individuel visite le site sur la période.",
           accent: "forest",
         },
       ]
@@ -312,7 +311,7 @@ export default function AdminFunnelAnalyticsPage() {
   const stagesMeta = [
     {
       stageTitle: "Étape 1 — Awareness (Notoriété)",
-      subtitle: "Visibilité de la marque TefLook et portée publicitaire",
+      subtitle: "Visites globales, appareils uniques et fréquence calculés depuis analytics_events",
       icon: Megaphone,
       badgeClass: "bg-[#4B9393]/12 text-[#4B9393] border-[#4B9393]/25",
       kpis: awarenessKpis,
@@ -403,42 +402,6 @@ export default function AdminFunnelAnalyticsPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              <div>
-                <label className="block font-bold text-[#1A3C34] mb-1">
-                  Impressions
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  value={metricsForm.impressions}
-                  onChange={(e) =>
-                    setMetricsForm((prev) => ({
-                      ...prev,
-                      impressions: Number(e.target.value) || 0,
-                    }))
-                  }
-                  className="w-full h-10 px-3 rounded-xl border border-[#4B9393]/25 bg-[#F3EFE6]/35 focus:bg-white text-sm text-[#1A3C34] outline-none focus:border-[#4B9393]"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-[#1A3C34] mb-1">
-                  Reach / Portée
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  value={metricsForm.reach}
-                  onChange={(e) =>
-                    setMetricsForm((prev) => ({
-                      ...prev,
-                      reach: Number(e.target.value) || 0,
-                    }))
-                  }
-                  className="w-full h-10 px-3 rounded-xl border border-[#4B9393]/25 bg-[#F3EFE6]/35 focus:bg-white text-sm text-[#1A3C34] outline-none focus:border-[#4B9393]"
-                />
-              </div>
-
               <div>
                 <label className="block font-bold text-[#1A3C34] mb-1">
                   Budget Ads dépensé (MAD)

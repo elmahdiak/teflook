@@ -9,8 +9,6 @@ export type AnalyticsDateRange = "7d" | "30d" | "all";
 
 export interface MarketingMetricsConfig {
   id: AnalyticsDateRange;
-  impressions: number;
-  reach: number;
   ad_spend_mad: number;
   brand_searches: number;
   rewards_engagements: number;
@@ -24,8 +22,6 @@ export const DEFAULT_MARKETING_METRICS: Record<
 > = {
   "7d": {
     id: "7d",
-    impressions: 0,
-    reach: 0,
     ad_spend_mad: 0,
     brand_searches: 0,
     rewards_engagements: 0,
@@ -33,8 +29,6 @@ export const DEFAULT_MARKETING_METRICS: Record<
   },
   "30d": {
     id: "30d",
-    impressions: 0,
-    reach: 0,
     ad_spend_mad: 0,
     brand_searches: 0,
     rewards_engagements: 0,
@@ -42,8 +36,6 @@ export const DEFAULT_MARKETING_METRICS: Record<
   },
   all: {
     id: "all",
-    impressions: 0,
-    reach: 0,
     ad_spend_mad: 0,
     brand_searches: 0,
     rewards_engagements: 0,
@@ -68,11 +60,10 @@ export interface FunnelAnalyticsData {
   marketingMetrics: MarketingMetricsConfig;
   stages: FunnelStageSummary[];
   kpis: {
-    // Stage 1: Awareness
+    // Stage 1: Awareness (from analytics_events)
     impressions: number;
     reach: number;
     frequency: number;
-    frequencySource: "ads" | "sessions";
     // Stage 2: Consideration
     brandSearches: number;
     firstTimeVisitors: number;

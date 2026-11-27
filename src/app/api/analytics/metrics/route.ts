@@ -27,8 +27,6 @@ function normalizeMetrics(
   const base = DEFAULT_MARKETING_METRICS[range];
   return {
     id: range,
-    impressions: Math.max(0, Number(raw?.impressions ?? base.impressions) || 0),
-    reach: Math.max(0, Number(raw?.reach ?? base.reach) || 0),
     ad_spend_mad: Math.max(0, Number(raw?.ad_spend_mad ?? base.ad_spend_mad) || 0),
     brand_searches: Math.max(
       0,

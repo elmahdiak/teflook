@@ -145,8 +145,6 @@ export async function GET(req: NextRequest) {
     const baseMetrics = DEFAULT_MARKETING_METRICS[range];
     const marketingMetrics: MarketingMetricsConfig = {
       id: range,
-      impressions: Math.max(0, Number(metricsRow?.impressions ?? baseMetrics.impressions) || 0),
-      reach: Math.max(0, Number(metricsRow?.reach ?? baseMetrics.reach) || 0),
       ad_spend_mad: Math.max(0, Number(metricsRow?.ad_spend_mad ?? baseMetrics.ad_spend_mad) || 0),
       brand_searches: Math.max(0, Number(metricsRow?.brand_searches ?? baseMetrics.brand_searches) || 0),
       rewards_engagements: Math.max(
@@ -204,7 +202,7 @@ export async function GET(req: NextRequest) {
             return Number.isFinite(ts) && ts >= cutoffMs;
           });
 
-    // Stage 1: Awareness
+    // Stage 1: Awareness (directly calculated from storefront analytics_events)
     const sessionsInPeriod = new Set(
       eventsInPeriod.map((e) => e.session_id).filter(Boolean)
     ).size;
@@ -213,17 +211,9 @@ export async function GET(req: NextRequest) {
     );
     const totalUniqueVisitors = visitorsInPeriodSet.size;
 
-    const frequencySource: "ads" | "sessions" =
-      marketingMetrics.reach > 0 && marketingMetrics.impressions > 0
-        ? "ads"
-        : "sessions";
-
-    const frequency =
-      frequencySource === "ads"
-        ? marketingMetrics.impressions / marketingMetrics.reach
-        : totalUniqueVisitors > 0
-          ? sessionsInPeriod / totalUniqueVisitors
-          : 0;
+    const impressions = sessionsInPeriod;
+    const reach = totalUniqueVisitors;
+    const frequency = reach > 0 ? impressions / reach : 0;
 
     // Stage 2: Consideration
     let firstTimeVisitors = 0;
@@ -419,13 +409,7 @@ export async function GET(req: NextRequest) {
       marketingMetrics.rewards_engagements + referralOrdersCount;
 
     // Compute 4-Stage Visual Funnel Progression
-    const awarenessVolume =
-      marketingMetrics.reach > 0
-        ? marketingMetrics.reach
-        : marketingMetrics.impressions > 0
-          ? marketingMetrics.impressions
-          : totalUniqueVisitors;
-
+    const awarenessVolume = impressions;
     const considerationVolume = totalUniqueVisitors;
     const conversionVolume = conversionsCount;
     const loyaltyVolume = repeatCustomersCount;
@@ -433,9 +417,7 @@ export async function GET(req: NextRequest) {
     const awarenessToConsideration =
       awarenessVolume > 0
         ? Math.min(100, (considerationVolume / awarenessVolume) * 100)
-        : considerationVolume > 0
-          ? 100
-          : 0;
+        : 0;
 
     const considerationToConversion =
       considerationVolume > 0
@@ -458,11 +440,10 @@ export async function GET(req: NextRequest) {
         {
           key: "awareness",
           title: "1. Awareness (Notoriété)",
-          primaryMetricLabel:
-            marketingMetrics.reach > 0 ? "Portée (Reach)" : "Impressions",
+          primaryMetricLabel: "Visites totales (Impressions)",
           primaryMetricValue: awarenessVolume,
           primaryFormatted: awarenessVolume.toLocaleString("fr-FR"),
-          secondaryNote: `${marketingMetrics.impressions.toLocaleString("fr-FR")} impressions`,
+          secondaryNote: `${reach.toLocaleString("fr-FR")} visiteurs uniques • ${frequency.toFixed(2)}x`,
           conversionToNextPct: Number(awarenessToConsideration.toFixed(1)),
         },
         {
@@ -494,10 +475,9 @@ export async function GET(req: NextRequest) {
         },
       ],
       kpis: {
-        impressions: marketingMetrics.impressions,
-        reach: marketingMetrics.reach,
+        impressions,
+        reach,
         frequency,
-        frequencySource,
         brandSearches: marketingMetrics.brand_searches,
         firstTimeVisitors,
         totalUniqueVisitors,
