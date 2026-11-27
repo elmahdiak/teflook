@@ -5,13 +5,10 @@ import Link from "next/link";
 import {
   ArrowDown,
   Check,
-  Heart,
   Minus,
   Plus,
   ShoppingBag,
-  Sparkles,
   Trash2,
-  Truck,
   X,
 } from "lucide-react";
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -469,28 +466,7 @@ function TefLookStorefront() {
         </div>
       </section>
 
-      {/* 6. Values Section */}
-      <section id="univers" className="store-shell scroll-mt-24 py-14 sm:py-20">
-        <div className="grid gap-8 border-y border-border py-10 sm:grid-cols-3 sm:py-12">
-          <ValuePoint
-            icon={<Sparkles size={19} />}
-            title={t("values.safety")}
-            detail={t("values.safetyText")}
-          />
-          <ValuePoint
-            icon={<Heart size={19} />}
-            title={t("values.growth")}
-            detail={t("values.growthText")}
-          />
-          <ValuePoint
-            icon={<Truck size={20} />}
-            title={t("values.connection")}
-            detail={t("values.connectionText")}
-          />
-        </div>
-      </section>
-
-      {/* 7. Collapsible Storefront FAQ Section */}
+      {/* 5. Collapsible Storefront FAQ Section */}
       <FAQAccordion />
 
       {/* 8. Multi-column Slanted Teal Footer */}
@@ -532,28 +508,6 @@ function TefLookStorefront() {
         </div>
       )}
     </main>
-  );
-}
-
-function ValuePoint({
-  icon,
-  title,
-  detail,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  detail: string;
-}) {
-  return (
-    <div className="flex gap-4">
-      <div className="grid size-10 shrink-0 place-items-center border border-border text-brand-orange">
-        {icon}
-      </div>
-      <div>
-        <h3 className="text-sm font-semibold">{title}</h3>
-        <p className="mt-1.5 text-[13px] leading-5 text-muted-foreground">{detail}</p>
-      </div>
-    </div>
   );
 }
 
