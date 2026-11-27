@@ -214,7 +214,7 @@ function TefLookStorefront() {
         className="relative w-full overflow-hidden bg-[#F7FAFA]"
         aria-label={locale === "ar" ? "الواجهة الرئيسية" : "Bannière principale"}
       >
-        <div className="relative w-full h-[420px] sm:h-[520px] md:h-[620px] lg:h-[680px] overflow-hidden pb-16 sm:pb-20 lg:pb-24">
+        <div className="relative w-full h-[70dvh] sm:h-[520px] md:h-[620px] lg:h-[680px] overflow-hidden pb-16 sm:pb-20 lg:pb-24">
           <img
             src="/Gemini_Generated_Gif_frnpcwfrnpcwfrnp.gif"
             alt="TefLook - Grandir, jouer et s'épanouir ensemble"
