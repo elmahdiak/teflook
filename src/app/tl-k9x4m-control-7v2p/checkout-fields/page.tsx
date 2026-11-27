@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ArabicInputWithKeyboard } from "@/components/admin/ArabicVirtualKeyboard";
 import {
   CHECKOUT_FIELDS_SQL_MIGRATION,
   DEFAULT_CHECKOUT_FIELDS,
@@ -61,6 +62,7 @@ export default function AdminCheckoutFieldsPage() {
   const [previewLocale, setPreviewLocale] = useState<"fr" | "ar">("fr");
   const [dirtyFieldIds, setDirtyFieldIds] = useState<Record<string, boolean>>({});
   const [optionsDrafts, setOptionsDrafts] = useState<Record<string, string>>({});
+  const [activeKeyboardId, setActiveKeyboardId] = useState<string | null>(null);
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const [toast, setToast] = useState<{
     message: string;
@@ -670,15 +672,19 @@ export default function AdminCheckoutFieldsPage() {
               <label className="block text-xs font-bold text-[#1A3C34] mb-1.5">
                 Libellé (Arabe)
               </label>
-              <input
-                type="text"
-                dir="rtl"
+              <ArabicInputWithKeyboard
+                keyboardId="new-label-ar"
+                isOpen={activeKeyboardId === "new-label-ar"}
+                onToggle={(id) =>
+                  setActiveKeyboardId((prev) => (prev === id ? null : id))
+                }
+                onClose={() => setActiveKeyboardId(null)}
                 placeholder="مثال: وقت التوصيل المفضل"
                 value={newField.label_ar}
-                onChange={(e) =>
-                  setNewField((prev) => ({ ...prev, label_ar: e.target.value }))
+                onChange={(nextVal) =>
+                  setNewField((prev) => ({ ...prev, label_ar: nextVal }))
                 }
-                className="w-full h-10 px-3.5 rounded-xl border border-[#4B9393]/20 bg-white text-sm text-[#1A3C34] outline-none focus:border-[#4B9393]"
+                inputClassName="w-full h-10 rounded-xl border border-[#4B9393]/20 bg-white text-sm text-[#1A3C34] outline-none focus:border-[#4B9393]"
               />
             </div>
 
@@ -744,18 +750,22 @@ export default function AdminCheckoutFieldsPage() {
               <label className="block text-xs font-bold text-[#1A3C34] mb-1.5">
                 Placeholder (Arabe)
               </label>
-              <input
-                type="text"
-                dir="rtl"
+              <ArabicInputWithKeyboard
+                keyboardId="new-placeholder-ar"
+                isOpen={activeKeyboardId === "new-placeholder-ar"}
+                onToggle={(id) =>
+                  setActiveKeyboardId((prev) => (prev === id ? null : id))
+                }
+                onClose={() => setActiveKeyboardId(null)}
                 placeholder="مثال: صباحاً أو مساءً"
                 value={newField.placeholder_ar}
-                onChange={(e) =>
+                onChange={(nextVal) =>
                   setNewField((prev) => ({
                     ...prev,
-                    placeholder_ar: e.target.value,
+                    placeholder_ar: nextVal,
                   }))
                 }
-                className="w-full h-10 px-3.5 rounded-xl border border-[#4B9393]/20 bg-white text-sm text-[#1A3C34] outline-none focus:border-[#4B9393]"
+                inputClassName="w-full h-10 rounded-xl border border-[#4B9393]/20 bg-white text-sm text-[#1A3C34] outline-none focus:border-[#4B9393]"
               />
             </div>
 
@@ -1017,17 +1027,23 @@ export default function AdminCheckoutFieldsPage() {
                         <label className="block font-semibold text-[#1A3C34]/70 mb-1">
                           Libellé (AR)
                         </label>
-                        <input
-                          type="text"
-                          dir="rtl"
+                        <ArabicInputWithKeyboard
+                          keyboardId={`${field.id}-label-ar`}
+                          isOpen={activeKeyboardId === `${field.id}-label-ar`}
+                          onToggle={(id) =>
+                            setActiveKeyboardId((prev) =>
+                              prev === id ? null : id
+                            )
+                          }
+                          onClose={() => setActiveKeyboardId(null)}
                           value={field.label_ar}
-                          onChange={(e) =>
+                          onChange={(nextVal) =>
                             handleFieldTextChange(field.id, {
-                              label_ar: e.target.value,
+                              label_ar: nextVal,
                             })
                           }
                           onBlur={() => handleFieldBlur(field.id)}
-                          className="w-full h-9 px-3 rounded-xl border border-[#4B9393]/20 bg-[#F3EFE6]/35 focus:bg-white text-[#1A3C34] outline-none focus:border-[#4B9393]"
+                          inputClassName="w-full h-9 rounded-xl border border-[#4B9393]/20 bg-[#F3EFE6]/35 focus:bg-white text-[#1A3C34] outline-none focus:border-[#4B9393]"
                         />
                       </div>
                       <div>
@@ -1050,17 +1066,25 @@ export default function AdminCheckoutFieldsPage() {
                         <label className="block font-semibold text-[#1A3C34]/70 mb-1">
                           Placeholder (AR)
                         </label>
-                        <input
-                          type="text"
-                          dir="rtl"
+                        <ArabicInputWithKeyboard
+                          keyboardId={`${field.id}-placeholder-ar`}
+                          isOpen={
+                            activeKeyboardId === `${field.id}-placeholder-ar`
+                          }
+                          onToggle={(id) =>
+                            setActiveKeyboardId((prev) =>
+                              prev === id ? null : id
+                            )
+                          }
+                          onClose={() => setActiveKeyboardId(null)}
                           value={field.placeholder_ar}
-                          onChange={(e) =>
+                          onChange={(nextVal) =>
                             handleFieldTextChange(field.id, {
-                              placeholder_ar: e.target.value,
+                              placeholder_ar: nextVal,
                             })
                           }
                           onBlur={() => handleFieldBlur(field.id)}
-                          className="w-full h-9 px-3 rounded-xl border border-[#4B9393]/20 bg-[#F3EFE6]/35 focus:bg-white text-[#1A3C34] outline-none focus:border-[#4B9393]"
+                          inputClassName="w-full h-9 rounded-xl border border-[#4B9393]/20 bg-[#F3EFE6]/35 focus:bg-white text-[#1A3C34] outline-none focus:border-[#4B9393]"
                         />
                       </div>
 
