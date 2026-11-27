@@ -44,7 +44,7 @@ function buildInitialFieldValues(
 
     if (field.field_type === "checkbox") {
       next[field.field_key] = false;
-    } else if (field.field_type === "select") {
+    } else if (field.field_type === "select" || field.field_type === "radio") {
       const opts =
         field.options && field.options.length > 0
           ? field.options
@@ -216,15 +216,46 @@ export function CODCheckoutModal({
         }
       }
 
-      if (field.field_key === "phone") {
+      if (field.field_key === "phone" || field.field_type === "tel") {
         const cleanedPhone = String(val ?? "").replace(/\s+/g, "").trim();
         if ((field.is_required || cleanedPhone.length > 0) && cleanedPhone.length < 8) {
           setErrorMsg(
             isAr
               ? "يرجى إدخال رقم هاتف مغربي صحيح."
-              : "Veuillez renseigner un numéro de téléphone valide au Maroc."
+              : "Veuillez renseigner un numéro de téléphone valide."
           );
           return;
+        }
+      }
+
+      if (field.field_type === "email") {
+        const emailVal = String(val ?? "").trim();
+        if (emailVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+          setErrorMsg(
+            isAr
+              ? `يرجى إدخال بريد إلكتروني صحيح في حقل « ${label} ».`
+              : `Veuillez saisir une adresse e-mail valide pour « ${label} ».`
+          );
+          return;
+        }
+      }
+
+      if (field.field_type === "url") {
+        const urlVal = String(val ?? "").trim();
+        if (urlVal) {
+          try {
+            const parsedUrl = new URL(urlVal);
+            if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+              throw new Error("invalid protocol");
+            }
+          } catch {
+            setErrorMsg(
+              isAr
+                ? `يرجى إدخال رابط صحيح (https://...) في حقل « ${label} ».`
+                : `Veuillez saisir une URL valide (ex: https://...) pour « ${label} ».`
+            );
+            return;
+          }
         }
       }
     }
@@ -600,7 +631,9 @@ export function CODCheckoutModal({
 
                   if (
                     field.field_key === "phone" &&
-                    (field.field_type === "text" || field.field_type === "number")
+                    (field.field_type === "text" ||
+                      field.field_type === "tel" ||
+                      field.field_type === "number")
                   ) {
                     return (
                       <div key={field.id}>
@@ -620,6 +653,7 @@ export function CODCheckoutModal({
                           </span>
                           <input
                             type="tel"
+                            inputMode="tel"
                             required={field.is_required}
                             placeholder={placeholder || "06 XX XX XX XX"}
                             value={String(rawValue ?? "")}
@@ -635,6 +669,57 @@ export function CODCheckoutModal({
                             : "Le livreur vous appellera sur ce numéro avant d'arriver chez vous."}
                         </p>
                       </div>
+                    );
+                  }
+
+                  if (field.field_type === "radio") {
+                    const options =
+                      field.options && field.options.length > 0
+                        ? field.options
+                        : ["Option 1", "Option 2"];
+                    const selectedVal = String(rawValue ?? "");
+
+                    return (
+                      <fieldset key={field.id} className="space-y-1.5">
+                        <legend className="block text-xs font-bold text-foreground mb-1">
+                          {label}{" "}
+                          {field.is_required && (
+                            <span className="text-destructive">*</span>
+                          )}
+                        </legend>
+                        {placeholder && (
+                          <p className="text-[11px] text-muted-foreground mb-1">
+                            {placeholder}
+                          </p>
+                        )}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {options.map((opt) => {
+                            const isSelected = selectedVal === opt;
+                            return (
+                              <label
+                                key={opt}
+                                className={cn(
+                                  "flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-xs font-semibold cursor-pointer transition-all",
+                                  isSelected
+                                    ? "border-brand-teal bg-[#4B9393]/10 text-[#1A3C34]"
+                                    : "border-border bg-background text-foreground hover:border-[#4B9393]/40"
+                                )}
+                              >
+                                <input
+                                  type="radio"
+                                  name={`cod-radio-${field.field_key}`}
+                                  value={opt}
+                                  required={field.is_required}
+                                  checked={isSelected}
+                                  onChange={() => setValue(field.field_key, opt)}
+                                  className="size-4 accent-[#4B9393] cursor-pointer"
+                                />
+                                <span>{opt}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </fieldset>
                     );
                   }
 
@@ -701,6 +786,27 @@ export function CODCheckoutModal({
                     );
                   }
 
+                  const inputType =
+                    field.field_type === "tel" ||
+                    field.field_type === "email" ||
+                    field.field_type === "number" ||
+                    field.field_type === "date" ||
+                    field.field_type === "time" ||
+                    field.field_type === "url"
+                      ? field.field_type
+                      : "text";
+
+                  const inputMode =
+                    field.field_type === "tel"
+                      ? "tel"
+                      : field.field_type === "email"
+                        ? "email"
+                        : field.field_type === "number"
+                          ? "decimal"
+                          : field.field_type === "url"
+                            ? "url"
+                            : undefined;
+
                   return (
                     <div key={field.id}>
                       <label className="block text-xs font-bold text-foreground mb-1">
@@ -710,7 +816,8 @@ export function CODCheckoutModal({
                         )}
                       </label>
                       <input
-                        type={field.field_type === "number" ? "number" : "text"}
+                        type={inputType}
+                        inputMode={inputMode}
                         required={field.is_required}
                         placeholder={placeholder}
                         value={String(rawValue ?? "")}

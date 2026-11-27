@@ -1,4 +1,15 @@
-export type CheckoutFieldType = "text" | "textarea" | "select" | "checkbox" | "number";
+export type CheckoutFieldType =
+  | "text"
+  | "tel"
+  | "email"
+  | "number"
+  | "textarea"
+  | "select"
+  | "radio"
+  | "checkbox"
+  | "date"
+  | "time"
+  | "url";
 
 export interface CheckoutFieldConfig {
   id: string;
@@ -135,7 +146,7 @@ export const CHECKOUT_FIELDS_SQL_MIGRATION = `CREATE TABLE IF NOT EXISTS public.
   field_key text NOT NULL UNIQUE,
   label_fr text NOT NULL,
   label_ar text NOT NULL DEFAULT '',
-  field_type text NOT NULL CHECK (field_type IN ('text', 'textarea', 'select', 'checkbox', 'number')),
+  field_type text NOT NULL CHECK (field_type IN ('text', 'tel', 'email', 'number', 'textarea', 'select', 'radio', 'checkbox', 'date', 'time', 'url')),
   is_required boolean NOT NULL DEFAULT false,
   is_enabled boolean NOT NULL DEFAULT true,
   display_order integer NOT NULL DEFAULT 1,
@@ -144,14 +155,26 @@ export const CHECKOUT_FIELDS_SQL_MIGRATION = `CREATE TABLE IF NOT EXISTS public.
   options jsonb DEFAULT '[]'::jsonb,
   is_system boolean NOT NULL DEFAULT false,
   updated_at timestamptz DEFAULT now()
-);`;
+);
+
+ALTER TABLE public.checkout_fields
+  DROP CONSTRAINT IF EXISTS checkout_fields_field_type_check;
+ALTER TABLE public.checkout_fields
+  ADD CONSTRAINT checkout_fields_field_type_check
+  CHECK (field_type IN ('text', 'tel', 'email', 'number', 'textarea', 'select', 'radio', 'checkbox', 'date', 'time', 'url'));`;
 
 const VALID_FIELD_TYPES = new Set<CheckoutFieldType>([
   "text",
+  "tel",
+  "email",
+  "number",
   "textarea",
   "select",
+  "radio",
   "checkbox",
-  "number",
+  "date",
+  "time",
+  "url",
 ]);
 
 export function sanitizeFieldKey(raw: string): string {

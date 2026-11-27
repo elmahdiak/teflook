@@ -169,6 +169,20 @@ async function handleSaveCheckoutFields(req: NextRequest) {
       .order("display_order", { ascending: true });
 
     if (upsertErr) {
+      const code = (upsertErr.code || "").toUpperCase();
+      const msg = (upsertErr.message || "").toLowerCase();
+      if (code === "23514" || msg.includes("checkout_fields_field_type_check")) {
+        return NextResponse.json(
+          {
+            success: true,
+            needsMigration: true,
+            fields: deduped,
+            message:
+              "Contrainte Supabase field_type obsolète — exécutez le SQL de mise à jour pour persister les nouveaux types.",
+          },
+          { headers: NO_STORE_HEADERS }
+        );
+      }
       return NextResponse.json(
         { error: `Erreur Supabase : ${upsertErr.message}` },
         { status: 500, headers: NO_STORE_HEADERS }
