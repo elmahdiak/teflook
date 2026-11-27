@@ -209,20 +209,69 @@ function TefLookStorefront() {
         defaultSearchOpen={false}
       />
 
-      {/* 3. Hero Section - Pure Full-Width Unobstructed Visual Display */}
-      <section className="relative w-full overflow-hidden bg-[#F7FAFA]" aria-label="Bannière principale">
-        <div className="relative w-full h-[420px] sm:h-[520px] md:h-[620px] lg:h-[680px] overflow-hidden">
+      {/* 3. Hero Section - Full-Width Display with Architectural Inset Frame & Scroll Cue */}
+      <section
+        className="relative w-full overflow-hidden bg-[#F7FAFA]"
+        aria-label={locale === "ar" ? "الواجهة الرئيسية" : "Bannière principale"}
+      >
+        <div className="relative w-full h-[420px] sm:h-[520px] md:h-[620px] lg:h-[680px] overflow-hidden pb-16 sm:pb-20 lg:pb-24">
           <img
             src="/Gemini_Generated_Gif_frnpcwfrnpcwfrnp.gif"
             alt="TefLook - Grandir, jouer et s'épanouir ensemble"
-            className="h-full w-full object-cover object-center opacity-100"
+            className="absolute inset-0 h-full w-full object-cover object-center opacity-100"
             loading="eager"
           />
+
+          {/* Subtle Bottom Scrim for Contrast */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent"
+          />
+
+          {/* Responsive Architectural Inset Keyline Frame */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-3 sm:inset-5 lg:inset-8 rounded-xl sm:rounded-2xl lg:rounded-3xl border border-white/25 z-10"
+          />
+
+          {/* Bottom-Center EXPLORER Scroll Cue */}
+          <a
+            href="#collections"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById("collections")?.scrollIntoView({ behavior: "smooth" });
+            }}
+            aria-label={
+              locale === "ar"
+                ? "اكتشف المجموعات"
+                : "Explorer les collections ci-dessous"
+            }
+            className="absolute bottom-5 sm:bottom-8 lg:bottom-11 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5 sm:gap-2 group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 rounded-md px-2 py-0.5"
+          >
+            <span
+              className={cn(
+                "text-[9px] sm:text-[10px] lg:text-[11px] font-semibold uppercase text-white/80 group-hover:text-white transition-colors",
+                locale === "ar"
+                  ? "font-sans tracking-normal text-[11px] sm:text-xs"
+                  : "tracking-[0.25em] sm:tracking-[0.35em]"
+              )}
+            >
+              {locale === "ar" ? "اكتشف" : "EXPLORER"}
+            </span>
+            <span
+              aria-hidden="true"
+              className="w-[1px] h-5 sm:h-7 lg:h-9 bg-gradient-to-b from-white/80 to-transparent group-hover:h-7 sm:group-hover:h-9 lg:group-hover:h-11 transition-all duration-300"
+            />
+          </a>
         </div>
       </section>
 
       {/* 4. Developmental Categories (The 6 Pillars) */}
-      <section className="store-shell pb-12 pt-10 sm:pt-14" aria-label={t("category.heading")}>
+      <section
+        id="collections"
+        className="store-shell scroll-mt-24 pb-12 pt-10 sm:pt-14"
+        aria-label={t("category.heading")}
+      >
         <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#F67D56]">
