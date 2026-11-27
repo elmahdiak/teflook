@@ -30,6 +30,7 @@ import {
 } from "@/lib/admin-config";
 import { Button } from "@/components/ui/button";
 import { BrandLogo } from "@/components/ui/BrandLogo";
+import { AdminNotificationsBell } from "@/components/admin/AdminNotificationsBell";
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -229,6 +230,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               <span>Accéder au site client</span>
               <ExternalLink size={13} />
             </Link>
+            <AdminNotificationsBell />
             <div className="flex items-center gap-2 pl-3 border-l border-border">
               <div className="size-8 rounded-full bg-brand-teal text-white font-bold grid place-items-center text-xs">
                 A

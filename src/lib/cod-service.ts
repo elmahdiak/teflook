@@ -406,6 +406,16 @@ export function saveCODOrder(orderData: Omit<CODOrder, "id" | "createdAt" | "sta
   const updated = [newOrder, ...current];
   if (typeof window !== "undefined") {
     localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(updated));
+    try {
+      window.dispatchEvent(
+        new CustomEvent("teflook:cod-order-created", { detail: newOrder })
+      );
+      if (typeof BroadcastChannel !== "undefined") {
+        const bc = new BroadcastChannel("teflook_sync");
+        bc.postMessage({ type: "cod-order-created", order: newOrder });
+        bc.close();
+      }
+    } catch {}
   }
 
   // Persist order + dynamic checkout metadata to Supabase asynchronously
