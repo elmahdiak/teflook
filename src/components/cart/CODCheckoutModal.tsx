@@ -234,7 +234,7 @@ export function CODCheckoutModal({
       }
 
       if (field.field_key === "phone" || field.field_type === "tel") {
-        const cleanedPhone = String(val ?? "").replace(/\s+/g, "").trim();
+        const cleanedPhone = String(val ?? "").replace(/[\s.\-()]+/g, "").trim();
         if (
           (field.is_required || cleanedPhone.length > 0) &&
           cleanedPhone.length < 8
@@ -784,16 +784,8 @@ export function CODCheckoutModal({
                           )}
                         </label>
                         <div className={SPLIT_INPUT_GROUP_CLASS}>
-                          <div className={cn(addonBoxClass, "gap-1.5")}>
+                          <div className={addonBoxClass}>
                             <CheckoutFieldAddonIcon field={field} size={16} />
-                            {field.field_key === "phone" && (
-                              <span
-                                dir="ltr"
-                                className="text-[11px] font-bold text-[#1A3C34]/80"
-                              >
-                                +212
-                              </span>
-                            )}
                           </div>
                           <input
                             type="tel"

@@ -1388,16 +1388,8 @@ export default function AdminCheckoutFieldsPage() {
                             )}
                           </label>
                           <div className={SPLIT_INPUT_GROUP_CLASS}>
-                            <div className={cn(addonBoxClass, "gap-1")}>
+                            <div className={addonBoxClass}>
                               <CheckoutFieldAddonIcon field={field} size={14} />
-                              {field.field_key === "phone" && (
-                                <span
-                                  dir="ltr"
-                                  className="text-[10px] font-bold text-[#1A3C34]/80"
-                                >
-                                  +212
-                                </span>
-                              )}
                             </div>
 
                             {field.field_type === "textarea" ? (
