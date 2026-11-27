@@ -28,10 +28,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  getCODOrders,
+  fetchSyncedCODOrders,
   getDashboardStats,
   type CODOrder,
 } from "@/lib/cod-service";
+import { supabase } from "@/lib/supabase";
 import {
   fetchSiteSettings,
   saveSiteSettings,
@@ -75,13 +76,50 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     setIsMounted(true);
-    const updatedStats = getDashboardStats();
-    setStats(updatedStats);
-    setRecentOrders(getCODOrders().slice(0, 5));
+
+    async function loadDashboard() {
+      const [orders, prodRes, revRes] = await Promise.all([
+        fetchSyncedCODOrders(),
+        fetch("/api/products", { cache: "no-store" })
+          .then((r) => (r.ok ? r.json() : null))
+          .catch(() => null),
+        fetch("/api/reviews", { cache: "no-store" })
+          .then((r) => (r.ok ? r.json() : null))
+          .catch(() => null),
+      ]);
+
+      const prodCount = Array.isArray(prodRes) ? prodRes.length : undefined;
+      const revCount = Array.isArray(revRes) ? revRes.length : undefined;
+      setStats(getDashboardStats(orders, prodCount, revCount));
+      setRecentOrders(orders.slice(0, 5));
+    }
+
+    void loadDashboard();
 
     fetchSiteSettings().then((s) => {
       if (s) setSiteSettings(s);
     });
+
+    const channel = supabase
+      .channel("teflook-dashboard-orders")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders" },
+        () => {
+          void loadDashboard();
+        }
+      )
+      .subscribe();
+
+    const handleLocalSync = () => {
+      void loadDashboard();
+    };
+    window.addEventListener("teflook:cod-order-created", handleLocalSync);
+
+    return () => {
+      window.removeEventListener("teflook:cod-order-created", handleLocalSync);
+      void supabase.removeChannel(channel);
+    };
   }, []);
 
   const handleSaveSettings = async (e: React.FormEvent) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import {
   AlertCircle,
@@ -9,9 +9,11 @@ import {
   Coins,
   ExternalLink,
   Filter,
+  LoaderCircle,
   MapPin,
   MessageCircle,
   Phone,
+  RefreshCw,
   Search,
   Trash2,
   Truck,
@@ -22,11 +24,11 @@ import { Button } from "@/components/ui/button";
 import {
   deleteCODOrder,
   fetchSyncedCODOrders,
-  getCODOrders,
   updateCODOrderStatus,
   type CODOrder,
   type OrderStatus,
 } from "@/lib/cod-service";
+import { supabase } from "@/lib/supabase";
 
 const STATUS_OPTIONS: { value: OrderStatus; label: string; color: string }[] = [
   { value: "pending", label: "En attente d'appel", color: "bg-amber-100 text-amber-800 border-amber-300" },
@@ -38,19 +40,59 @@ const STATUS_OPTIONS: { value: OrderStatus; label: string; color: string }[] = [
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<CODOrder[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<CODOrder | null>(null);
 
-  useEffect(() => {
-    setOrders(getCODOrders());
-    fetchSyncedCODOrders().then((synced) => {
+  const loadOrders = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const synced = await fetchSyncedCODOrders();
       setOrders(synced);
-    });
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  function handleStatusChange(orderId: string, newStatus: OrderStatus) {
-    updateCODOrderStatus(orderId, newStatus);
+  useEffect(() => {
+    void loadOrders();
+
+    const channel = supabase
+      .channel("teflook-admin-orders-page")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "orders" },
+        () => {
+          void loadOrders();
+        }
+      )
+      .subscribe();
+
+    const handleLocalOrder = () => {
+      void loadOrders();
+    };
+    window.addEventListener("teflook:cod-order-created", handleLocalOrder);
+
+    let bc: BroadcastChannel | null = null;
+    if (typeof BroadcastChannel !== "undefined") {
+      bc = new BroadcastChannel("teflook_sync");
+      bc.onmessage = (event) => {
+        if (event.data?.type === "cod-order-created") {
+          void loadOrders();
+        }
+      };
+    }
+
+    return () => {
+      window.removeEventListener("teflook:cod-order-created", handleLocalOrder);
+      if (bc) bc.close();
+      void supabase.removeChannel(channel);
+    };
+  }, [loadOrders]);
+
+  async function handleStatusChange(orderId: string, newStatus: OrderStatus) {
+    const previousOrder = orders.find((o) => o.id === orderId);
     setOrders((prev) =>
       prev.map((order) =>
         order.id === orderId ? { ...order, status: newStatus } : order
@@ -59,14 +101,28 @@ export default function AdminOrdersPage() {
     if (selectedOrder?.id === orderId) {
       setSelectedOrder({ ...selectedOrder, status: newStatus });
     }
+
+    const ok = await updateCODOrderStatus(orderId, newStatus);
+    if (!ok && previousOrder) {
+      setOrders((prev) =>
+        prev.map((order) =>
+          order.id === orderId ? previousOrder : order
+        )
+      );
+      if (selectedOrder?.id === orderId) {
+        setSelectedOrder(previousOrder);
+      }
+    }
   }
 
-  function handleDelete(orderId: string) {
+  async function handleDelete(orderId: string) {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cette commande ?")) {
-      deleteCODOrder(orderId);
-      setOrders((prev) => prev.filter((order) => order.id !== orderId));
-      if (selectedOrder?.id === orderId) {
-        setSelectedOrder(null);
+      const ok = await deleteCODOrder(orderId);
+      if (ok) {
+        setOrders((prev) => prev.filter((order) => order.id !== orderId));
+        if (selectedOrder?.id === orderId) {
+          setSelectedOrder(null);
+        }
       }
     }
   }
@@ -109,9 +165,24 @@ export default function AdminOrdersPage() {
             Gestion des Commandes Cash on Delivery (COD)
           </h1>
           <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-            Suivi des appels de confirmation, expéditions et encaissements en espèces à la livraison.
+            Suivi en direct des commandes Supabase, expéditions et encaissements en espèces à la livraison.
           </p>
         </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={isLoading}
+          onClick={() => void loadOrders()}
+          className="rounded-xl text-xs gap-2 self-start sm:self-auto cursor-pointer"
+        >
+          {isLoading ? (
+            <LoaderCircle size={14} className="animate-spin" />
+          ) : (
+            <RefreshCw size={14} />
+          )}
+          <span>Actualiser</span>
+        </Button>
       </div>
 
       {/* Filter Tabs & Search Bar */}
@@ -179,7 +250,16 @@ export default function AdminOrdersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
-              {filteredOrders.length === 0 ? (
+              {isLoading && orders.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-muted-foreground text-sm">
+                    <div className="inline-flex items-center gap-2">
+                      <LoaderCircle size={16} className="animate-spin text-brand-teal" />
+                      <span>Chargement des commandes depuis Supabase...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredOrders.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-muted-foreground text-sm">
                     Aucune commande trouvée correspondant à vos critères.

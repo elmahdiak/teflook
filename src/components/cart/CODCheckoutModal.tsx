@@ -23,10 +23,11 @@ import {
   type CheckoutFieldConfig,
 } from "@/lib/checkout-fields";
 import {
-  saveCODOrder,
+  isMissingOrderColumnError,
   type CODOrderCustomFieldEntry,
   type CODOrderItem,
 } from "@/lib/cod-service";
+import { supabase } from "@/lib/supabase";
 import { useCartStore } from "@/lib/shopify-cart";
 import { cleanWhatsAppNumber, fetchSiteSettings } from "@/lib/site-settings";
 import { useTefLookLanguage } from "@/lib/teflook-language";
@@ -204,7 +205,7 @@ export function CODCheckoutModal({
     setFieldValues((prev) => ({ ...prev, [key]: value }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     for (const field of activeFields) {
@@ -340,24 +341,132 @@ export function CODCheckoutModal({
           .filter(Boolean)
           .join(" • ") || undefined;
 
-      const order = saveCODOrder({
-        customerName,
-        customerPhone,
-        customerCity,
-        customerAddress,
-        notes: combinedNotes,
-        customFields,
-        customFieldsSummary,
+      const orderId = `CMD-${Math.floor(10000 + Math.random() * 90000)}`;
+      const createdAt = new Date().toISOString();
+
+      const orderPayload = {
+        id: orderId,
+        created_at: createdAt,
+        customer_name: customerName,
+        customer_phone: customerPhone,
+        customer_city: customerCity,
+        customer_address: customerAddress,
+        notes: combinedNotes ?? null,
+        custom_fields: customFields,
+        custom_fields_summary: customFieldsSummary,
         items: checkoutItems,
-        totalMad: totalWithShipping,
-      });
+        total_mad: totalWithShipping,
+        status: "pending",
+        payment_method: "COD",
+      };
+
+      let { error: directInsertError } = await supabase
+        .from("orders")
+        .insert([orderPayload]);
+
+      if (directInsertError && isMissingOrderColumnError(directInsertError)) {
+        const extraSummaryText = customFieldsSummary
+          .filter(
+            (entry) =>
+              ![
+                "full_name",
+                "phone",
+                "city",
+                "neighborhood",
+                "address",
+                "notes",
+              ].includes(entry.key)
+          )
+          .map((entry) => `${entry.labelFr || entry.key}: ${entry.value}`)
+          .join(" • ");
+        const fallbackNotes =
+          [combinedNotes, extraSummaryText].filter(Boolean).join(" • ") || null;
+
+        const retryRes = await supabase.from("orders").insert([
+          {
+            id: orderId,
+            created_at: createdAt,
+            customer_name: customerName,
+            customer_phone: customerPhone,
+            customer_city: customerCity,
+            customer_address: customerAddress,
+            notes: fallbackNotes,
+            items: checkoutItems,
+            total_mad: totalWithShipping,
+            status: "pending",
+            payment_method: "COD",
+          },
+        ]);
+        directInsertError = retryRes.error;
+      }
+
+      if (directInsertError) {
+        console.warn(
+          "Direct Supabase orders insert failed, trying /api/orders:",
+          directInsertError.message
+        );
+        const apiRes = await fetch("/api/orders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: orderId,
+            createdAt,
+            customerName,
+            customerPhone,
+            customerCity,
+            customerAddress,
+            notes: combinedNotes,
+            customFields,
+            customFieldsSummary,
+            items: checkoutItems,
+            totalMad: totalWithShipping,
+            status: "pending",
+            paymentMethod: "COD",
+          }),
+        });
+
+        const apiJson = await apiRes.json().catch(() => null);
+        if (!apiRes.ok || !apiJson?.savedToSupabase) {
+          throw new Error(
+            apiJson?.error ||
+              directInsertError.message ||
+              "Supabase insert error"
+          );
+        }
+      }
+
+      try {
+        const liveOrder = {
+          id: orderId,
+          createdAt,
+          customerName,
+          customerPhone,
+          customerCity,
+          customerAddress,
+          notes: combinedNotes,
+          customFields,
+          customFieldsSummary,
+          items: checkoutItems,
+          totalMad: totalWithShipping,
+          status: "pending" as const,
+          paymentMethod: "COD" as const,
+        };
+        window.dispatchEvent(
+          new CustomEvent("teflook:cod-order-created", { detail: liveOrder })
+        );
+        if (typeof BroadcastChannel !== "undefined") {
+          const bc = new BroadcastChannel("teflook_sync");
+          bc.postMessage({ type: "cod-order-created", order: liveOrder });
+          bc.close();
+        }
+      } catch {}
 
       if (!directItem) {
         useCartStore.setState({ items: [] });
       }
 
       setCreatedOrder({
-        id: order.id,
+        id: orderId,
         customerName,
         customerPhone,
         customerCity,
@@ -365,11 +474,12 @@ export function CODCheckoutModal({
         shippingFee: effectiveShippingFee,
         customSummary: customFieldsSummary,
       });
-    } catch {
+    } catch (err) {
+      console.error("COD order submission failed:", err);
       setErrorMsg(
         isAr
-          ? "حدث خطأ أثناء تسجيل طلبكم. يرجى المحاولة مرة أخرى."
-          : "Une erreur est survenue lors de l'enregistrement de votre commande."
+          ? "تعذر إرسال طلبكم إلى الخادم السحابي. يرجى التحقق من اتصالكم وإعادة المحاولة."
+          : "Impossible d'enregistrer votre commande sur le serveur. Veuillez réessayer dans un instant."
       );
     } finally {
       setIsSubmitting(false);

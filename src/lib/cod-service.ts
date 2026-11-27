@@ -1,4 +1,5 @@
 import { PRODUCTS, CATEGORIES, REVIEWS } from "@/data/teflookData";
+import { supabase } from "@/lib/supabase";
 
 export interface CODOrderItem {
   productId: string;
@@ -271,238 +272,113 @@ export interface AdminReview {
 }
 
 // Storage Keys
-const ORDERS_STORAGE_KEY = "teflook_cod_orders_v2";
 const PRODUCTS_STORAGE_KEY = "teflook_admin_products_v2";
 const CATEGORIES_STORAGE_KEY = "teflook_admin_categories_v2";
 const REVIEWS_STORAGE_KEY = "teflook_admin_reviews_v2";
 
-// Seed realistic initial orders
-const INITIAL_ORDERS: CODOrder[] = [
-  {
-    id: "CMD-84910",
-    createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(), // 45 mins ago
-    customerName: "Khadija Benani",
-    customerPhone: "0661234567",
-    customerCity: "Casablanca",
-    customerAddress: "Bd Ghandi, Résidence Anfa Palm, Imm B, Apt 14",
-    notes: "Appeler avant la livraison svp",
-    items: [
-      {
-        productId: "prod-disc-1",
-        title: "Horloge Minuteur Visuel 'Focus & Rituels' Silencieux",
-        variantTitle: "7 - 10 ans",
-        price: 199,
-        quantity: 1,
-        imageUrl: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=600&auto=format&fit=crop",
-      },
-      {
-        productId: "prod-emo-1",
-        title: "La Météo des Émotions : Roue & Cartes d'Apaisement",
-        variantTitle: "5 - 6 ans",
-        price: 189,
-        quantity: 1,
-        imageUrl: "https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=600&auto=format&fit=crop",
-      },
-    ],
-    totalMad: 388,
-    status: "pending",
-    paymentMethod: "COD",
-  },
-  {
-    id: "CMD-84909",
-    createdAt: new Date(Date.now() - 1000 * 60 * 180).toISOString(), // 3 hours ago
-    customerName: "Omar Tazi",
-    customerPhone: "0670889900",
-    customerCity: "Rabat",
-    customerAddress: "Avenue Annakhil, Hay Riad, Villa 42",
-    items: [
-      {
-        productId: "prod-auto-1",
-        title: "Set d'Apprentissage Culinaire Sécurisé 'Petit Chef'",
-        variantTitle: "Tous âges",
-        price: 229,
-        quantity: 1,
-        imageUrl: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=600&auto=format&fit=crop",
-      },
-    ],
-    totalMad: 229,
-    status: "confirmed",
-    paymentMethod: "COD",
-  },
-  {
-    id: "CMD-84908",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(), // 12 hours ago
-    customerName: "Salma El Idrissi",
-    customerPhone: "0655443322",
-    customerCity: "Marrakech",
-    customerAddress: "Guéliz, Rue de la Liberté, Apt 6",
-    notes: "Livraison l'après-midi uniquement",
-    items: [
-      {
-        productId: "prod-crit-1",
-        title: "Casse-Tête Labyrinthe Gravitationnel en Bois Écologique",
-        variantTitle: "7 - 10 ans",
-        price: 189,
-        quantity: 2,
-        imageUrl: "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?q=80&w=600&auto=format&fit=crop",
-      },
-    ],
-    totalMad: 378,
-    status: "shipped",
-    paymentMethod: "COD",
-  },
-  {
-    id: "CMD-84907",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 28).toISOString(), // yesterday
-    customerName: "Mehdi Cherkaoui",
-    customerPhone: "0663112233",
-    customerCity: "Tanger",
-    customerAddress: "Malabata, Résidence Bay City, Bloc C",
-    items: [
-      {
-        productId: "prod-disc-2",
-        title: "Tour de Concentration & Équilibre Zen en Bois Massif",
-        variantTitle: "5 - 6 ans",
-        price: 249,
-        quantity: 1,
-        imageUrl: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=600&auto=format&fit=crop",
-      },
-    ],
-    totalMad: 249,
-    status: "delivered",
-    paymentMethod: "COD",
-  },
-];
-
 /* ========================================================================= */
-/* ORDERS MANAGEMENT                                                         */
+/* CLOUD COD ORDERS (SUPABASE `orders` TABLE)                                */
 /* ========================================================================= */
 
-export function getCODOrders(): CODOrder[] {
-  if (typeof window === "undefined") return INITIAL_ORDERS;
-  try {
-    const raw = localStorage.getItem(ORDERS_STORAGE_KEY);
-    if (!raw) {
-      localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(INITIAL_ORDERS));
-      return INITIAL_ORDERS;
-    }
-    return JSON.parse(raw);
-  } catch {
-    return INITIAL_ORDERS;
-  }
+export function isMissingOrderColumnError(
+  err: { code?: string; message?: string } | null | undefined
+): boolean {
+  if (!err) return false;
+  const code = (err.code || "").toUpperCase();
+  const msg = (err.message || "").toLowerCase();
+  return (
+    code === "PGRST204" ||
+    code === "42703" ||
+    (msg.includes("custom_fields") &&
+      (msg.includes("column") || msg.includes("schema cache")))
+  );
 }
 
-export function saveCODOrder(orderData: Omit<CODOrder, "id" | "createdAt" | "status" | "paymentMethod">): CODOrder {
-  const current = getCODOrders();
-  const randomSuffix = Math.floor(10000 + Math.random() * 90000);
-  const newOrder: CODOrder = {
-    ...orderData,
-    id: `CMD-${randomSuffix}`,
-    createdAt: new Date().toISOString(),
-    status: "pending",
+export function mapRowToCODOrder(row: Record<string, any>): CODOrder {
+  return {
+    id: String(row.id),
+    createdAt: row.created_at || row.createdAt || new Date().toISOString(),
+    customerName: row.customer_name || row.customerName || "",
+    customerPhone: row.customer_phone || row.customerPhone || "",
+    customerCity: row.customer_city || row.customerCity || "",
+    customerAddress: row.customer_address || row.customerAddress || "",
+    notes: row.notes || undefined,
+    customFields:
+      row.custom_fields && typeof row.custom_fields === "object"
+        ? row.custom_fields
+        : undefined,
+    customFieldsSummary: Array.isArray(row.custom_fields_summary)
+      ? row.custom_fields_summary
+      : undefined,
+    items: Array.isArray(row.items) ? row.items : [],
+    totalMad: Number(row.total_mad ?? row.totalMad ?? 0),
+    status: (row.status || "pending") as OrderStatus,
     paymentMethod: "COD",
   };
+}
 
-  const updated = [newOrder, ...current];
+export async function fetchSyncedCODOrders(): Promise<CODOrder[]> {
   if (typeof window !== "undefined") {
-    localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(updated));
     try {
-      window.dispatchEvent(
-        new CustomEvent("teflook:cod-order-created", { detail: newOrder })
-      );
-      if (typeof BroadcastChannel !== "undefined") {
-        const bc = new BroadcastChannel("teflook_sync");
-        bc.postMessage({ type: "cod-order-created", order: newOrder });
-        bc.close();
+      const res = await fetch("/api/orders", { cache: "no-store" });
+      if (res.ok) {
+        const serverOrders = await res.json();
+        if (Array.isArray(serverOrders)) {
+          return serverOrders.sort(
+            (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)
+          );
+        }
       }
     } catch {}
   }
 
-  // Persist order + dynamic checkout metadata to Supabase asynchronously
-  if (typeof window !== "undefined") {
-    void fetch("/api/orders", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newOrder),
-    }).catch(() => {});
+  const { data, error } = await supabase
+    .from("orders")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error || !Array.isArray(data)) {
+    return [];
   }
 
-  return newOrder;
+  return data.map(mapRowToCODOrder);
 }
 
-export async function fetchSyncedCODOrders(): Promise<CODOrder[]> {
-  const localOrders = getCODOrders();
-  if (typeof window === "undefined") return localOrders;
+export async function updateCODOrderStatus(
+  orderId: string,
+  newStatus: OrderStatus
+): Promise<boolean> {
+  if (typeof window !== "undefined") {
+    try {
+      const res = await fetch("/api/orders", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: orderId, status: newStatus }),
+      });
+      if (res.ok) return true;
+    } catch {}
+  }
 
-  try {
-    const res = await fetch("/api/orders", { cache: "no-store" });
-    if (res.ok) {
-      const serverOrders = await res.json();
-      if (Array.isArray(serverOrders) && serverOrders.length > 0) {
-        const mergedMap = new Map<string, CODOrder>();
-        for (const o of serverOrders) {
-          if (o?.id) mergedMap.set(o.id, o);
-        }
-        for (const o of localOrders) {
-          if (o?.id && !mergedMap.has(o.id)) {
-            mergedMap.set(o.id, o);
-          }
-        }
-        const merged = Array.from(mergedMap.values()).sort(
-          (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)
-        );
-        try {
-          localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(merged));
-        } catch {}
-        return merged;
-      }
-    }
-  } catch {}
+  const { error } = await supabase
+    .from("orders")
+    .update({ status: newStatus })
+    .eq("id", orderId);
 
-  return localOrders;
+  return !error;
 }
 
-export function updateCODOrderStatus(orderId: string, newStatus: OrderStatus): CODOrder | null {
-  const current = getCODOrders();
-  const index = current.findIndex((o) => o.id === orderId);
-  let updatedOrder: CODOrder | null = null;
-
-  if (index !== -1) {
-    updatedOrder = { ...current[index], status: newStatus };
-    current[index] = updatedOrder;
-
-    if (typeof window !== "undefined") {
-      localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(current));
-    }
-  }
-
+export async function deleteCODOrder(orderId: string): Promise<boolean> {
   if (typeof window !== "undefined") {
-    fetch("/api/orders", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: orderId, status: newStatus }),
-    }).catch(() => {});
+    try {
+      const res = await fetch(`/api/orders?id=${encodeURIComponent(orderId)}`, {
+        method: "DELETE",
+      });
+      if (res.ok) return true;
+    } catch {}
   }
 
-  return updatedOrder;
-}
-
-export function deleteCODOrder(orderId: string): boolean {
-  const current = getCODOrders();
-  const filtered = current.filter((o) => o.id !== orderId);
-  const removedLocally = filtered.length !== current.length;
-
-  if (removedLocally && typeof window !== "undefined") {
-    localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(filtered));
-  }
-
-  if (typeof window !== "undefined") {
-    fetch(`/api/orders?id=${encodeURIComponent(orderId)}`, {
-      method: "DELETE",
-    }).catch(() => {});
-  }
-
-  return removedLocally;
+  const { error } = await supabase.from("orders").delete().eq("id", orderId);
+  return !error;
 }
 
 /* ========================================================================= */
@@ -793,8 +669,11 @@ export function deleteReview(reviewId: string): boolean {
 /* ANALYTICS & STATS                                                         */
 /* ========================================================================= */
 
-export function getDashboardStats() {
-  const orders = getCODOrders();
+export function getDashboardStats(
+  orders: CODOrder[] = [],
+  productsCountOverride?: number,
+  reviewsCountOverride?: number
+) {
   const products = getAdminProducts();
   const reviews = getAdminReviews();
 
@@ -820,8 +699,8 @@ export function getDashboardStats() {
     shippedOrders,
     deliveredOrders,
     confirmationRate,
-    productsCount: products.length,
-    reviewsCount: reviews.length,
+    productsCount: productsCountOverride ?? products.length,
+    reviewsCount: reviewsCountOverride ?? reviews.length,
     recentOrders: orders.slice(0, 5),
   };
 }

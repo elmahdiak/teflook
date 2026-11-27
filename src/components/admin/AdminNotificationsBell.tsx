@@ -138,14 +138,14 @@ export function AdminNotificationsBell() {
       };
     }
 
-    // Supabase Realtime subscription on cod_orders & product_reviews INSERT events
+    // Supabase Realtime subscription on orders & product_reviews INSERT events
     const supabase = getSupabaseBrowserClient();
     const realtimeChannel = supabase
       ? supabase
           .channel("teflook-admin-notifications")
           .on(
             "postgres_changes",
-            { event: "INSERT", schema: "public", table: "cod_orders" },
+            { event: "INSERT", schema: "public", table: "orders" },
             (payload) => {
               const row = payload.new as Record<string, unknown> | undefined;
               if (!row?.id) return;
