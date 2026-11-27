@@ -103,7 +103,7 @@ export function CollectionCardsGrid({
         const title = isAr ? card.titleAr : card.titleFr;
 
         const cardClassName = cn(
-          "relative rounded-2xl p-8 sm:p-10 transition-all duration-300 flex flex-col items-start justify-start text-start group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4B9393] cursor-pointer",
+          "relative rounded-2xl p-8 sm:p-10 transition-all duration-300 flex flex-col items-center justify-center text-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4B9393] cursor-pointer",
           isSelected
             ? "border-2 border-[#4B9393] bg-[#F4F9F9] shadow-md ring-2 ring-[#4B9393]/15"
             : "bg-white border border-slate-200/80 shadow-[0_2px_12px_-4px_rgba(26,60,52,0.05)] hover:shadow-[0_14px_30px_-8px_rgba(75,147,147,0.16)] hover:border-[#4B9393]/40 hover:-translate-y-0.5"
@@ -114,7 +114,7 @@ export function CollectionCardsGrid({
             {/* Full-Width Pastel Pill Strip with Centered Icon */}
             <div
               className={cn(
-                "relative w-full h-7 sm:h-8 rounded-full flex items-center justify-center mb-4 sm:mb-5 transition-transform duration-300 group-hover:scale-[1.01]",
+                "relative w-full h-7 sm:h-8 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-5 transition-transform duration-300 group-hover:scale-[1.01]",
                 card.stripBgClass
               )}
               aria-hidden="true"
@@ -129,10 +129,10 @@ export function CollectionCardsGrid({
               )}
             </div>
 
-            {/* Clean Category Title */}
+            {/* Centered Category Title */}
             <h3
               className={cn(
-                "font-display font-bold text-[12.5px] sm:text-base lg:text-lg text-[#1A3C34] leading-snug group-hover:text-[#4B9393] transition-colors",
+                "font-display font-bold text-[12.5px] sm:text-base lg:text-lg text-[#1A3C34] text-center mx-auto leading-snug group-hover:text-[#4B9393] transition-colors",
                 isSelected && "text-[#4B9393]",
                 isAr && "font-sans"
               )}
