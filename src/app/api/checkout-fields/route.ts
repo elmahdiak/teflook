@@ -207,3 +207,69 @@ export async function PUT(req: NextRequest) {
 export async function POST(req: NextRequest) {
   return handleSaveCheckoutFields(req);
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    let fieldId = searchParams.get("id")?.trim() || "";
+
+    if (!fieldId) {
+      try {
+        const body = await req.json();
+        if (typeof body?.id === "string") {
+          fieldId = body.id.trim();
+        }
+      } catch {}
+    }
+
+    if (!fieldId) {
+      return NextResponse.json(
+        { error: "L'identifiant du champ (id) est requis pour la suppression." },
+        { status: 400, headers: NO_STORE_HEADERS }
+      );
+    }
+
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("checkout_fields")
+      .delete()
+      .eq("id", fieldId);
+
+    if (error) {
+      if (isMissingTableError(error)) {
+        return NextResponse.json(
+          {
+            success: true,
+            needsMigration: true,
+            deletedId: fieldId,
+            message:
+              "Table checkout_fields introuvable dans Supabase — suppression appliquée localement.",
+          },
+          { headers: NO_STORE_HEADERS }
+        );
+      }
+
+      return NextResponse.json(
+        { error: `Erreur Supabase lors de la suppression : ${error.message}` },
+        { status: 500, headers: NO_STORE_HEADERS }
+      );
+    }
+
+    try {
+      revalidatePath("/", "layout");
+      revalidatePath(ADMIN_BASE_PATH);
+      revalidatePath(ADMIN_CHECKOUT_FIELDS_PATH);
+    } catch {}
+
+    return NextResponse.json(
+      { success: true, needsMigration: false, deletedId: fieldId },
+      { headers: NO_STORE_HEADERS }
+    );
+  } catch (error) {
+    console.error("DELETE /api/checkout-fields error:", error);
+    return NextResponse.json(
+      { error: "Erreur serveur lors de la suppression du champ." },
+      { status: 500, headers: NO_STORE_HEADERS }
+    );
+  }
+}

@@ -383,3 +383,88 @@ export async function saveCheckoutFields(
     };
   }
 }
+
+export async function deleteCheckoutField(
+  fieldId: string,
+  remainingFields: CheckoutFieldConfig[]
+): Promise<{
+  success: boolean;
+  fields: CheckoutFieldConfig[];
+  needsMigration?: boolean;
+  error?: string;
+}> {
+  const sortedRemaining = sortCheckoutFields(
+    remainingFields.map((f, idx) => normalizeCheckoutField(f, idx))
+  );
+
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(
+        CHECKOUT_FIELDS_STORAGE_KEY,
+        JSON.stringify(sortedRemaining)
+      );
+      window.dispatchEvent(
+        new CustomEvent("teflook:checkout-fields-updated", {
+          detail: sortedRemaining,
+        })
+      );
+      if (typeof BroadcastChannel !== "undefined") {
+        const bc = new BroadcastChannel("teflook_sync");
+        bc.postMessage({
+          type: "checkout-fields-updated",
+          fields: sortedRemaining,
+        });
+        bc.close();
+      }
+    } catch {}
+  }
+
+  try {
+    const res = await fetch(
+      `/api/checkout-fields?id=${encodeURIComponent(fieldId)}`,
+      {
+        method: "DELETE",
+        cache: "no-store",
+      }
+    );
+
+    const json = await res.json();
+    if (!res.ok) {
+      return {
+        success: false,
+        fields: sortedRemaining,
+        needsMigration: Boolean(json?.needsMigration),
+        error:
+          json?.error ||
+          "Erreur lors de la suppression du champ dans Supabase.",
+      };
+    }
+
+    if (json?.needsMigration) {
+      return {
+        success: true,
+        fields: sortedRemaining,
+        needsMigration: true,
+      };
+    }
+
+    // Persist remaining fields & updated display_order (also prevents an unseeded table from re-injecting deleted defaults)
+    if (sortedRemaining.length > 0) {
+      const syncRes = await saveCheckoutFields(sortedRemaining);
+      return syncRes;
+    }
+
+    return {
+      success: true,
+      fields: sortedRemaining,
+      needsMigration: false,
+    };
+  } catch (e) {
+    console.error("deleteCheckoutField error:", e);
+    return {
+      success: false,
+      fields: sortedRemaining,
+      error: "Erreur réseau lors de la suppression.",
+    };
+  }
+}

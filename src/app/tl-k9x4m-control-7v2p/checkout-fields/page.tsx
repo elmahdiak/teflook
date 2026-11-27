@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  AlertTriangle,
   ArrowDown,
   ArrowUp,
+  Check,
   CheckCircle2,
   ClipboardList,
   Copy,
@@ -20,7 +22,10 @@ import { Button } from "@/components/ui/button";
 import {
   CHECKOUT_FIELDS_SQL_MIGRATION,
   DEFAULT_CHECKOUT_FIELDS,
+  MOROCCAN_CITIES_OPTIONS,
+  deleteCheckoutField,
   fetchCheckoutFields,
+  normalizeCheckoutField,
   sanitizeFieldKey,
   saveCheckoutFields,
   sortCheckoutFields,
@@ -44,10 +49,17 @@ export default function AdminCheckoutFieldsPage() {
   const [needsMigration, setNeedsMigration] = useState(false);
   const [copiedSql, setCopiedSql] = useState(false);
   const [previewLocale, setPreviewLocale] = useState<"fr" | "ar">("fr");
+  const [dirtyFieldIds, setDirtyFieldIds] = useState<Record<string, boolean>>({});
+  const [optionsDrafts, setOptionsDrafts] = useState<Record<string, string>>({});
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
   } | null>(null);
+
+  // Delete confirmation modal state
+  const [fieldToDelete, setFieldToDelete] = useState<CheckoutFieldConfig | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // New Custom Field Drawer/Form
   const [isAddingField, setIsAddingField] = useState(false);
@@ -63,56 +75,265 @@ export default function AdminCheckoutFieldsPage() {
     is_enabled: true,
   });
 
+  // Track latest state & serialized save queue so rapid blur/toggle edits never overwrite newer typing
+  const latestFieldsRef = useRef<CheckoutFieldConfig[]>([]);
+  const mutationVersionRef = useRef(0);
+  const lastSavedSnapshotRef = useRef("");
+  const saveQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showToast = useCallback(
+    (message: string, type: "success" | "error" = "success") => {
+      setToast({ message, type });
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+      toastTimerRef.current = setTimeout(() => setToast(null), 4000);
+    },
+    []
+  );
+
   useEffect(() => {
     fetchCheckoutFields().then((res) => {
+      latestFieldsRef.current = res.fields;
+      lastSavedSnapshotRef.current = JSON.stringify(sortCheckoutFields(res.fields));
       setFields(res.fields);
       setNeedsMigration(Boolean(res.needsMigration));
       setIsLoading(false);
     });
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    };
   }, []);
 
-  const showToast = (message: string, type: "success" | "error" = "success") => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 4500);
-  };
+  const persistFields = useCallback(
+    (
+      nextFields: CheckoutFieldConfig[],
+      options?: {
+        force?: boolean;
+        successMessage?: string;
+        fieldIdJustSaved?: string;
+      }
+    ): Promise<boolean> => {
+      const normalizedSnapshot = sortCheckoutFields(
+        nextFields.map((f, idx) => normalizeCheckoutField(f, idx))
+      );
+      const serialized = JSON.stringify(normalizedSnapshot);
+      const force = Boolean(options?.force);
 
-  function handleFieldUpdate(
+      if (!force && serialized === lastSavedSnapshotRef.current) {
+        if (options?.fieldIdJustSaved) {
+          setDirtyFieldIds((prev) => {
+            if (!prev[options.fieldIdJustSaved!]) return prev;
+            const copy = { ...prev };
+            delete copy[options.fieldIdJustSaved!];
+            return copy;
+          });
+        }
+        return Promise.resolve(true);
+      }
+
+      const expectedVersion = mutationVersionRef.current;
+
+      const task = saveQueueRef.current.then(async () => {
+        setIsSaving(true);
+        const res = await saveCheckoutFields(normalizedSnapshot);
+        setIsSaving(false);
+
+        setNeedsMigration(Boolean(res.needsMigration));
+
+        if (res.success) {
+          lastSavedSnapshotRef.current = JSON.stringify(
+            sortCheckoutFields(res.fields)
+          );
+          if (mutationVersionRef.current === expectedVersion) {
+            latestFieldsRef.current = res.fields;
+            setFields(res.fields);
+            setDirtyFieldIds({});
+          } else if (options?.fieldIdJustSaved) {
+            setDirtyFieldIds((prev) => {
+              const copy = { ...prev };
+              delete copy[options.fieldIdJustSaved!];
+              return copy;
+            });
+          }
+
+          if (res.needsMigration) {
+            showToast(
+              "Sauvegardé localement. Exécutez le SQL ci-dessous dans Supabase pour persister en base.",
+              "error"
+            );
+            return false;
+          }
+
+          setLastSavedAt(
+            new Date().toLocaleTimeString("fr-FR", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          );
+          showToast(
+            options?.successMessage ||
+              "Modifications enregistrées dans Supabase !"
+          );
+          return true;
+        }
+
+        showToast(res.error || "Erreur lors de la sauvegarde.", "error");
+        return false;
+      });
+
+      saveQueueRef.current = task.then(() => undefined);
+      return task;
+    },
+    [showToast]
+  );
+
+  function applyFieldsChange(
+    updater: (prev: CheckoutFieldConfig[]) => CheckoutFieldConfig[],
+    dirtyId?: string
+  ): CheckoutFieldConfig[] {
+    mutationVersionRef.current += 1;
+    const next = updater(latestFieldsRef.current);
+    latestFieldsRef.current = next;
+    setFields(next);
+
+    if (dirtyId) {
+      setDirtyFieldIds((prev) => ({ ...prev, [dirtyId]: true }));
+    }
+    return next;
+  }
+
+  function handleFieldTextChange(
     id: string,
     patch: Partial<CheckoutFieldConfig>
   ) {
-    setFields((prev) =>
+    applyFieldsChange(
+      (prev) => prev.map((field) => (field.id === id ? { ...field, ...patch } : field)),
+      id
+    );
+  }
+
+  function handleFieldImmediateSave(
+    id: string,
+    patch: Partial<CheckoutFieldConfig>,
+    successMessage?: string
+  ) {
+    const next = applyFieldsChange((prev) =>
       prev.map((field) => (field.id === id ? { ...field, ...patch } : field))
     );
+    void persistFields(next, {
+      successMessage:
+        successMessage || "Champ mis à jour et enregistré dans Supabase !",
+      fieldIdJustSaved: id,
+    });
+  }
+
+  function handleTypeChange(
+    field: CheckoutFieldConfig,
+    nextType: CheckoutFieldType
+  ) {
+    const patch: Partial<CheckoutFieldConfig> = { field_type: nextType };
+    if (
+      nextType === "select" &&
+      (!field.options || field.options.length === 0)
+    ) {
+      patch.options =
+        field.field_key === "city"
+          ? MOROCCAN_CITIES_OPTIONS
+          : ["Option 1", "Option 2"];
+    }
+    handleFieldImmediateSave(
+      field.id,
+      patch,
+      `Type du champ « ${field.label_fr} » enregistré !`
+    );
+  }
+
+  function handleFieldBlur(fieldId: string) {
+    if (!dirtyFieldIds[fieldId]) return;
+    void persistFields(latestFieldsRef.current, {
+      successMessage: "Modifications du champ enregistrées dans Supabase !",
+      fieldIdJustSaved: fieldId,
+    });
   }
 
   function handleMove(index: number, direction: -1 | 1) {
     const targetIndex = index + direction;
-    if (targetIndex < 0 || targetIndex >= fields.length) return;
+    if (targetIndex < 0 || targetIndex >= latestFieldsRef.current.length) return;
 
-    setFields((prev) => {
-      const next = [...prev];
-      const [moved] = next.splice(index, 1);
-      next.splice(targetIndex, 0, moved);
-      return next.map((f, i) => ({ ...f, display_order: i + 1 }));
+    const next = applyFieldsChange((prev) => {
+      const copy = [...prev];
+      const [moved] = copy.splice(index, 1);
+      copy.splice(targetIndex, 0, moved);
+      return copy.map((f, i) => ({ ...f, display_order: i + 1 }));
+    });
+
+    void persistFields(next, {
+      successMessage: "Ordre des champs enregistré dans Supabase !",
     });
   }
 
-  function handleDeleteField(field: CheckoutFieldConfig) {
-    if (field.is_system) {
+  async function handleConfirmDeleteField() {
+    if (!fieldToDelete || isDeleting) return;
+    const target = fieldToDelete;
+    setIsDeleting(true);
+
+    mutationVersionRef.current += 1;
+    const expectedVersion = mutationVersionRef.current;
+    const remaining = latestFieldsRef.current
+      .filter((f) => f.id !== target.id)
+      .map((f, idx) => ({ ...f, display_order: idx + 1 }));
+
+    latestFieldsRef.current = remaining;
+    setFields(remaining);
+    setDirtyFieldIds((prev) => {
+      const copy = { ...prev };
+      delete copy[target.id];
+      return copy;
+    });
+    setOptionsDrafts((prev) => {
+      const copy = { ...prev };
+      delete copy[target.id];
+      return copy;
+    });
+
+    const res = await deleteCheckoutField(target.id, remaining);
+    setIsDeleting(false);
+    setFieldToDelete(null);
+    setNeedsMigration(Boolean(res.needsMigration));
+
+    if (res.success) {
+      lastSavedSnapshotRef.current = JSON.stringify(
+        sortCheckoutFields(res.fields)
+      );
+      if (mutationVersionRef.current === expectedVersion) {
+        latestFieldsRef.current = res.fields;
+        setFields(res.fields);
+        setDirtyFieldIds({});
+      }
+
+      if (res.needsMigration) {
+        showToast(
+          `Champ « ${target.label_fr} » supprimé localement. Exécutez le SQL pour persister dans Supabase.`,
+          "error"
+        );
+      } else {
+        setLastSavedAt(
+          new Date().toLocaleTimeString("fr-FR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        );
+        showToast(`Champ « ${target.label_fr} » supprimé de Supabase !`);
+      }
+    } else {
       showToast(
-        "Les champs principaux ne peuvent pas être supprimés — désactivez-les avec le bouton interrupteur.",
+        res.error || "Erreur lors de la suppression dans Supabase.",
         "error"
       );
-      return;
     }
-    setFields((prev) =>
-      prev
-        .filter((f) => f.id !== field.id)
-        .map((f, idx) => ({ ...f, display_order: idx + 1 }))
-    );
   }
 
-  function handleCreateField(e: React.FormEvent) {
+  async function handleCreateField(e: React.FormEvent) {
     e.preventDefault();
     const labelFr = newField.label_fr.trim();
     if (!labelFr) {
@@ -123,7 +344,9 @@ export default function AdminCheckoutFieldsPage() {
     const baseKey =
       sanitizeFieldKey(newField.field_key || labelFr) ||
       `custom_${Date.now()}`;
-    const existingKeys = new Set(fields.map((f) => f.field_key));
+    const existingKeys = new Set(
+      latestFieldsRef.current.map((f) => f.field_key)
+    );
     let finalKey = baseKey;
     let counter = 2;
     while (existingKeys.has(finalKey)) {
@@ -158,14 +381,14 @@ export default function AdminCheckoutFieldsPage() {
       field_type: newField.field_type,
       is_required: newField.is_required,
       is_enabled: newField.is_enabled,
-      display_order: fields.length + 1,
+      display_order: latestFieldsRef.current.length + 1,
       placeholder_fr: newField.placeholder_fr.trim(),
       placeholder_ar: newField.placeholder_ar.trim(),
       options: parsedOptions,
       is_system: false,
     };
 
-    setFields((prev) => sortCheckoutFields([...prev, created]));
+    const next = applyFieldsChange((prev) => sortCheckoutFields([...prev, created]));
     setNewField({
       label_fr: "",
       label_ar: "",
@@ -178,29 +401,19 @@ export default function AdminCheckoutFieldsPage() {
       is_enabled: true,
     });
     setIsAddingField(false);
-    showToast(`Champ "${labelFr}" ajouté — pensez à enregistrer !`);
+
+    await persistFields(next, {
+      force: true,
+      successMessage: `Champ « ${labelFr} » ajouté et enregistré dans Supabase !`,
+    });
   }
 
   async function handleSaveAll() {
-    setIsSaving(true);
-    const res = await saveCheckoutFields(fields);
-    setIsSaving(false);
-
-    setFields(res.fields);
-    setNeedsMigration(Boolean(res.needsMigration));
-
-    if (res.success && !res.needsMigration) {
-      showToast(
-        "Formulaire de commande enregistré avec succès dans Supabase !"
-      );
-    } else if (res.success && res.needsMigration) {
-      showToast(
-        "Sauvegardé localement. Exécutez le SQL ci-dessous dans Supabase pour persister en base.",
-        "error"
-      );
-    } else {
-      showToast(res.error || "Erreur lors de la sauvegarde.", "error");
-    }
+    await persistFields(latestFieldsRef.current, {
+      force: true,
+      successMessage:
+        "Formulaire de commande enregistré avec succès dans Supabase !",
+    });
   }
 
   function handleResetDefaults() {
@@ -211,8 +424,14 @@ export default function AdminCheckoutFieldsPage() {
     ) {
       return;
     }
-    setFields(DEFAULT_CHECKOUT_FIELDS);
-    showToast("Valeurs par défaut restaurées — cliquez sur Enregistrer.");
+    setOptionsDrafts({});
+    setDirtyFieldIds({});
+    const next = applyFieldsChange(() => DEFAULT_CHECKOUT_FIELDS);
+    void persistFields(next, {
+      force: true,
+      successMessage:
+        "Valeurs par défaut restaurées et enregistrées dans Supabase !",
+    });
   }
 
   async function handleCopySql() {
@@ -224,12 +443,14 @@ export default function AdminCheckoutFieldsPage() {
   }
 
   const enabledFields = fields.filter((f) => f.is_enabled);
+  const hasUnsavedChanges = Object.keys(dirtyFieldIds).length > 0;
 
   return (
     <div className="space-y-8 max-w-6xl">
       {/* Toast Notification */}
       {toast && (
         <div
+          role="status"
           className={cn(
             "fixed top-5 end-5 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl shadow-2xl text-xs sm:text-sm font-bold text-white animate-in fade-in slide-in-from-top-4",
             toast.type === "error" ? "bg-[#F67D56]" : "bg-[#4B9393]"
@@ -240,18 +461,100 @@ export default function AdminCheckoutFieldsPage() {
         </div>
       )}
 
+      {/* Delete Confirmation Modal */}
+      {fieldToDelete && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-field-title"
+        >
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-xs"
+            onClick={() => !isDeleting && setFieldToDelete(null)}
+            aria-hidden="true"
+          />
+          <div className="relative z-10 w-full max-w-md rounded-3xl border border-[#4B9393]/20 bg-white p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-start gap-3.5">
+              <div className="grid size-11 shrink-0 place-items-center rounded-2xl bg-red-50 text-red-600 border border-red-200">
+                <AlertTriangle size={20} />
+              </div>
+              <div className="space-y-1">
+                <h2
+                  id="delete-field-title"
+                  className="font-display text-lg font-bold text-[#1A3C34]"
+                >
+                  Supprimer ce champ ?
+                </h2>
+                <p className="text-xs sm:text-sm text-[#1A3C34]/75 leading-relaxed">
+                  Voulez-vous vraiment supprimer le champ{" "}
+                  <strong className="text-[#1A3C34]">
+                    « {fieldToDelete.label_fr} »
+                  </strong>{" "}
+                  (<code className="text-xs">{fieldToDelete.field_key}</code>) ?
+                  Il sera retiré immédiatement de Supabase et du formulaire
+                  client.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isDeleting}
+                onClick={() => setFieldToDelete(null)}
+                className="rounded-xl text-xs font-semibold cursor-pointer"
+              >
+                Annuler
+              </Button>
+              <Button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => void handleConfirmDeleteField()}
+                className="rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm cursor-pointer"
+              >
+                {isDeleting ? (
+                  <LoaderCircle size={14} className="animate-spin me-1.5" />
+                ) : (
+                  <Trash2 size={14} className="me-1.5" />
+                )}
+                Confirmer la suppression
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#4B9393]/15">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-[#4B9393]/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#4B9393] mb-2">
-            <ClipboardList size={13} />
-            <span>Constructeur Checkout COD</span>
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#4B9393]/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#4B9393]">
+              <ClipboardList size={13} />
+              <span>Constructeur Checkout COD</span>
+            </div>
+            {isSaving ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#F3EFE6] px-2.5 py-1 text-[11px] font-semibold text-[#1A3C34]">
+                <LoaderCircle size={12} className="animate-spin text-[#4B9393]" />
+                Synchronisation Supabase...
+              </span>
+            ) : hasUnsavedChanges ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#F67D56]/10 px-2.5 py-1 text-[11px] font-semibold text-[#F67D56]">
+                Modifications en attente de sauvegarde
+              </span>
+            ) : lastSavedAt ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
+                <Check size={12} />
+                Synchronisé à {lastSavedAt}
+              </span>
+            ) : null}
           </div>
           <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#1A3C34]">
             Champs du Formulaire de Commande
           </h1>
           <p className="mt-1 text-xs sm:text-sm text-[#1A3C34]/70">
-            Activez, réordonnez, personnalisez les libellés bilingues FR/AR et ajoutez des champs sur mesure à votre fenêtre Cash on Delivery.
+            Modifiez, réordonnez, activez/désactivez ou supprimez chaque champ : toute modification est synchronisée avec Supabase et le formulaire client.
           </p>
         </div>
 
@@ -495,6 +798,7 @@ export default function AdminCheckoutFieldsPage() {
               </Button>
               <Button
                 type="submit"
+                disabled={isSaving}
                 className="rounded-xl bg-[#F67D56] hover:bg-[#e06d48] text-white text-xs font-bold cursor-pointer"
               >
                 Ajouter au formulaire
@@ -512,190 +816,333 @@ export default function AdminCheckoutFieldsPage() {
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
           {/* Left 7 Cols: Fields List & Inline Editors */}
           <div className="xl:col-span-7 space-y-4">
-            {fields.map((field, idx) => (
-              <div
-                key={field.id}
-                className={cn(
-                  "rounded-3xl border p-5 sm:p-6 transition-all shadow-xs space-y-4",
-                  field.is_enabled
-                    ? "bg-white border-[#4B9393]/20"
-                    : "bg-[#F3EFE6]/50 border-slate-200/80 opacity-80"
-                )}
-              >
-                {/* Top Controls Row */}
-                <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#4B9393]/10">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="inline-flex size-7 items-center justify-center rounded-full bg-[#4B9393]/10 text-xs font-bold text-[#4B9393] tabular-nums shrink-0">
-                      {idx + 1}
-                    </span>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-display font-bold text-sm sm:text-base text-[#1A3C34] truncate">
-                          {field.label_fr}
-                        </span>
-                        <code className="rounded-full bg-[#F3EFE6] px-2.5 py-0.5 text-[10px] font-mono font-semibold text-[#1A3C34]/75">
-                          {field.field_key}
-                        </code>
-                        <span className="rounded-full bg-[#4B9393]/10 px-2.5 py-0.5 text-[10px] font-bold text-[#4B9393]">
-                          {field.field_type}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Order, Required & Enable Actions */}
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      disabled={idx === 0}
-                      onClick={() => handleMove(idx, -1)}
-                      aria-label="Monter"
-                      className="grid size-8 place-items-center rounded-xl border border-[#4B9393]/20 bg-[#F3EFE6]/60 text-[#1A3C34] hover:bg-[#4B9393] hover:text-white disabled:opacity-35 transition-colors cursor-pointer"
-                    >
-                      <ArrowUp size={14} />
-                    </button>
-                    <button
-                      type="button"
-                      disabled={idx === fields.length - 1}
-                      onClick={() => handleMove(idx, 1)}
-                      aria-label="Descendre"
-                      className="grid size-8 place-items-center rounded-xl border border-[#4B9393]/20 bg-[#F3EFE6]/60 text-[#1A3C34] hover:bg-[#4B9393] hover:text-white disabled:opacity-35 transition-colors cursor-pointer"
-                    >
-                      <ArrowDown size={14} />
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleFieldUpdate(field.id, {
-                          is_required: !field.is_required,
-                        })
-                      }
-                      className={cn(
-                        "rounded-full px-3 py-1 text-[11px] font-bold transition-colors cursor-pointer border",
-                        field.is_required
-                          ? "bg-[#F67D56]/12 border-[#F67D56]/30 text-[#F67D56]"
-                          : "bg-slate-100 border-slate-200 text-slate-500 hover:border-[#4B9393]/40"
-                      )}
-                    >
-                      {field.is_required ? "Obligatoire *" : "Optionnel"}
-                    </button>
-
-                    {/* Toggle Switch */}
-                    <label
-                      className="relative inline-flex items-center cursor-pointer"
-                      title={field.is_enabled ? "Activé" : "Désactivé"}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={field.is_enabled}
-                        onChange={(e) =>
-                          handleFieldUpdate(field.id, {
-                            is_enabled: e.target.checked,
-                          })
-                        }
-                        className="sr-only peer"
-                      />
-                      <div className="w-10 h-5.5 bg-slate-200 rounded-full peer peer-checked:bg-[#4B9393] after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:after:translate-x-4.5" />
-                    </label>
-
-                    {!field.is_system && (
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteField(field)}
-                        aria-label="Supprimer ce champ"
-                        className="grid size-8 place-items-center rounded-xl text-slate-400 hover:text-[#F67D56] hover:bg-[#F67D56]/10 transition-colors cursor-pointer"
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Inline Bilingual Config Inputs */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  <div>
-                    <label className="block font-semibold text-[#1A3C34]/70 mb-1">
-                      Libellé (FR)
-                    </label>
-                    <input
-                      type="text"
-                      value={field.label_fr}
-                      onChange={(e) =>
-                        handleFieldUpdate(field.id, { label_fr: e.target.value })
-                      }
-                      className="w-full h-9 px-3 rounded-xl border border-[#4B9393]/20 bg-[#F3EFE6]/35 focus:bg-white text-[#1A3C34] outline-none focus:border-[#4B9393]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-semibold text-[#1A3C34]/70 mb-1">
-                      Libellé (AR)
-                    </label>
-                    <input
-                      type="text"
-                      dir="rtl"
-                      value={field.label_ar}
-                      onChange={(e) =>
-                        handleFieldUpdate(field.id, { label_ar: e.target.value })
-                      }
-                      className="w-full h-9 px-3 rounded-xl border border-[#4B9393]/20 bg-[#F3EFE6]/35 focus:bg-white text-[#1A3C34] outline-none focus:border-[#4B9393]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-semibold text-[#1A3C34]/70 mb-1">
-                      Placeholder (FR)
-                    </label>
-                    <input
-                      type="text"
-                      value={field.placeholder_fr}
-                      onChange={(e) =>
-                        handleFieldUpdate(field.id, {
-                          placeholder_fr: e.target.value,
-                        })
-                      }
-                      className="w-full h-9 px-3 rounded-xl border border-[#4B9393]/20 bg-[#F3EFE6]/35 focus:bg-white text-[#1A3C34] outline-none focus:border-[#4B9393]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-semibold text-[#1A3C34]/70 mb-1">
-                      Placeholder (AR)
-                    </label>
-                    <input
-                      type="text"
-                      dir="rtl"
-                      value={field.placeholder_ar}
-                      onChange={(e) =>
-                        handleFieldUpdate(field.id, {
-                          placeholder_ar: e.target.value,
-                        })
-                      }
-                      className="w-full h-9 px-3 rounded-xl border border-[#4B9393]/20 bg-[#F3EFE6]/35 focus:bg-white text-[#1A3C34] outline-none focus:border-[#4B9393]"
-                    />
-                  </div>
-
-                  {field.field_type === "select" && (
-                    <div className="sm:col-span-2">
-                      <label className="block font-semibold text-[#1A3C34]/70 mb-1">
-                        Options (séparées par des virgules)
-                      </label>
-                      <input
-                        type="text"
-                        value={(field.options || []).join(", ")}
-                        onChange={(e) =>
-                          handleFieldUpdate(field.id, {
-                            options: e.target.value
-                              .split(",")
-                              .map((s) => s.trim())
-                              .filter(Boolean),
-                          })
-                        }
-                        className="w-full h-9 px-3 rounded-xl border border-[#4B9393]/20 bg-[#F3EFE6]/35 focus:bg-white text-[#1A3C34] outline-none focus:border-[#4B9393]"
-                      />
-                    </div>
-                  )}
+            {fields.length === 0 ? (
+              <div className="rounded-3xl border border-dashed border-[#4B9393]/30 bg-[#F3EFE6]/50 p-10 text-center space-y-4">
+                <p className="text-sm font-semibold text-[#1A3C34]">
+                  Aucun champ dans le formulaire.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <Button
+                    type="button"
+                    onClick={() => setIsAddingField(true)}
+                    className="rounded-2xl bg-[#4B9393] hover:bg-[#3D7B7B] text-white text-xs font-bold cursor-pointer"
+                  >
+                    <Plus size={14} className="me-1.5" />
+                    Ajouter un champ
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleResetDefaults}
+                    className="rounded-2xl text-xs font-semibold cursor-pointer"
+                  >
+                    <RotateCcw size={14} className="me-1.5" />
+                    Restaurer les champs par défaut
+                  </Button>
                 </div>
               </div>
-            ))}
+            ) : (
+              fields.map((field, idx) => {
+                const isDirty = Boolean(dirtyFieldIds[field.id]);
+                const optionsDisplayValue =
+                  optionsDrafts[field.id] ?? (field.options || []).join(", ");
+
+                return (
+                  <div
+                    key={field.id}
+                    className={cn(
+                      "rounded-3xl border p-5 sm:p-6 transition-all shadow-xs space-y-4",
+                      field.is_enabled
+                        ? "bg-white border-[#4B9393]/20"
+                        : "bg-[#F3EFE6]/50 border-slate-200/80 opacity-85",
+                      isDirty && "ring-2 ring-[#F67D56]/30"
+                    )}
+                  >
+                    {/* Top Controls Row */}
+                    <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#4B9393]/10">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="inline-flex size-7 items-center justify-center rounded-full bg-[#4B9393]/10 text-xs font-bold text-[#4B9393] tabular-nums shrink-0">
+                          {idx + 1}
+                        </span>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-display font-bold text-sm sm:text-base text-[#1A3C34] truncate">
+                              {field.label_fr || field.field_key}
+                            </span>
+                            <code className="rounded-full bg-[#F3EFE6] px-2.5 py-0.5 text-[10px] font-mono font-semibold text-[#1A3C34]/75">
+                              {field.field_key}
+                            </code>
+                            <span className="rounded-full bg-[#4B9393]/10 px-2.5 py-0.5 text-[10px] font-bold text-[#4B9393]">
+                              {field.field_type}
+                            </span>
+                            {isDirty && (
+                              <span className="rounded-full bg-[#F67D56]/12 px-2 py-0.5 text-[10px] font-bold text-[#F67D56]">
+                                Non enregistré
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Order, Required, Enable, Save & Delete Actions */}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          disabled={idx === 0}
+                          onClick={() => handleMove(idx, -1)}
+                          aria-label="Monter"
+                          title="Monter"
+                          className="grid size-8 place-items-center rounded-xl border border-[#4B9393]/20 bg-[#F3EFE6]/60 text-[#1A3C34] hover:bg-[#4B9393] hover:text-white disabled:opacity-35 transition-colors cursor-pointer"
+                        >
+                          <ArrowUp size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={idx === fields.length - 1}
+                          onClick={() => handleMove(idx, 1)}
+                          aria-label="Descendre"
+                          title="Descendre"
+                          className="grid size-8 place-items-center rounded-xl border border-[#4B9393]/20 bg-[#F3EFE6]/60 text-[#1A3C34] hover:bg-[#4B9393] hover:text-white disabled:opacity-35 transition-colors cursor-pointer"
+                        >
+                          <ArrowDown size={14} />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleFieldImmediateSave(
+                              field.id,
+                              { is_required: !field.is_required },
+                              `Champ « ${field.label_fr} » défini comme ${
+                                !field.is_required ? "obligatoire" : "optionnel"
+                              }.`
+                            )
+                          }
+                          className={cn(
+                            "rounded-full px-3 py-1 text-[11px] font-bold transition-colors cursor-pointer border",
+                            field.is_required
+                              ? "bg-[#F67D56]/12 border-[#F67D56]/30 text-[#F67D56]"
+                              : "bg-slate-100 border-slate-200 text-slate-500 hover:border-[#4B9393]/40"
+                          )}
+                        >
+                          {field.is_required ? "Obligatoire *" : "Optionnel"}
+                        </button>
+
+                        {/* Toggle Switch */}
+                        <label
+                          className="relative inline-flex items-center cursor-pointer"
+                          title={field.is_enabled ? "Activé" : "Désactivé"}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={field.is_enabled}
+                            onChange={(e) =>
+                              handleFieldImmediateSave(
+                                field.id,
+                                { is_enabled: e.target.checked },
+                                `Champ « ${field.label_fr} » ${
+                                  e.target.checked ? "activé" : "désactivé"
+                                } !`
+                              )
+                            }
+                            className="sr-only peer"
+                          />
+                          <div className="w-10 h-5.5 bg-slate-200 rounded-full peer peer-checked:bg-[#4B9393] after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:after:translate-x-4.5" />
+                        </label>
+
+                        {/* Per-Card Explicit Save Button */}
+                        <button
+                          type="button"
+                          disabled={isSaving}
+                          onClick={() =>
+                            void persistFields(latestFieldsRef.current, {
+                              force: true,
+                              successMessage: `Champ « ${field.label_fr} » enregistré dans Supabase !`,
+                              fieldIdJustSaved: field.id,
+                            })
+                          }
+                          title="Enregistrer ce champ dans Supabase"
+                          className={cn(
+                            "inline-flex items-center gap-1 rounded-xl px-2.5 h-8 text-[11px] font-bold border transition-colors cursor-pointer",
+                            isDirty
+                              ? "bg-[#F67D56] border-[#F67D56] text-white hover:bg-[#e06d48] shadow-xs"
+                              : "bg-[#4B9393]/8 border-[#4B9393]/20 text-[#4B9393] hover:bg-[#4B9393] hover:text-white"
+                          )}
+                        >
+                          <Save size={13} />
+                          <span className="hidden sm:inline">Enregistrer</span>
+                        </button>
+
+                        {/* Delete Field Button (all cards) */}
+                        <button
+                          type="button"
+                          onClick={() => setFieldToDelete(field)}
+                          aria-label={`Supprimer ${field.label_fr}`}
+                          title="Supprimer ce champ"
+                          className="inline-flex items-center justify-center rounded-xl border border-red-200 bg-red-50/70 size-8 text-red-500 hover:bg-red-100 hover:text-red-700 hover:border-red-300 transition-colors cursor-pointer"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Inline Bilingual & Type Config Inputs */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      <div>
+                        <label className="block font-semibold text-[#1A3C34]/70 mb-1">
+                          Libellé (FR)
+                        </label>
+                        <input
+                          type="text"
+                          value={field.label_fr}
+                          onChange={(e) =>
+                            handleFieldTextChange(field.id, {
+                              label_fr: e.target.value,
+                            })
+                          }
+                          onBlur={() => handleFieldBlur(field.id)}
+                          className="w-full h-9 px-3 rounded-xl border border-[#4B9393]/20 bg-[#F3EFE6]/35 focus:bg-white text-[#1A3C34] outline-none focus:border-[#4B9393]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold text-[#1A3C34]/70 mb-1">
+                          Libellé (AR)
+                        </label>
+                        <input
+                          type="text"
+                          dir="rtl"
+                          value={field.label_ar}
+                          onChange={(e) =>
+                            handleFieldTextChange(field.id, {
+                              label_ar: e.target.value,
+                            })
+                          }
+                          onBlur={() => handleFieldBlur(field.id)}
+                          className="w-full h-9 px-3 rounded-xl border border-[#4B9393]/20 bg-[#F3EFE6]/35 focus:bg-white text-[#1A3C34] outline-none focus:border-[#4B9393]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold text-[#1A3C34]/70 mb-1">
+                          Placeholder (FR)
+                        </label>
+                        <input
+                          type="text"
+                          value={field.placeholder_fr}
+                          onChange={(e) =>
+                            handleFieldTextChange(field.id, {
+                              placeholder_fr: e.target.value,
+                            })
+                          }
+                          onBlur={() => handleFieldBlur(field.id)}
+                          className="w-full h-9 px-3 rounded-xl border border-[#4B9393]/20 bg-[#F3EFE6]/35 focus:bg-white text-[#1A3C34] outline-none focus:border-[#4B9393]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block font-semibold text-[#1A3C34]/70 mb-1">
+                          Placeholder (AR)
+                        </label>
+                        <input
+                          type="text"
+                          dir="rtl"
+                          value={field.placeholder_ar}
+                          onChange={(e) =>
+                            handleFieldTextChange(field.id, {
+                              placeholder_ar: e.target.value,
+                            })
+                          }
+                          onBlur={() => handleFieldBlur(field.id)}
+                          className="w-full h-9 px-3 rounded-xl border border-[#4B9393]/20 bg-[#F3EFE6]/35 focus:bg-white text-[#1A3C34] outline-none focus:border-[#4B9393]"
+                        />
+                      </div>
+
+                      <div
+                        className={cn(
+                          field.field_type === "select"
+                            ? "sm:col-span-1"
+                            : "sm:col-span-2"
+                        )}
+                      >
+                        <label className="block font-semibold text-[#1A3C34]/70 mb-1">
+                          Type de champ
+                        </label>
+                        <select
+                          value={field.field_type}
+                          onChange={(e) =>
+                            handleTypeChange(
+                              field,
+                              e.target.value as CheckoutFieldType
+                            )
+                          }
+                          className="w-full h-9 px-3 rounded-xl border border-[#4B9393]/20 bg-[#F3EFE6]/35 focus:bg-white text-[#1A3C34] outline-none focus:border-[#4B9393] cursor-pointer"
+                        >
+                          {FIELD_TYPE_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {field.field_type === "select" && (
+                        <div>
+                          <label className="block font-semibold text-[#1A3C34]/70 mb-1">
+                            Options (séparées par des virgules)
+                          </label>
+                          <input
+                            type="text"
+                            value={optionsDisplayValue}
+                            onChange={(e) => {
+                              const raw = e.target.value;
+                              setOptionsDrafts((prev) => ({
+                                ...prev,
+                                [field.id]: raw,
+                              }));
+                              handleFieldTextChange(field.id, {
+                                options: raw
+                                  .split(",")
+                                  .map((s) => s.trim())
+                                  .filter(Boolean),
+                              });
+                            }}
+                            onBlur={() => {
+                              setOptionsDrafts((prev) => {
+                                const copy = { ...prev };
+                                delete copy[field.id];
+                                return copy;
+                              });
+                              handleFieldBlur(field.id);
+                            }}
+                            className="w-full h-9 px-3 rounded-xl border border-[#4B9393]/20 bg-[#F3EFE6]/35 focus:bg-white text-[#1A3C34] outline-none focus:border-[#4B9393]"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+
+            {/* Footer Save Bar */}
+            {fields.length > 0 && (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-[#4B9393]/20 bg-[#F3EFE6]/70 px-5 py-4">
+                <p className="text-xs text-[#1A3C34]/75">
+                  Les interrupteurs et changements de type s&apos;enregistrent instantanément ; les libellés et placeholders se synchronisent dès que vous quittez un champ ou cliquez sur Enregistrer.
+                </p>
+                <Button
+                  type="button"
+                  onClick={() => void handleSaveAll()}
+                  disabled={isSaving || isLoading}
+                  className="rounded-2xl bg-[#F67D56] hover:bg-[#e06d48] text-white text-xs sm:text-sm font-bold shadow-sm cursor-pointer shrink-0"
+                >
+                  {isSaving ? (
+                    <LoaderCircle size={15} className="animate-spin me-1.5" />
+                  ) : (
+                    <Save size={15} className="me-1.5" />
+                  )}
+                  Enregistrer tout
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Right 5 Cols: Live Checkout Modal Preview */}
