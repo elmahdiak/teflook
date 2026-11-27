@@ -12,14 +12,23 @@ import {
   Database,
   Eye,
   LoaderCircle,
+  Package,
   Plus,
   RotateCcw,
   Save,
+  ShoppingBag,
   Trash2,
+  Truck,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ArabicInputWithKeyboard } from "@/components/admin/ArabicVirtualKeyboard";
+import {
+  CheckoutFieldAddonIcon,
+  DEFAULT_SHIPPING_FEE_MAD,
+  SPLIT_INPUT_GROUP_CLASS,
+  getAddonBoxClass,
+} from "@/components/cart/CheckoutFieldAddonIcon";
 import {
   CHECKOUT_FIELDS_SQL_MIGRATION,
   DEFAULT_CHECKOUT_FIELDS,
@@ -1217,132 +1226,230 @@ export default function AdminCheckoutFieldsPage() {
 
             <div
               dir={previewLocale === "ar" ? "rtl" : "ltr"}
-              className="rounded-2xl bg-white border border-[#4B9393]/15 p-5 space-y-3.5"
+              className="rounded-2xl bg-white border border-[#4B9393]/20 overflow-hidden shadow-xs"
             >
-              {enabledFields.length === 0 ? (
-                <p className="text-xs text-center text-slate-400 py-6">
-                  Aucun champ activé. Activez au moins un champ à gauche.
-                </p>
-              ) : (
-                enabledFields.map((field) => {
-                  const label =
-                    previewLocale === "ar"
-                      ? field.label_ar || field.label_fr
-                      : field.label_fr;
-                  const placeholder =
-                    previewLocale === "ar"
-                      ? field.placeholder_ar || field.placeholder_fr
-                      : field.placeholder_fr;
+              {/* Preview Modal Header */}
+              <div className="border-b border-[#4B9393]/15 bg-[#F3EFE6]/70 px-4 py-3 flex items-center gap-2.5">
+                <div className="grid size-8 place-items-center rounded-lg bg-[#4B9393] text-white shrink-0">
+                  <ShoppingBag size={14} />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-display text-xs font-bold text-[#1A3C34] truncate">
+                    {previewLocale === "ar"
+                      ? "يرجى ملء الاستمارة للطلب"
+                      : "Veuillez remplir le formulaire pour commander"}
+                  </p>
+                  <p className="text-[10px] font-medium text-[#4B9393]">
+                    {previewLocale === "ar"
+                      ? "الدفع نقداً عند الاستلام • المغرب"
+                      : "Paiement en espèces à la livraison"}
+                  </p>
+                </div>
+              </div>
 
-                  if (field.field_type === "checkbox") {
-                    return (
-                      <div
-                        key={field.id}
-                        className="flex items-center gap-2.5 rounded-xl border border-[#4B9393]/15 bg-[#F3EFE6]/50 px-3 py-2.5 text-xs"
-                      >
-                        <input
-                          type="checkbox"
-                          disabled
-                          className="size-4 accent-[#4B9393]"
-                        />
-                        <span className="font-semibold text-[#1A3C34]">
-                          {label}
-                          {field.is_required && (
-                            <span className="text-[#F67D56] ms-1">*</span>
-                          )}
-                        </span>
+              <div className="p-4 space-y-3.5">
+                {/* Preview Product Summary Row */}
+                <div className="rounded-xl border border-[#4B9393]/20 bg-[#F3EFE6]/45 p-2.5 flex items-center justify-between gap-2.5">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="relative shrink-0 mt-1 me-1">
+                      <div className="w-11 h-11 rounded-xl border border-[#4B9393]/15 bg-[#F3EFE6] flex items-center justify-center text-[#4B9393]">
+                        <Package size={18} />
                       </div>
-                    );
-                  }
-
-                  if (field.field_type === "radio") {
-                    const radioOpts =
-                      field.options && field.options.length > 0
-                        ? field.options
-                        : ["Option 1", "Option 2"];
-                    return (
-                      <div key={field.id} className="space-y-1.5">
-                        <label className="block text-xs font-bold text-[#1A3C34]">
-                          {label}
-                          {field.is_required && (
-                            <span className="text-[#F67D56] ms-1">*</span>
-                          )}
-                        </label>
-                        <div className="grid grid-cols-2 gap-1.5">
-                          {radioOpts.map((opt, radioIdx) => (
-                            <div
-                              key={`${opt}-${radioIdx}`}
-                              className="flex items-center gap-2 rounded-xl border border-slate-200 bg-[#F3EFE6]/30 px-2.5 py-2 text-[11px] font-medium text-[#1A3C34]"
-                            >
-                              <input
-                                type="radio"
-                                disabled
-                                name={`preview-radio-${field.id}`}
-                                defaultChecked={radioIdx === 0}
-                                className="size-3.5 accent-[#4B9393]"
-                              />
-                              <span className="truncate">{opt}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  }
-
-                  const previewInputType =
-                    field.field_type === "tel" ||
-                    field.field_type === "email" ||
-                    field.field_type === "number" ||
-                    field.field_type === "date" ||
-                    field.field_type === "time" ||
-                    field.field_type === "url"
-                      ? field.field_type
-                      : "text";
-
-                  return (
-                    <div key={field.id}>
-                      <label className="block text-xs font-bold text-[#1A3C34] mb-1">
-                        {label}
-                        {field.is_required && (
-                          <span className="text-[#F67D56] ms-1">*</span>
-                        )}
-                      </label>
-                      {field.field_type === "textarea" ? (
-                        <textarea
-                          disabled
-                          rows={2}
-                          placeholder={placeholder}
-                          className="w-full p-2.5 rounded-xl border border-slate-200 bg-[#F3EFE6]/30 text-xs resize-none"
-                        />
-                      ) : field.field_type === "select" ? (
-                        <select
-                          disabled
-                          className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-[#F3EFE6]/30 text-xs"
-                        >
-                          <option>
-                            {(field.options && field.options[0]) ||
-                              placeholder ||
-                              label}
-                          </option>
-                        </select>
-                      ) : (
-                        <input
-                          type={previewInputType}
-                          disabled
-                          placeholder={placeholder}
-                          className="w-full h-9 px-3 rounded-xl border border-slate-200 bg-[#F3EFE6]/30 text-xs"
-                        />
-                      )}
+                      <span className="absolute -top-2 -right-2 bg-[#1A3C34] text-white text-[10px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center">
+                        1
+                      </span>
                     </div>
-                  );
-                })
-              )}
+                    <span className="text-xs font-bold text-[#1A3C34] truncate">
+                      {previewLocale === "ar"
+                        ? "لعبة تعليمية تيفلوك"
+                        : "Coffret éducatif TefLook"}
+                    </span>
+                  </div>
+                  <span className="text-xs font-extrabold text-[#1A3C34] shrink-0">
+                    240 {previewLocale === "ar" ? "درهم" : "MAD"}
+                  </span>
+                </div>
 
-              <div className="pt-2">
-                <div className="w-full py-3 px-4 rounded-xl bg-[#F67D56] text-white text-center text-xs font-bold shadow-sm">
-                  {previewLocale === "ar"
-                    ? "تأكيد الطلب • الدفع عند الاستلام"
-                    : "Valider ma commande (COD)"}
+                {/* Preview Shipping Card */}
+                <div className="space-y-1">
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-[#1A3C34]/70">
+                    {previewLocale === "ar" ? "خيارات الشحن" : "Options d'expédition"}
+                  </span>
+                  <div className="border border-[#4B9393]/25 bg-[#F3EFE6]/40 rounded-xl p-2.5 flex items-center justify-between gap-2 text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="size-3.5 rounded-full border-2 border-[#4B9393] bg-white flex items-center justify-center">
+                        <span className="size-1.5 rounded-full bg-[#4B9393]" />
+                      </span>
+                      <span className="font-semibold text-[#1A3C34]">
+                        {previewLocale === "ar"
+                          ? "التوصيل لجميع المدن المغربية"
+                          : "Partout au Maroc"}
+                      </span>
+                    </div>
+                    <span className="font-extrabold text-[#1A3C34]">
+                      {DEFAULT_SHIPPING_FEE_MAD}{" "}
+                      {previewLocale === "ar" ? "درهم" : "MAD"}
+                    </span>
+                  </div>
+                </div>
+
+                {enabledFields.length === 0 ? (
+                  <p className="text-xs text-center text-slate-400 py-6">
+                    Aucun champ activé. Activez au moins un champ à gauche.
+                  </p>
+                ) : (
+                  <div className="space-y-2.5">
+                    {enabledFields.map((field) => {
+                      const isPreviewAr = previewLocale === "ar";
+                      const label = isPreviewAr
+                        ? field.label_ar || field.label_fr
+                        : field.label_fr;
+                      const placeholder = isPreviewAr
+                        ? field.placeholder_ar || field.placeholder_fr
+                        : field.placeholder_fr;
+                      const addonBoxClass = getAddonBoxClass(isPreviewAr);
+
+                      if (field.field_type === "checkbox") {
+                        return (
+                          <div
+                            key={field.id}
+                            className="flex items-center gap-2.5 rounded-xl border border-[#4B9393]/25 bg-[#F3EFE6]/30 px-3 py-2.5 text-xs"
+                          >
+                            <input
+                              type="checkbox"
+                              disabled
+                              className="size-4 accent-[#4B9393]"
+                            />
+                            <span className="font-semibold text-[#1A3C34]">
+                              {label}
+                              {field.is_required && (
+                                <span className="text-[#F67D56] ms-1">*</span>
+                              )}
+                            </span>
+                          </div>
+                        );
+                      }
+
+                      if (field.field_type === "radio") {
+                        const radioOpts =
+                          field.options && field.options.length > 0
+                            ? field.options
+                            : ["Option 1", "Option 2"];
+                        return (
+                          <div key={field.id} className="space-y-1.5">
+                            <label className="block text-xs font-bold text-[#1A3C34]">
+                              {label}
+                              {field.is_required && (
+                                <span className="text-[#F67D56] ms-1">*</span>
+                              )}
+                            </label>
+                            <div className="grid grid-cols-2 gap-1.5">
+                              {radioOpts.map((opt, radioIdx) => (
+                                <div
+                                  key={`${opt}-${radioIdx}`}
+                                  className={cn(
+                                    "flex items-center gap-2 rounded-xl border px-2.5 py-2 text-[11px] font-medium text-[#1A3C34]",
+                                    radioIdx === 0
+                                      ? "border-[#4B9393] bg-[#F3EFE6]/65"
+                                      : "border-[#4B9393]/20 bg-white"
+                                  )}
+                                >
+                                  <input
+                                    type="radio"
+                                    disabled
+                                    name={`preview-radio-${field.id}`}
+                                    defaultChecked={radioIdx === 0}
+                                    className="size-3.5 accent-[#4B9393]"
+                                  />
+                                  <span className="truncate">{opt}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      const previewInputType =
+                        field.field_type === "tel" ||
+                        field.field_type === "email" ||
+                        field.field_type === "number" ||
+                        field.field_type === "date" ||
+                        field.field_type === "time" ||
+                        field.field_type === "url"
+                          ? field.field_type
+                          : "text";
+
+                      return (
+                        <div key={field.id}>
+                          <label className="block text-xs font-bold text-[#1A3C34] mb-1">
+                            {label}
+                            {field.is_required && (
+                              <span className="text-[#F67D56] ms-1">*</span>
+                            )}
+                          </label>
+                          <div className={SPLIT_INPUT_GROUP_CLASS}>
+                            <div className={cn(addonBoxClass, "gap-1")}>
+                              <CheckoutFieldAddonIcon field={field} size={14} />
+                              {field.field_key === "phone" && (
+                                <span
+                                  dir="ltr"
+                                  className="text-[10px] font-bold text-[#1A3C34]/80"
+                                >
+                                  +212
+                                </span>
+                              )}
+                            </div>
+
+                            {field.field_type === "textarea" ? (
+                              <textarea
+                                disabled
+                                rows={2}
+                                placeholder={placeholder}
+                                className="flex-1 min-w-0 p-2.5 text-xs text-[#1A3C34] bg-transparent resize-none"
+                              />
+                            ) : field.field_type === "select" ? (
+                              <select
+                                disabled
+                                className="flex-1 min-w-0 h-9 px-3 text-xs text-[#1A3C34] bg-transparent"
+                              >
+                                <option>
+                                  {(field.options && field.options[0]) ||
+                                    placeholder ||
+                                    label}
+                                </option>
+                              </select>
+                            ) : (
+                              <input
+                                type={previewInputType}
+                                disabled
+                                placeholder={placeholder}
+                                className="flex-1 min-w-0 h-9 px-3 text-xs text-[#1A3C34] bg-transparent"
+                              />
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                <div className="pt-1 space-y-2">
+                  <div className="w-full py-3 px-4 rounded-xl bg-[#F67D56] text-white text-xs font-bold shadow-md flex items-center justify-center gap-2">
+                    <ShoppingBag size={15} />
+                    <span>
+                      {previewLocale === "ar"
+                        ? `اطلب الآن • ${240 + DEFAULT_SHIPPING_FEE_MAD} درهم`
+                        : `Commander maintenant • ${240 + DEFAULT_SHIPPING_FEE_MAD} MAD`}
+                    </span>
+                  </div>
+                  <p className="text-center text-[10px] font-medium text-[#1A3C34]/70 flex items-center justify-center gap-1">
+                    <Truck size={11} className="text-[#4B9393]" />
+                    <span>
+                      {previewLocale === "ar"
+                        ? "توصيل خلال 24-48 ساعة • الدفع نقداً عند الاستلام"
+                        : "Livraison 24–48h • Paiement en espèces à la livraison"}
+                    </span>
+                  </p>
                 </div>
               </div>
             </div>

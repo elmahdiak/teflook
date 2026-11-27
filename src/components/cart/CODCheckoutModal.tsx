@@ -1,8 +1,21 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { CheckCircle2, LoaderCircle, ShieldCheck, Truck, X } from "lucide-react";
+import {
+  CheckCircle2,
+  LoaderCircle,
+  Package,
+  ShoppingBag,
+  Truck,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  CheckoutFieldAddonIcon,
+  DEFAULT_SHIPPING_FEE_MAD,
+  SPLIT_INPUT_GROUP_CLASS,
+  getAddonBoxClass,
+} from "@/components/cart/CheckoutFieldAddonIcon";
 import {
   DEFAULT_CHECKOUT_FIELDS,
   MOROCCAN_CITIES_OPTIONS,
@@ -23,6 +36,7 @@ interface CODCheckoutModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   directItem?: CODOrderItem;
+  shippingFee?: number;
 }
 
 interface CreatedOrderSnapshot {
@@ -30,6 +44,8 @@ interface CreatedOrderSnapshot {
   customerName: string;
   customerPhone: string;
   customerCity: string;
+  totalWithShipping: number;
+  shippingFee: number;
   customSummary: CODOrderCustomFieldEntry[];
 }
 
@@ -69,6 +85,7 @@ export function CODCheckoutModal({
   open,
   onOpenChange,
   directItem,
+  shippingFee,
 }: CODCheckoutModalProps) {
   const { items } = useCartStore();
   const { locale, direction, isMounted } = useTefLookLanguage();
@@ -87,10 +104,19 @@ export function CODCheckoutModal({
         imageUrl: i.product.images.edges[0]?.node?.url,
       }));
 
-  const totalMad = checkoutItems.reduce(
+  const subtotalMad = checkoutItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
+
+  const effectiveShippingFee =
+    checkoutItems.length === 0
+      ? 0
+      : typeof shippingFee === "number" && Number.isFinite(shippingFee)
+        ? Math.max(0, shippingFee)
+        : DEFAULT_SHIPPING_FEE_MAD;
+
+  const totalWithShipping = subtotalMad + effectiveShippingFee;
 
   const [fieldsConfig, setFieldsConfig] = useState<CheckoutFieldConfig[]>(
     DEFAULT_CHECKOUT_FIELDS
@@ -218,7 +244,10 @@ export function CODCheckoutModal({
 
       if (field.field_key === "phone" || field.field_type === "tel") {
         const cleanedPhone = String(val ?? "").replace(/\s+/g, "").trim();
-        if ((field.is_required || cleanedPhone.length > 0) && cleanedPhone.length < 8) {
+        if (
+          (field.is_required || cleanedPhone.length > 0) &&
+          cleanedPhone.length < 8
+        ) {
           setErrorMsg(
             isAr
               ? "يرجى إدخال رقم هاتف مغربي صحيح."
@@ -329,7 +358,7 @@ export function CODCheckoutModal({
         customFields,
         customFieldsSummary,
         items: checkoutItems,
-        totalMad,
+        totalMad: totalWithShipping,
       });
 
       if (!directItem) {
@@ -341,6 +370,8 @@ export function CODCheckoutModal({
         customerName,
         customerPhone,
         customerCity,
+        totalWithShipping,
+        shippingFee: effectiveShippingFee,
         customSummary: customFieldsSummary,
       });
     } catch {
@@ -363,9 +394,11 @@ export function CODCheckoutModal({
 
   const whatsappMessage = createdOrder
     ? isAr
-      ? `مرحباً TefLook، لقد أتممت الطلب رقم #${createdOrder.id} بمبلغ ${totalMad} درهم (الدفع عند الاستلام). يرجى تأكيد التوصيل.`
-      : `Bonjour TefLook, je viens de passer la commande #${createdOrder.id} pour un montant de ${totalMad} MAD (Paiement à la livraison). Merci de me confirmer la livraison.`
+      ? `مرحباً TefLook، لقد أتممت الطلب رقم #${createdOrder.id} بمبلغ ${createdOrder.totalWithShipping} درهم (الدفع عند الاستلام). يرجى تأكيد التوصيل.`
+      : `Bonjour TefLook, je viens de passer la commande #${createdOrder.id} pour un montant de ${createdOrder.totalWithShipping} MAD (Paiement à la livraison). Merci de me confirmer la livraison.`
     : "";
+
+  const addonBoxClass = getAddonBoxClass(isAr);
 
   return (
     <div
@@ -374,29 +407,29 @@ export function CODCheckoutModal({
     >
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+        className="fixed inset-0 bg-[#1A3C34]/55 backdrop-blur-xs transition-opacity"
         onClick={handleClose}
         aria-hidden="true"
       />
 
       {/* Modal Dialog */}
-      <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl bg-card border border-border shadow-2xl my-auto animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-2xl bg-white border border-[#4B9393]/20 shadow-2xl my-auto animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-border px-5 py-4 bg-[#F7FAFA]">
-          <div className="flex items-center gap-2.5">
-            <div className="grid size-9 place-items-center rounded-xl bg-brand-orange text-white shrink-0">
-              <Truck size={18} />
+        <div className="flex items-center justify-between border-b border-[#4B9393]/15 px-5 py-4 bg-[#F3EFE6]/70">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="grid size-10 place-items-center rounded-xl bg-[#4B9393] text-white shrink-0 shadow-xs">
+              <ShoppingBag size={18} />
             </div>
-            <div>
-              <h2 className="font-display text-base sm:text-lg font-bold text-foreground">
+            <div className="min-w-0">
+              <h2 className="font-display text-base sm:text-lg font-bold text-[#1A3C34] leading-snug">
                 {isAr
-                  ? "الدفع عند الاستلام (COD)"
-                  : "Paiement à la livraison (Cash on Delivery)"}
+                  ? "يرجى ملء الاستمارة للطلب"
+                  : "Veuillez remplir le formulaire pour commander"}
               </h2>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-[11px] font-medium text-[#4B9393]">
                 {isAr
-                  ? "ادفع نقداً عند استلام طلبك في جميع مدن المغرب"
-                  : "Réglez en espèces directement à la réception de votre colis partout au Maroc"}
+                  ? "الدفع نقداً عند الاستلام • لجميع مدن المغرب"
+                  : "Paiement en espèces à la livraison • Partout au Maroc"}
               </p>
             </div>
           </div>
@@ -404,7 +437,7 @@ export function CODCheckoutModal({
             type="button"
             onClick={handleClose}
             aria-label={isAr ? "إغلاق" : "Fermer"}
-            className="grid size-8 place-items-center rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+            className="grid size-8 shrink-0 place-items-center rounded-full text-[#1A3C34]/60 hover:bg-white hover:text-[#1A3C34] transition-colors cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -414,35 +447,35 @@ export function CODCheckoutModal({
         {createdOrder ? (
           /* Confirmation Success View */
           <div className="p-6 text-center space-y-4">
-            <div className="mx-auto grid size-16 place-items-center rounded-full bg-emerald-100 text-emerald-600">
+            <div className="mx-auto grid size-16 place-items-center rounded-full bg-[#4B9393]/15 text-[#4B9393]">
               <CheckCircle2 size={36} />
             </div>
 
             <div>
-              <span className="inline-block rounded-full bg-brand-teal/10 px-3 py-1 text-xs font-bold text-brand-teal mb-2">
+              <span className="inline-block rounded-full bg-[#F3EFE6] border border-[#4B9393]/20 px-3 py-1 text-xs font-bold text-[#4B9393] mb-2">
                 {isAr
                   ? `الطلب رقم #${createdOrder.id}`
                   : `Commande N° #${createdOrder.id}`}
               </span>
-              <h3 className="font-display text-2xl font-bold text-foreground">
+              <h3 className="font-display text-2xl font-bold text-[#1A3C34]">
                 {isAr
                   ? "تم تأكيد طلبك بنجاح!"
                   : "Commande confirmée avec succès !"}
               </h3>
-              <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
+              <p className="mt-2 text-sm text-[#1A3C34]/75 max-w-md mx-auto leading-relaxed">
                 {isAr ? (
                   <>
                     شكراً لك <strong>{createdOrder.customerName}</strong>! تم
                     إرسال طلبك إلى ورشتنا. ستدفع{" "}
-                    <strong>{totalMad} درهم نقداً</strong> لعامل التوصيل عند
-                    باب منزلك.
+                    <strong>{createdOrder.totalWithShipping} درهم نقداً</strong>{" "}
+                    لعامل التوصيل عند باب منزلك.
                   </>
                 ) : (
                   <>
                     Merci <strong>{createdOrder.customerName}</strong> ! Votre
                     commande a été transmise à notre atelier. Vous paierez{" "}
-                    <strong>{totalMad} MAD en espèces</strong> au livreur à votre
-                    porte.
+                    <strong>{createdOrder.totalWithShipping} MAD en espèces</strong>{" "}
+                    au livreur à votre porte.
                   </>
                 )}
               </p>
@@ -451,26 +484,26 @@ export function CODCheckoutModal({
             {/* Delivery Recap Card */}
             <div
               className={cn(
-                "rounded-xl border border-border/80 bg-secondary/50 p-4 text-xs space-y-2",
+                "rounded-xl border border-[#4B9393]/20 bg-[#F3EFE6]/50 p-4 text-xs space-y-2",
                 isAr ? "text-right" : "text-left"
               )}
             >
               {createdOrder.customerCity && createdOrder.customerCity !== "-" && (
                 <div className="flex justify-between gap-3">
-                  <span className="text-muted-foreground">
+                  <span className="text-[#1A3C34]/65">
                     {isAr ? "مدينة التوصيل :" : "Ville de livraison :"}
                   </span>
-                  <span className="font-bold text-foreground">
+                  <span className="font-bold text-[#1A3C34]">
                     {createdOrder.customerCity}
                   </span>
                 </div>
               )}
               {createdOrder.customerPhone && (
                 <div className="flex justify-between gap-3">
-                  <span className="text-muted-foreground">
+                  <span className="text-[#1A3C34]/65">
                     {isAr ? "رقم الهاتف :" : "Téléphone :"}
                   </span>
-                  <span className="font-bold text-foreground" dir="ltr">
+                  <span className="font-bold text-[#1A3C34]" dir="ltr">
                     {createdOrder.customerPhone}
                   </span>
                 </div>
@@ -482,30 +515,46 @@ export function CODCheckoutModal({
                 )
                 .map((entry) => (
                   <div key={entry.key} className="flex justify-between gap-3">
-                    <span className="text-muted-foreground">
+                    <span className="text-[#1A3C34]/65">
                       {(isAr ? entry.labelAr || entry.labelFr : entry.labelFr) +
                         " :"}
                     </span>
-                    <span className="font-bold text-foreground truncate max-w-[60%]">
+                    <span className="font-bold text-[#1A3C34] truncate max-w-[60%]">
                       {entry.value}
                     </span>
                   </div>
                 ))}
               <div className="flex justify-between gap-3">
-                <span className="text-muted-foreground">
+                <span className="text-[#1A3C34]/65">
+                  {isAr ? "الشحن :" : "Expédition (Partout au Maroc) :"}
+                </span>
+                <span className="font-bold text-[#4B9393]">
+                  {createdOrder.shippingFee <= 0
+                    ? isAr
+                      ? "مجاني"
+                      : "Gratuit"
+                    : isAr
+                      ? `${createdOrder.shippingFee} درهم`
+                      : `${createdOrder.shippingFee} MAD`}
+                </span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span className="text-[#1A3C34]/65">
                   {isAr ? "مدة التوصيل المقدرة :" : "Délai estimé :"}
                 </span>
-                <span className="font-bold text-emerald-700">
+                <span className="font-bold text-[#4B9393]">
                   {isAr ? "24 إلى 48 ساعة عمل" : "24h à 48h ouvrées"}
                 </span>
               </div>
-              <div className="flex justify-between gap-3 border-t border-border/60 pt-2 font-bold text-sm">
+              <div className="flex justify-between gap-3 border-t border-[#4B9393]/15 pt-2 font-bold text-sm text-[#1A3C34]">
                 <span>
                   {isAr
                     ? "المبلغ المستحق عند التسليم :"
-                    : "Montant à régler au livreur :"}
+                    : "Total à régler au livreur :"}
                 </span>
-                <span className="text-brand-orange-deep">{totalMad} MAD</span>
+                <span className="text-[#F67D56]">
+                  {createdOrder.totalWithShipping} MAD
+                </span>
               </div>
             </div>
 
@@ -530,7 +579,7 @@ export function CODCheckoutModal({
                 type="button"
                 variant="outline"
                 onClick={handleClose}
-                className="h-11 rounded-xl"
+                className="h-11 rounded-xl border-[#4B9393]/25 text-[#1A3C34] hover:bg-[#F3EFE6] cursor-pointer"
               >
                 {isAr ? "مواصلة التسوق" : "Continuer mes achats"}
               </Button>
@@ -540,47 +589,98 @@ export function CODCheckoutModal({
           /* COD Dynamic Form View */
           <form
             onSubmit={handleSubmit}
-            className="p-5 sm:p-6 space-y-4 max-h-[75vh] overflow-y-auto"
+            className="p-5 sm:p-6 space-y-4 max-h-[80vh] overflow-y-auto"
           >
             {errorMsg && (
-              <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive font-medium flex items-center gap-2">
+              <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700 font-medium flex items-center gap-2">
                 <X size={15} className="shrink-0" />
                 <span>{errorMsg}</span>
               </div>
             )}
 
-            {/* Order Items Preview */}
-            <div className="rounded-xl border border-border bg-[#FBF9F5] p-3">
-              <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground mb-2">
-                <span>
-                  {isAr
-                    ? `المنتجات (${checkoutItems.reduce((acc, i) => acc + i.quantity, 0)})`
-                    : `Articles (${checkoutItems.reduce((acc, i) => acc + i.quantity, 0)})`}
-                </span>
-                <span className="font-bold text-foreground">{totalMad} MAD</span>
-              </div>
-              <div className="max-h-24 overflow-y-auto divide-y divide-border/60 text-xs">
+            {/* 1. Compact Horizontal Product Summary Row(s) with Floating Quantity Badge */}
+            {checkoutItems.length > 0 && (
+              <div className="rounded-xl border border-[#4B9393]/20 bg-[#F3EFE6]/45 px-3.5 py-2.5 divide-y divide-[#4B9393]/15 max-h-40 overflow-y-auto">
                 {checkoutItems.map((item, idx) => (
                   <div
-                    key={idx}
-                    className="py-1.5 flex justify-between items-center gap-2"
+                    key={`${item.productId}-${idx}`}
+                    className="flex items-center justify-between gap-3 py-2 first:pt-1 last:pb-0.5"
                   >
-                    <span className="truncate max-w-[260px] text-foreground">
-                      {item.quantity}x {item.title}
-                    </span>
-                    <span className="font-bold shrink-0 text-brand-orange-deep">
-                      {item.price * item.quantity} MAD
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="relative shrink-0 mt-1 me-1">
+                        {item.imageUrl ? (
+                          <img
+                            src={item.imageUrl}
+                            alt={item.title}
+                            className="w-14 h-14 rounded-xl object-cover border border-[#4B9393]/15 bg-white"
+                          />
+                        ) : (
+                          <div className="w-14 h-14 rounded-xl border border-[#4B9393]/15 bg-[#F3EFE6] flex items-center justify-center text-[#4B9393]">
+                            <Package size={22} />
+                          </div>
+                        )}
+                        <span className="absolute -top-2 -right-2 bg-[#1A3C34] text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-xs tabular-nums">
+                          {item.quantity}
+                        </span>
+                      </div>
+
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-[#1A3C34] line-clamp-2 leading-snug">
+                          {item.title}
+                        </p>
+                        {item.variantTitle &&
+                          item.variantTitle !== "Default Title" && (
+                            <p className="text-[11px] text-[#1A3C34]/65 truncate mt-0.5">
+                              {item.variantTitle}
+                            </p>
+                          )}
+                      </div>
+                    </div>
+
+                    <span className="text-sm font-extrabold text-[#1A3C34] whitespace-nowrap shrink-0 tabular-nums">
+                      {item.price * item.quantity} {isAr ? "درهم" : "MAD"}
                     </span>
                   </div>
                 ))}
               </div>
+            )}
+
+            {/* 2. Dedicated Shipping Option Card */}
+            <div className="space-y-1.5">
+              <p className="text-xs font-bold uppercase tracking-wider text-[#1A3C34]/75">
+                {isAr ? "خيارات الشحن" : "Options d'expédition"}
+              </p>
+              <div className="border border-[#4B9393]/25 bg-[#F3EFE6]/40 rounded-xl p-3.5 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span
+                    aria-hidden="true"
+                    className="size-4 shrink-0 rounded-full border-2 border-[#4B9393] bg-white flex items-center justify-center"
+                  >
+                    <span className="size-2 rounded-full bg-[#4B9393]" />
+                  </span>
+                  <span className="text-xs sm:text-sm font-semibold text-[#1A3C34]">
+                    {isAr
+                      ? "التوصيل لجميع المدن المغربية"
+                      : "Partout au Maroc"}
+                  </span>
+                </div>
+                <span className="text-xs sm:text-sm font-extrabold text-[#1A3C34] shrink-0">
+                  {effectiveShippingFee <= 0
+                    ? isAr
+                      ? "مجاني"
+                      : "Gratuit"
+                    : isAr
+                      ? `${effectiveShippingFee} درهم`
+                      : `${effectiveShippingFee} MAD`}
+                </span>
+              </div>
             </div>
 
-            {/* Dynamic Inputs */}
+            {/* 3. Dynamic Split-Group Form Inputs */}
             <div className="space-y-3">
               {isLoadingFields && activeFields.length === 0 ? (
-                <div className="py-6 flex items-center justify-center text-xs text-muted-foreground gap-2">
-                  <LoaderCircle className="animate-spin size-4" />
+                <div className="py-6 flex items-center justify-center text-xs text-[#1A3C34]/70 gap-2">
+                  <LoaderCircle className="animate-spin size-4 text-[#4B9393]" />
                   <span>
                     {isAr
                       ? "جاري تحميل استمارة الطلب..."
@@ -602,7 +702,7 @@ export function CODCheckoutModal({
                     return (
                       <label
                         key={field.id}
-                        className="flex items-start gap-3 rounded-xl border border-border bg-background px-3.5 py-3 cursor-pointer hover:border-[#4B9393]/40 transition-colors"
+                        className="flex items-start gap-3 rounded-xl border border-[#4B9393]/25 bg-[#F3EFE6]/30 px-3.5 py-3 cursor-pointer hover:border-[#4B9393]/50 transition-colors"
                       >
                         <input
                           type="checkbox"
@@ -610,65 +710,22 @@ export function CODCheckoutModal({
                           onChange={(e) =>
                             setValue(field.field_key, e.target.checked)
                           }
-                          className="mt-0.5 size-4 rounded border-border accent-[#4B9393] cursor-pointer"
+                          className="mt-0.5 size-4 rounded border-[#4B9393]/30 accent-[#4B9393] cursor-pointer"
                         />
                         <div className="text-xs leading-relaxed">
-                          <span className="font-bold text-foreground">
+                          <span className="font-bold text-[#1A3C34]">
                             {label}{" "}
                             {field.is_required && (
-                              <span className="text-destructive">*</span>
+                              <span className="text-[#F67D56]">*</span>
                             )}
                           </span>
                           {placeholder && (
-                            <p className="text-[11px] text-muted-foreground mt-0.5">
+                            <p className="text-[11px] text-[#1A3C34]/65 mt-0.5">
                               {placeholder}
                             </p>
                           )}
                         </div>
                       </label>
-                    );
-                  }
-
-                  if (
-                    field.field_key === "phone" &&
-                    (field.field_type === "text" ||
-                      field.field_type === "tel" ||
-                      field.field_type === "number")
-                  ) {
-                    return (
-                      <div key={field.id}>
-                        <label className="block text-xs font-bold text-foreground mb-1">
-                          {label}{" "}
-                          {field.is_required && (
-                            <span className="text-destructive">*</span>
-                          )}
-                        </label>
-                        <div
-                          dir="ltr"
-                          className="flex rounded-xl border border-border bg-background overflow-hidden focus-within:border-brand-teal focus-within:ring-2 focus-within:ring-brand-teal/20 transition-all"
-                        >
-                          <span className="flex items-center gap-1 bg-secondary px-3 text-xs font-bold text-foreground border-r border-border">
-                            <span>🇲🇦</span>
-                            <span>+212</span>
-                          </span>
-                          <input
-                            type="tel"
-                            inputMode="tel"
-                            required={field.is_required}
-                            placeholder={placeholder || "06 XX XX XX XX"}
-                            value={String(rawValue ?? "")}
-                            onChange={(e) =>
-                              setValue(field.field_key, e.target.value)
-                            }
-                            className="flex-1 h-10 px-3 text-sm bg-transparent outline-none"
-                          />
-                        </div>
-                        <p className="mt-1 text-[11px] text-muted-foreground">
-                          {isAr
-                            ? "سيقوم عامل التوصيل بالاتصال بك على هذا الرقم قبل الوصول."
-                            : "Le livreur vous appellera sur ce numéro avant d'arriver chez vous."}
-                        </p>
-                      </div>
                     );
                   }
 
@@ -681,14 +738,14 @@ export function CODCheckoutModal({
 
                     return (
                       <fieldset key={field.id} className="space-y-1.5">
-                        <legend className="block text-xs font-bold text-foreground mb-1">
+                        <legend className="block text-xs font-bold text-[#1A3C34] mb-1">
                           {label}{" "}
                           {field.is_required && (
-                            <span className="text-destructive">*</span>
+                            <span className="text-[#F67D56]">*</span>
                           )}
                         </legend>
                         {placeholder && (
-                          <p className="text-[11px] text-muted-foreground mb-1">
+                          <p className="text-[11px] text-[#1A3C34]/65 mb-1">
                             {placeholder}
                           </p>
                         )}
@@ -701,8 +758,8 @@ export function CODCheckoutModal({
                                 className={cn(
                                   "flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-xs font-semibold cursor-pointer transition-all",
                                   isSelected
-                                    ? "border-brand-teal bg-[#4B9393]/10 text-[#1A3C34]"
-                                    : "border-border bg-background text-foreground hover:border-[#4B9393]/40"
+                                    ? "border-[#4B9393] bg-[#F3EFE6]/65 text-[#1A3C34]"
+                                    : "border-[#4B9393]/20 bg-white text-[#1A3C34] hover:border-[#4B9393]/45"
                                 )}
                               >
                                 <input
@@ -723,6 +780,50 @@ export function CODCheckoutModal({
                     );
                   }
 
+                  if (
+                    field.field_key === "phone" ||
+                    field.field_type === "tel"
+                  ) {
+                    return (
+                      <div key={field.id}>
+                        <label className="block text-xs font-bold text-[#1A3C34] mb-1">
+                          {label}{" "}
+                          {field.is_required && (
+                            <span className="text-[#F67D56]">*</span>
+                          )}
+                        </label>
+                        <div className={SPLIT_INPUT_GROUP_CLASS}>
+                          <div className={cn(addonBoxClass, "gap-1.5")}>
+                            <CheckoutFieldAddonIcon field={field} size={16} />
+                            {field.field_key === "phone" && (
+                              <span
+                                dir="ltr"
+                                className="text-[11px] font-bold text-[#1A3C34]/80"
+                              >
+                                +212
+                              </span>
+                            )}
+                          </div>
+                          <input
+                            type="tel"
+                            inputMode="tel"
+                            dir="ltr"
+                            required={field.is_required}
+                            placeholder={placeholder || "06 XX XX XX XX"}
+                            value={String(rawValue ?? "")}
+                            onChange={(e) =>
+                              setValue(field.field_key, e.target.value)
+                            }
+                            className={cn(
+                              "flex-1 min-w-0 h-11 px-3.5 text-sm text-[#1A3C34] bg-transparent outline-none placeholder:text-[#1A3C34]/40",
+                              isAr && "text-right"
+                            )}
+                          />
+                        </div>
+                      </div>
+                    );
+                  }
+
                   if (field.field_type === "select") {
                     const options =
                       field.options && field.options.length > 0
@@ -733,32 +834,37 @@ export function CODCheckoutModal({
 
                     return (
                       <div key={field.id}>
-                        <label className="block text-xs font-bold text-foreground mb-1">
+                        <label className="block text-xs font-bold text-[#1A3C34] mb-1">
                           {label}{" "}
                           {field.is_required && (
-                            <span className="text-destructive">*</span>
+                            <span className="text-[#F67D56]">*</span>
                           )}
                         </label>
-                        <select
-                          required={field.is_required}
-                          value={String(rawValue ?? "")}
-                          onChange={(e) =>
-                            setValue(field.field_key, e.target.value)
-                          }
-                          className="w-full h-10 px-3 rounded-xl border border-border bg-background text-sm outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20 transition-all"
-                        >
-                          {field.field_key !== "city" && (
-                            <option value="">
-                              {placeholder ||
-                                (isAr ? "اختر خياراً..." : "Sélectionner...")}
-                            </option>
-                          )}
-                          {options.map((opt) => (
-                            <option key={opt} value={opt}>
-                              {opt}
-                            </option>
-                          ))}
-                        </select>
+                        <div className={SPLIT_INPUT_GROUP_CLASS}>
+                          <div className={addonBoxClass}>
+                            <CheckoutFieldAddonIcon field={field} size={16} />
+                          </div>
+                          <select
+                            required={field.is_required}
+                            value={String(rawValue ?? "")}
+                            onChange={(e) =>
+                              setValue(field.field_key, e.target.value)
+                            }
+                            className="flex-1 min-w-0 h-11 px-3.5 text-sm text-[#1A3C34] bg-transparent outline-none cursor-pointer"
+                          >
+                            {field.field_key !== "city" && (
+                              <option value="">
+                                {placeholder ||
+                                  (isAr ? "اختر خياراً..." : "Sélectionner...")}
+                              </option>
+                            )}
+                            {options.map((opt) => (
+                              <option key={opt} value={opt}>
+                                {opt}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                       </div>
                     );
                   }
@@ -766,28 +872,32 @@ export function CODCheckoutModal({
                   if (field.field_type === "textarea") {
                     return (
                       <div key={field.id}>
-                        <label className="block text-xs font-bold text-foreground mb-1">
+                        <label className="block text-xs font-bold text-[#1A3C34] mb-1">
                           {label}{" "}
                           {field.is_required && (
-                            <span className="text-destructive">*</span>
+                            <span className="text-[#F67D56]">*</span>
                           )}
                         </label>
-                        <textarea
-                          required={field.is_required}
-                          rows={2}
-                          placeholder={placeholder}
-                          value={String(rawValue ?? "")}
-                          onChange={(e) =>
-                            setValue(field.field_key, e.target.value)
-                          }
-                          className="w-full p-3 rounded-xl border border-border bg-background text-sm outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20 transition-all resize-none"
-                        />
+                        <div className={SPLIT_INPUT_GROUP_CLASS}>
+                          <div className={addonBoxClass}>
+                            <CheckoutFieldAddonIcon field={field} size={16} />
+                          </div>
+                          <textarea
+                            required={field.is_required}
+                            rows={2}
+                            placeholder={placeholder}
+                            value={String(rawValue ?? "")}
+                            onChange={(e) =>
+                              setValue(field.field_key, e.target.value)
+                            }
+                            className="flex-1 min-w-0 p-3 text-sm text-[#1A3C34] bg-transparent outline-none resize-none placeholder:text-[#1A3C34]/40"
+                          />
+                        </div>
                       </div>
                     );
                   }
 
                   const inputType =
-                    field.field_type === "tel" ||
                     field.field_type === "email" ||
                     field.field_type === "number" ||
                     field.field_type === "date" ||
@@ -797,70 +907,74 @@ export function CODCheckoutModal({
                       : "text";
 
                   const inputMode =
-                    field.field_type === "tel"
-                      ? "tel"
-                      : field.field_type === "email"
-                        ? "email"
-                        : field.field_type === "number"
-                          ? "decimal"
-                          : field.field_type === "url"
-                            ? "url"
-                            : undefined;
+                    field.field_type === "email"
+                      ? "email"
+                      : field.field_type === "number"
+                        ? "decimal"
+                        : field.field_type === "url"
+                          ? "url"
+                          : undefined;
 
                   return (
                     <div key={field.id}>
-                      <label className="block text-xs font-bold text-foreground mb-1">
+                      <label className="block text-xs font-bold text-[#1A3C34] mb-1">
                         {label}{" "}
                         {field.is_required && (
-                          <span className="text-destructive">*</span>
+                          <span className="text-[#F67D56]">*</span>
                         )}
                       </label>
-                      <input
-                        type={inputType}
-                        inputMode={inputMode}
-                        required={field.is_required}
-                        placeholder={placeholder}
-                        value={String(rawValue ?? "")}
-                        onChange={(e) =>
-                          setValue(field.field_key, e.target.value)
-                        }
-                        className="w-full h-10 px-3 rounded-xl border border-border bg-background text-sm outline-none focus:border-brand-teal focus:ring-2 focus:ring-brand-teal/20 transition-all"
-                      />
+                      <div className={SPLIT_INPUT_GROUP_CLASS}>
+                        <div className={addonBoxClass}>
+                          <CheckoutFieldAddonIcon field={field} size={16} />
+                        </div>
+                        <input
+                          type={inputType}
+                          inputMode={inputMode}
+                          required={field.is_required}
+                          placeholder={placeholder}
+                          value={String(rawValue ?? "")}
+                          onChange={(e) =>
+                            setValue(field.field_key, e.target.value)
+                          }
+                          className="flex-1 min-w-0 h-11 px-3.5 text-sm text-[#1A3C34] bg-transparent outline-none placeholder:text-[#1A3C34]/40"
+                        />
+                      </div>
                     </div>
                   );
                 })
               )}
             </div>
 
-            {/* Trust Badges */}
-            <div className="flex flex-wrap items-center justify-between gap-2 py-2 text-[11px] text-muted-foreground border-y border-border/60">
-              <span className="flex items-center gap-1">
-                <Truck size={14} className="text-brand-teal" />
-                {isAr ? "توصيل خلال 24-48 ساعة" : "Livraison 24-48h"}
-              </span>
-              <span className="flex items-center gap-1">
-                <ShieldCheck size={14} className="text-brand-teal" />
-                {isAr ? "بدون دفع إلكتروني" : "Zéro paiement en ligne"}
-              </span>
-              <span className="flex items-center gap-1 font-semibold text-emerald-700">
-                💵 {isAr ? "نقداً عند الاستلام" : "Espèces à la livraison"}
-              </span>
-            </div>
+            {/* 4. High-Conversion Coral Submit CTA & Single-Line Trust Footer */}
+            <div className="pt-1 space-y-2.5">
+              <Button
+                type="submit"
+                disabled={isSubmitting || checkoutItems.length === 0}
+                className="h-auto bg-[#F67D56] hover:bg-[#e56c45] text-white font-bold py-4 px-6 rounded-xl shadow-md transition-all w-full flex items-center justify-center gap-2.5 text-sm sm:text-base cursor-pointer disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  <LoaderCircle className="animate-spin size-5" />
+                ) : (
+                  <>
+                    <ShoppingBag size={18} className="shrink-0" />
+                    <span>
+                      {isAr
+                        ? `اطلب الآن • ${totalWithShipping} درهم`
+                        : `Commander maintenant • ${totalWithShipping} MAD`}
+                    </span>
+                  </>
+                )}
+              </Button>
 
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              disabled={isSubmitting || checkoutItems.length === 0}
-              className="w-full h-12 rounded-xl bg-brand-orange text-white font-extrabold text-sm sm:text-base hover:bg-brand-orange/90 shadow-md shadow-brand-orange/25 transition-all cursor-pointer"
-            >
-              {isSubmitting ? (
-                <LoaderCircle className="animate-spin size-5" />
-              ) : isAr ? (
-                `تأكيد الطلب • ${totalMad} درهم (الدفع عند الاستلام)`
-              ) : (
-                `Valider ma commande • ${totalMad} MAD (Paiement à la livraison)`
-              )}
-            </Button>
+              <p className="text-center text-[11px] font-medium text-[#1A3C34]/70 flex items-center justify-center gap-1.5">
+                <Truck size={13} className="text-[#4B9393] shrink-0" />
+                <span>
+                  {isAr
+                    ? "توصيل خلال 24-48 ساعة • الدفع نقداً عند الاستلام"
+                    : "Livraison 24–48h • Paiement en espèces à la livraison"}
+                </span>
+              </p>
+            </div>
           </form>
         )}
       </div>
