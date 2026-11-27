@@ -4,33 +4,22 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowDown,
-  ArrowRight,
-  ArrowUpRight,
-  Brain,
   Check,
-  Footprints,
   Heart,
-  LoaderCircle,
   Minus,
-  Palette,
   Plus,
-  Puzzle,
   ShoppingBag,
   Sparkles,
-  Sprout,
-  Star,
-  Target,
   Trash2,
   Truck,
-  UsersRound,
   X,
-  type LucideIcon,
 } from "lucide-react";
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { CollectionCardsGrid } from "@/components/collections/CollectionCardsGrid";
 import { ProductCard } from "@/components/product/ProductCard";
 import {
   DEFAULT_PRODUCT_FILTER_STATE,
@@ -62,68 +51,6 @@ import {
 import { CHILD_STORE_CATEGORY_MESSAGE_KEYS, useTefLookLanguage } from "@/lib/teflook-language";
 import { getLocalizedProduct } from "@/lib/product-localization";
 import { cn } from "@/lib/utils";
-
-interface CategoryPillarTheme {
-  icon: LucideIcon;
-  bgTint: string;
-  iconColor: string;
-  badgeBg: string;
-  badgeText: string;
-}
-
-const CATEGORY_THEMES: Record<ChildStoreCategory, CategoryPillarTheme> = {
-  discipline: {
-    icon: Target,
-    bgTint: "bg-[#4B9393]/10 group-hover:bg-[#4B9393]/20",
-    iconColor: "text-[#4B9393]",
-    badgeBg: "bg-[#4B9393]/10",
-    badgeText: "text-[#4B9393]",
-  },
-  emotionalIntelligence: {
-    icon: Heart,
-    bgTint: "bg-[#F67D56]/10 group-hover:bg-[#F67D56]/20",
-    iconColor: "text-[#F67D56]",
-    badgeBg: "bg-[#F67D56]/10",
-    badgeText: "text-[#F67D56]",
-  },
-  independence: {
-    icon: Sprout,
-    bgTint: "bg-[#4B9393]/12 group-hover:bg-[#4B9393]/20",
-    iconColor: "text-[#4B9393]",
-    badgeBg: "bg-[#FCC846]/20",
-    badgeText: "text-[#9A6E04]",
-  },
-  confidence: {
-    icon: UsersRound,
-    bgTint: "bg-[#F67D56]/10 group-hover:bg-[#F67D56]/20",
-    iconColor: "text-[#F67D56]",
-    badgeBg: "bg-[#F67D56]/10",
-    badgeText: "text-[#F67D56]",
-  },
-  creativity: {
-    icon: Palette,
-    bgTint: "bg-[#FCC846]/20 group-hover:bg-[#FCC846]/30",
-    iconColor: "text-[#9A6E04]",
-    badgeBg: "bg-[#FCC846]/20",
-    badgeText: "text-[#9A6E04]",
-  },
-  criticalThinking: {
-    icon: Puzzle,
-    bgTint: "bg-[#4B9393]/10 group-hover:bg-[#4B9393]/20",
-    iconColor: "text-[#4B9393]",
-    badgeBg: "bg-[#4B9393]/10",
-    badgeText: "text-[#4B9393]",
-  },
-};
-
-const categoryIcons: Record<ChildStoreCategory, LucideIcon> = {
-  discipline: Target,
-  emotionalIntelligence: Heart,
-  independence: Sprout,
-  confidence: UsersRound,
-  creativity: Palette,
-  criticalThinking: Puzzle,
-};
 
 const formatPrice = (
   price: { amount: string; currencyCode: string },
@@ -239,13 +166,6 @@ function TefLookStorefront() {
     [baseCategoryAgeProducts, filterState]
   );
 
-  const categories = CHILD_STORE_CATEGORIES.map((category) => ({
-    ...category,
-    label: t(CHILD_STORE_CATEGORY_MESSAGE_KEYS[category.value]),
-    subtitle: t(`${CHILD_STORE_CATEGORY_MESSAGE_KEYS[category.value]}.subtitle`) || category.subtitle,
-    Icon: categoryIcons[category.value],
-  }));
-
   return (
     <main lang={locale} dir={direction} className="min-h-screen bg-background text-foreground">
       {/* 1. Announcement Marquee Ticker */}
@@ -323,61 +243,14 @@ function TefLookStorefront() {
           )}
         </div>
 
-        <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:grid-cols-6 lg:gap-5">
-          {categories.map((category) => {
-            const isSelected = activeCategory === category.value;
-            const theme = CATEGORY_THEMES[category.value];
-            const Icon = theme.icon;
-
-            return (
-              <button
-                type="button"
-                key={category.value}
-                aria-pressed={isSelected}
-                onClick={() => {
-                  setActiveCategory((current) =>
-                    current === category.value ? "all" : category.value
-                  );
-                  document.getElementById("boutique")?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className={`group relative flex min-h-[140px] sm:min-h-[225px] flex-col items-center justify-between rounded-2xl sm:rounded-3xl p-2 sm:p-5 text-center transition-all duration-300 cursor-pointer ${
-                  isSelected
-                    ? "border-2 border-[#4B9393] bg-[#F4F9F9] shadow-md ring-2 sm:ring-4 ring-[#4B9393]/15 scale-[1.02]"
-                    : "border border-[#4B9393]/15 bg-white text-card-foreground shadow-xs hover:border-[#4B9393]/50 hover:bg-[#F7FAFA] hover:shadow-md hover:-translate-y-1"
-                }`}
-              >
-                {/* 2D Vector Graphic Icon in Soft Rounded Container */}
-                <div className="relative mb-1.5 sm:mb-3 flex items-center justify-center">
-                  <div
-                    className={`size-10 sm:size-16 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all duration-300 ${theme.bgTint} ${
-                      isSelected ? "scale-105 shadow-xs" : "group-hover:scale-110"
-                    }`}
-                  >
-                    <Icon className={`size-5 sm:size-8 ${theme.iconColor} stroke-[2.2] transition-transform duration-300`} />
-                  </div>
-                  {isSelected && (
-                    <span className="absolute -top-1 -right-1 grid size-4 sm:size-5 place-items-center rounded-full bg-[#4B9393] text-white shadow-xs">
-                      <Check size={9} strokeWidth={3} className="sm:hidden" />
-                      <Check size={11} strokeWidth={3} className="hidden sm:block" />
-                    </span>
-                  )}
-                </div>
-
-                {/* Typography Hierarchy: Subtitle Badge + Bold Title */}
-                <div className="flex flex-1 flex-col justify-center items-center gap-1 sm:gap-1.5 w-full">
-                  <span
-                    className={`inline-flex items-center px-1.5 sm:px-2.5 py-0.5 rounded-full text-[9px] sm:text-[11px] font-extrabold uppercase tracking-wider ${theme.badgeBg} ${theme.badgeText}`}
-                  >
-                    {category.subtitle}
-                  </span>
-                  <span className="text-[11px] sm:text-[14px] font-bold text-[#1A3C34] group-hover:text-[#4B9393] transition-colors leading-[1.25] sm:leading-snug line-clamp-2 max-w-[17ch]">
-                    {category.label}
-                  </span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+        <CollectionCardsGrid
+          locale={locale}
+          activeCategory={activeCategory}
+          onSelectCategory={(category) => {
+            setActiveCategory((current) => (current === category ? "all" : category));
+            document.getElementById("boutique")?.scrollIntoView({ behavior: "smooth" });
+          }}
+        />
       </section>
 
       {/* 5. Shop Catalogue Section */}
