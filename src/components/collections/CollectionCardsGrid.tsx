@@ -12,7 +12,7 @@ import {
   UsersRound,
   type LucideIcon,
 } from "lucide-react";
-import type { ChildStoreCategory } from "@/lib/teflook-categories";
+import { getCollectionSlug, type ChildStoreCategory } from "@/lib/teflook-categories";
 import type { Locale } from "@/lib/teflook-language";
 import { cn } from "@/lib/utils";
 
@@ -159,7 +159,7 @@ export function CollectionCardsGrid({
         return (
           <Link
             key={card.value}
-            href={`/?category=${encodeURIComponent(card.value)}#boutique`}
+            href={`/collections/${getCollectionSlug(card.value)}`}
             className={cardClassName}
           >
             {content}

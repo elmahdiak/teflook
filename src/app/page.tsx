@@ -41,6 +41,8 @@ import { fetchProducts, type ShopifyProduct } from "@/lib/shopify-storefront";
 import {
   CHILD_STORE_CATEGORIES,
   getChildStoreCategory,
+  getCollectionSlug,
+  resolveChildStoreCategory,
   type ChildStoreCategory,
 } from "@/lib/teflook-categories";
 import {
@@ -106,14 +108,12 @@ function TefLookStorefront() {
     try {
       const params = new URLSearchParams(window.location.search);
       const qParam = params.get("q");
-      const catParam = params.get("category") as ChildStoreCategory | null;
+      const catParam = params.get("category");
       const ageParam = params.get("age");
       if (qParam) setSearchTerm(qParam);
-      if (
-        catParam &&
-        CHILD_STORE_CATEGORIES.some((c) => c.value === catParam)
-      ) {
-        setActiveCategory(catParam);
+      const resolvedCat = resolveChildStoreCategory(catParam);
+      if (resolvedCat) {
+        setActiveCategory(resolvedCat);
       }
       if (
         ageParam &&
@@ -360,6 +360,14 @@ function TefLookStorefront() {
               )}
             </div>
             <div className="flex items-center gap-3">
+              {activeCategory !== "all" && (
+                <Link
+                  href={`/collections/${getCollectionSlug(activeCategory)}`}
+                  className="text-xs font-semibold text-[#4B9393] hover:text-[#F67D56] transition-colors"
+                >
+                  {locale === "ar" ? "عرض صفحة المجموعة ←" : "Ouvrir la collection →"}
+                </Link>
+              )}
               {(activeCategory !== "all" || activeAge !== "all") && (
                 <button
                   type="button"
@@ -445,7 +453,13 @@ function TefLookStorefront() {
           {filteredProducts.length === 0 ? (
             <div className="border-y border-border py-14 text-center" id="product-grid">
               <ShoppingBag size={30} className="mx-auto text-primary" aria-hidden="true" />
-              <p className="mt-4 font-display text-2xl font-semibold">{t("shop.noProducts")}</p>
+              <p className="mt-4 font-display text-2xl font-semibold">
+                {activeCategory !== "all"
+                  ? locale === "ar"
+                    ? "لا توجد منتجات في هذه المجموعة حاليا"
+                    : "Aucun produit dans cette collection pour le moment"
+                  : t("shop.noProducts")}
+              </p>
               <p className="mt-2 text-sm text-muted-foreground">
                 {products.length === 0 ? t("shop.empty") : t("shop.emptyCategory")}
               </p>
@@ -458,7 +472,7 @@ function TefLookStorefront() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="mt-5 rounded-[3px] cursor-pointer"
+                  className="mt-5 rounded-full border-[#4B9393] text-[#4B9393] hover:bg-[#4B9393] hover:text-white cursor-pointer"
                   onClick={() => {
                     setSearchTerm("");
                     setActiveCategory("all");
@@ -466,7 +480,11 @@ function TefLookStorefront() {
                     setFilterState(DEFAULT_PRODUCT_FILTER_STATE);
                   }}
                 >
-                  {t("shop.reset")}
+                  {activeCategory !== "all"
+                    ? locale === "ar"
+                      ? "عرض جميع المنتجات"
+                      : "Voir tous les produits"
+                    : t("shop.reset")}
                 </Button>
               )}
             </div>

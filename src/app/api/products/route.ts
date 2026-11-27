@@ -9,6 +9,7 @@ import {
   type AdminProduct,
 } from "@/lib/cod-service";
 import { ADMIN_PRODUCTS_PATH } from "@/lib/admin-config";
+import { resolveChildStoreCategory } from "@/lib/teflook-categories";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -198,9 +199,22 @@ export async function GET(req: NextRequest) {
     }
 
     if (category && category !== "all") {
-      const filtered = products.filter(
-        (p) => p.categorySlug === category || p.categoryName === category
-      );
+      const requestedCanonical = resolveChildStoreCategory(category);
+      const filtered = products.filter((p) => {
+        if (
+          p.categorySlug.toLowerCase() === category.trim().toLowerCase() ||
+          p.categoryName.toLowerCase() === category.trim().toLowerCase()
+        ) {
+          return true;
+        }
+        if (requestedCanonical) {
+          const productCanonical =
+            resolveChildStoreCategory(p.categorySlug) ||
+            resolveChildStoreCategory(p.categoryName);
+          return productCanonical === requestedCanonical;
+        }
+        return false;
+      });
       return NextResponse.json(filtered);
     }
 

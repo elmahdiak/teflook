@@ -1,6 +1,6 @@
 import { PRODUCTS, type ProductItem } from "@/data/teflookData";
 import { normalizeProductAgeRanges, normalizeProductImages } from "./cod-service";
-import type { ChildStoreCategory } from "./teflook-categories";
+import { resolveChildStoreCategory, type ChildStoreCategory } from "./teflook-categories";
 import { PRODUCT_TRANSLATIONS_AR } from "./product-localization";
 
 export interface ShopifyImage {
@@ -43,6 +43,7 @@ export interface ShopifyProduct {
   categoryNameAr?: string;
   tags?: string[];
   category?: ChildStoreCategory;
+  categorySlug?: string;
   ageBracket?: string;
   ageRanges?: string[];
   ageRange?: string;
@@ -73,17 +74,12 @@ export interface ShopifyProduct {
   };
 }
 
-const slugToCategoryMap: Record<string, ChildStoreCategory> = {
-  "discipline-maitrise-de-soi": "discipline",
-  "intelligence-emotionnelle": "emotionalIntelligence",
-  "autonomie-competences-de-vie": "independence",
-  "confiance-en-soi-competences-sociales": "confidence",
-  "creativite-imagination": "creativity",
-  "esprit-critique-resolution-problemes": "criticalThinking",
-};
-
 export function mapItemToShopifyProduct(item: any): ShopifyProduct {
-  const category = slugToCategoryMap[item.categorySlug] || "discipline";
+  const category =
+    resolveChildStoreCategory(item.categorySlug) ||
+    resolveChildStoreCategory(item.category) ||
+    resolveChildStoreCategory(item.categoryName) ||
+    "discipline";
 
   const rawImages = normalizeProductImages(item);
 
@@ -126,6 +122,7 @@ export function mapItemToShopifyProduct(item: any): ShopifyProduct {
     productType_ar: item.categoryName_ar || trAr?.categoryName || item.categoryName || "النمو والتطوير",
     categoryNameAr: item.categoryName_ar || trAr?.categoryName || item.categoryName || "النمو والتطوير",
     category,
+    categorySlug: item.categorySlug || item.category_slug || undefined,
     ageBracket,
     ageRanges,
     ageRange,
