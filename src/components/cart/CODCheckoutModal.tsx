@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   CheckCircle2,
   LoaderCircle,
@@ -10,6 +10,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { trackAnalyticsEvent } from "@/lib/analytics";
 import {
   CheckoutFieldAddonIcon,
   DEFAULT_SHIPPING_FEE_MAD,
@@ -122,6 +123,13 @@ export function CODCheckoutModal({
   const [createdOrder, setCreatedOrder] = useState<CreatedOrderSnapshot | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [whatsappPhone, setWhatsappPhone] = useState("212600000000");
+  const hasTrackedCheckoutOpenRef = useRef(false);
+  const checkoutMetaRef = useRef({ count: 0, subtotal: 0, hasCreated: false });
+  checkoutMetaRef.current = {
+    count: checkoutItems.reduce((acc, i) => acc + i.quantity, 0),
+    subtotal: subtotalMad,
+    hasCreated: Boolean(createdOrder),
+  };
 
   const loadFields = useCallback(async () => {
     setIsLoadingFields(true);
@@ -147,6 +155,27 @@ export function CODCheckoutModal({
       loadFields();
     }
   }, [open, loadFields]);
+
+  useEffect(() => {
+    if (open) {
+      if (
+        !hasTrackedCheckoutOpenRef.current &&
+        checkoutMetaRef.current.count > 0 &&
+        !checkoutMetaRef.current.hasCreated
+      ) {
+        hasTrackedCheckoutOpenRef.current = true;
+        trackAnalyticsEvent({
+          eventType: "checkout_open",
+          metadata: {
+            items_count: checkoutMetaRef.current.count,
+            subtotal_mad: checkoutMetaRef.current.subtotal,
+          },
+        });
+      }
+    } else {
+      hasTrackedCheckoutOpenRef.current = false;
+    }
+  }, [open]);
 
   useEffect(() => {
     const handleCustomUpdate = (e: Event) => {
@@ -460,6 +489,25 @@ export function CODCheckoutModal({
           bc.close();
         }
       } catch {}
+
+      const orderEmailEntry = Object.entries(customFields).find(
+        ([key, val]) =>
+          typeof val === "string" &&
+          val.includes("@") &&
+          key.toLowerCase().includes("mail")
+      );
+
+      trackAnalyticsEvent({
+        eventType: "order_completed",
+        metadata: {
+          order_id: orderId,
+          total_mad: totalWithShipping,
+          customer_city: customerCity,
+          ...(typeof orderEmailEntry?.[1] === "string"
+            ? { email: orderEmailEntry[1].trim().toLowerCase() }
+            : {}),
+        },
+      });
 
       if (!directItem) {
         useCartStore.setState({ items: [] });

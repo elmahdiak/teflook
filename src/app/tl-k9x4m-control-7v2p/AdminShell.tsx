@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  BarChart3,
+  ChevronDown,
   ClipboardList,
   ExternalLink,
   FolderTree,
@@ -14,14 +16,17 @@ import {
   MessageSquare,
   Package,
   Store,
+  TrendingUp,
   Truck,
   X,
 } from "lucide-react";
 import { isAuthenticated, logoutAdmin } from "@/lib/admin-auth";
 import {
+  ADMIN_ANALYTICS_PATH,
   ADMIN_BASE_PATH,
   ADMIN_CATEGORIES_PATH,
   ADMIN_CHECKOUT_FIELDS_PATH,
+  ADMIN_FUNNEL_ANALYTICS_PATH,
   ADMIN_LOGIN_PATH,
   ADMIN_ORDERS_PATH,
   ADMIN_PRODUCTS_PATH,
@@ -37,6 +42,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [analyticsNavOpen, setAnalyticsNavOpen] = useState(true);
 
   useEffect(() => {
     setMounted(true);
@@ -153,6 +159,73 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               </Link>
             );
           })}
+
+          {/* Expandable Analytics Section */}
+          <div className="pt-1">
+            <button
+              type="button"
+              onClick={() => setAnalyticsNavOpen((prev) => !prev)}
+              aria-expanded={analyticsNavOpen}
+              className={`flex w-full items-center justify-between rounded-xl px-3.5 py-3 text-xs font-bold transition-all duration-200 cursor-pointer ${
+                pathname.startsWith(ADMIN_ANALYTICS_PATH)
+                  ? "bg-white/15 text-white"
+                  : "text-white/80 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <BarChart3
+                  size={18}
+                  className={
+                    pathname.startsWith(ADMIN_ANALYTICS_PATH)
+                      ? "text-[#FEC748]"
+                      : "text-white/70"
+                  }
+                />
+                <span>Analytics</span>
+              </div>
+              <ChevronDown
+                size={15}
+                className={`text-white/70 transition-transform duration-200 ${
+                  analyticsNavOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {analyticsNavOpen && (
+              <div className="mt-1 ms-4 ps-3 border-l border-white/15 space-y-1">
+                <Link
+                  href={ADMIN_FUNNEL_ANALYTICS_PATH}
+                  onClick={() => setMobileSidebarOpen(false)}
+                  className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-bold transition-all duration-200 ${
+                    pathname === ADMIN_FUNNEL_ANALYTICS_PATH
+                      ? "bg-[#FE7C58] text-white shadow-sm shadow-black/10"
+                      : "text-white/75 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <TrendingUp
+                      size={15}
+                      className={
+                        pathname === ADMIN_FUNNEL_ANALYTICS_PATH
+                          ? "text-white"
+                          : "text-white/70"
+                      }
+                    />
+                    <span>Funnel Analytics</span>
+                  </div>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                      pathname === ADMIN_FUNNEL_ANALYTICS_PATH
+                        ? "bg-[#FEC748] text-[#2C6466]"
+                        : "bg-white/15 text-white/90"
+                    }`}
+                  >
+                    19 KPI
+                  </span>
+                </Link>
+              </div>
+            )}
+          </div>
         </nav>
       </div>
 

@@ -10,6 +10,7 @@ import { WhatsAppButton } from "@/components/whatsapp/WhatsAppButton";
 import { BackToTopButton } from "@/components/ui/BackToTopButton";
 import { CookieConsentProvider } from "@/lib/cookies";
 import { ConsentScriptLoader } from "@/components/cookies/ConsentScriptLoader";
+import { StorefrontTracker } from "@/components/analytics/StorefrontTracker";
 
 const bricolageGrotesque = Bricolage_Grotesque({
   subsets: ["latin"],
@@ -92,6 +93,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-[#F7FAFA] text-[#1A3C34] antialiased selection:bg-[#F67D56] selection:text-white">
         <CookieConsentProvider>
+          <StorefrontTracker />
           {children}
           {/* Floating WhatsApp Contact Button (Active across all pages) */}
           <WhatsAppButton />

@@ -7,6 +7,7 @@ import { FooterSocialLinks } from "@/components/footer/FooterSocialLinks";
 import { useCookieConsent } from "@/lib/cookies";
 import { cleanWhatsAppNumber, fetchSiteSettings, type SiteSettings } from "@/lib/site-settings";
 import { translations, useTefLookLanguage } from "@/lib/teflook-language";
+import { trackAnalyticsEvent } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -83,6 +84,11 @@ export function Footer() {
       });
       return;
     }
+
+    trackAnalyticsEvent({
+      eventType: "newsletter_signup",
+      metadata: { email: trimmed.toLowerCase() },
+    });
 
     setFeedback({
       type: "success",
