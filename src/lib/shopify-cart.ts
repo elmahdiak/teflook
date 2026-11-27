@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { ShopifyProduct, ShopifyPrice, ShopifySelectedOption } from "./shopify-storefront";
+import { trackAnalyticsEvent } from "@/lib/analytics";
 
 export interface CartLineItem {
   product: ShopifyProduct;
@@ -71,6 +72,17 @@ export const useCartStore = create<CartStoreState>()(
           )}${summary}${encodeURIComponent(`\n\nTotal: ${total} MAD\nMerci !`)}`;
 
           set({ items: updated, checkoutUrl, isLoading: false });
+
+          trackAnalyticsEvent({
+            eventType: "cart_add",
+            metadata: {
+              source: "add_to_cart",
+              product_id: newItem.product.id,
+              title: newItem.product.title,
+              quantity: newItem.quantity,
+              price_mad: Number(newItem.price.amount),
+            },
+          });
         } catch (err) {
           set({
             error: err instanceof Error ? err.message : "Erreur lors de l'ajout au panier",

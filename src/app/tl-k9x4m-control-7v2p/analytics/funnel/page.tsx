@@ -252,9 +252,14 @@ export default function AdminFunnelAnalyticsPage() {
         {
           number: 14,
           label: "Abandon de panier",
-          value: `${k.cartAbandonmentRatePct.toFixed(1)}%`,
-          subtext: `${k.checkoutOpensCount} ouvertures vs ${k.conversionsCount} cmd`,
-          tooltip: "((checkout_open − orders) ÷ checkout_open) × 100%",
+          value: k.abandonedCartVisitorsCount.toLocaleString("fr-FR"),
+          subtext: `${k.abandonedCartVisitorsCount} ${
+            k.abandonedCartVisitorsCount === 1
+              ? "visiteur a ajouté"
+              : "visiteurs ont ajouté"
+          } au panier sans acheter`,
+          tooltip:
+            "Nombre de visiteurs uniques ayant ajouté un produit au panier ou ouvert le formulaire sans finaliser d'achat (exclut ceux qui sont revenus acheter).",
           accent: "coral",
         },
       ]

@@ -1,6 +1,7 @@
 export type AnalyticsEventType =
   | "page_view"
   | "page_exit"
+  | "cart_add"
   | "checkout_open"
   | "order_completed"
   | "newsletter_signup";
@@ -79,7 +80,8 @@ export interface FunnelAnalyticsData {
     costPerConversionMad: number;
     avgTouchpoints: number;
     averageOrderSizeMad: number;
-    cartAbandonmentRatePct: number;
+    abandonedCartVisitorsCount: number;
+    cartIntentVisitorsCount: number;
     checkoutOpensCount: number;
     // Stage 4: Loyalty
     repeatPurchaseRatePct: number;
@@ -98,11 +100,17 @@ export const ANALYTICS_SQL_MIGRATION = `CREATE TABLE IF NOT EXISTS public.analyt
   created_at timestamptz NOT NULL DEFAULT now(),
   visitor_id text NOT NULL,
   session_id text NOT NULL,
-  event_type text NOT NULL CHECK (event_type IN ('page_view', 'page_exit', 'checkout_open', 'order_completed', 'newsletter_signup')),
+  event_type text NOT NULL CHECK (event_type IN ('page_view', 'page_exit', 'cart_add', 'checkout_open', 'order_completed', 'newsletter_signup')),
   page_path text NOT NULL DEFAULT '/',
   duration_seconds integer,
   metadata jsonb NOT NULL DEFAULT '{}'::jsonb
 );
+
+ALTER TABLE public.analytics_events
+  DROP CONSTRAINT IF EXISTS analytics_events_event_type_check;
+ALTER TABLE public.analytics_events
+  ADD CONSTRAINT analytics_events_event_type_check
+  CHECK (event_type IN ('page_view', 'page_exit', 'cart_add', 'checkout_open', 'order_completed', 'newsletter_signup'));
 
 CREATE INDEX IF NOT EXISTS idx_analytics_events_created_at ON public.analytics_events (created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_analytics_events_visitor ON public.analytics_events (visitor_id, created_at);

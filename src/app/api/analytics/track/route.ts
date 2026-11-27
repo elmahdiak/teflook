@@ -8,6 +8,7 @@ export const revalidate = 0;
 const VALID_EVENT_TYPES = new Set<AnalyticsEventType>([
   "page_view",
   "page_exit",
+  "cart_add",
   "checkout_open",
   "order_completed",
   "newsletter_signup",
@@ -63,7 +64,7 @@ export async function POST(req: NextRequest) {
         : {};
 
     const supabase = getSupabaseAdmin();
-    const { error } = await supabase.from("analytics_events").insert([
+    let { error } = await supabase.from("analytics_events").insert([
       {
         visitor_id: visitorId,
         session_id: sessionId,
@@ -73,6 +74,26 @@ export async function POST(req: NextRequest) {
         metadata,
       },
     ]);
+
+    // Compatibility fallback if existing DB check constraint omits 'cart_add'
+    if (
+      error &&
+      eventType === "cart_add" &&
+      ((error.code || "").toUpperCase() === "23514" ||
+        (error.message || "").toLowerCase().includes("event_type_check"))
+    ) {
+      const retry = await supabase.from("analytics_events").insert([
+        {
+          visitor_id: visitorId,
+          session_id: sessionId,
+          event_type: "checkout_open",
+          page_path: pagePath,
+          duration_seconds: durationSeconds,
+          metadata: { ...metadata, original_event: "cart_add" },
+        },
+      ]);
+      error = retry.error;
+    }
 
     if (error) {
       if (isMissingTableError(error)) {

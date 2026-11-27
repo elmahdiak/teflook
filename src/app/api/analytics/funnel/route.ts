@@ -330,19 +330,48 @@ export async function GET(req: NextRequest) {
       conversionsCount > 0 ? totalRevenueMad / conversionsCount : 0;
 
     const checkoutOpensCount = eventsInPeriod.filter(
-      (e) => e.event_type === "checkout_open"
+      (e) => e.event_type === "checkout_open" || e.event_type === "cart_add"
     ).length;
 
-    const cartAbandonmentRatePct =
-      checkoutOpensCount > 0
-        ? Math.max(
-            0,
-            Math.min(
-              100,
-              ((checkoutOpensCount - conversionsCount) / checkoutOpensCount) * 100
-            )
-          )
-        : 0;
+    // Visitor-level Cart Abandonment Count with Recovery Exclusion:
+    // Find unique visitor_ids who triggered cart_add or checkout_open in the period,
+    // and exclude any visitor who completed an order at or after their intent (including later sessions).
+    const earliestCartIntentByVisitor = new Map<string, number>();
+    for (const ev of eventsInPeriod) {
+      if (ev.event_type !== "cart_add" && ev.event_type !== "checkout_open") {
+        continue;
+      }
+      const ts = Date.parse(ev.created_at);
+      if (!ev.visitor_id || !Number.isFinite(ts)) continue;
+      const existingTs = earliestCartIntentByVisitor.get(ev.visitor_id);
+      if (existingTs === undefined || ts < existingTs) {
+        earliestCartIntentByVisitor.set(ev.visitor_id, ts);
+      }
+    }
+
+    const orderCompletedTimestampsByVisitor = new Map<string, number[]>();
+    for (const ev of allEvents) {
+      if (ev.event_type !== "order_completed" || !ev.visitor_id) continue;
+      const ts = Date.parse(ev.created_at);
+      if (!Number.isFinite(ts)) continue;
+      const list = orderCompletedTimestampsByVisitor.get(ev.visitor_id) || [];
+      list.push(ts);
+      orderCompletedTimestampsByVisitor.set(ev.visitor_id, list);
+    }
+
+    const cartIntentVisitorsCount = earliestCartIntentByVisitor.size;
+    let abandonedCartVisitorsCount = 0;
+
+    for (const [visitorId, firstIntentTs] of earliestCartIntentByVisitor.entries()) {
+      const completionTimestamps =
+        orderCompletedTimestampsByVisitor.get(visitorId) || [];
+      const hasRecoveredOrPurchased = completionTimestamps.some(
+        (completedTs) => completedTs >= firstIntentTs - 5000
+      );
+      if (!hasRecoveredOrPurchased) {
+        abandonedCartVisitorsCount += 1;
+      }
+    }
 
     // Stage 4: Loyalty
     // Map lifetime orders by normalized customer_phone for repeat cohort detection
@@ -491,7 +520,8 @@ export async function GET(req: NextRequest) {
         costPerConversionMad,
         avgTouchpoints,
         averageOrderSizeMad,
-        cartAbandonmentRatePct,
+        abandonedCartVisitorsCount,
+        cartIntentVisitorsCount,
         checkoutOpensCount,
         repeatPurchaseRatePct,
         repeatCustomersCount,

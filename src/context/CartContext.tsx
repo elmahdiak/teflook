@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { ProductItem } from "@/data/teflookData";
+import { trackAnalyticsEvent } from "@/lib/analytics";
 
 export interface CartItem {
   product: ProductItem;
@@ -86,6 +87,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return [...prev, { product, quantity: 1, selectedSize }];
     });
     showNotification(`« ${product.name} » ajouté au panier`);
+    trackAnalyticsEvent({
+      eventType: "cart_add",
+      metadata: {
+        source: "add_to_cart",
+        product_id: product.id,
+        title: product.name,
+        quantity: 1,
+        price_mad: product.priceMad,
+      },
+    });
   };
 
   const removeFromCart = (productId: string, selectedSize?: number) => {
