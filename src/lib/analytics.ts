@@ -6,7 +6,7 @@ export type AnalyticsEventType =
   | "order_completed"
   | "newsletter_signup";
 
-export type AnalyticsDateRange = "7d" | "30d" | "all";
+export type AnalyticsDateRange = "24h" | "3d" | "7d" | "30d" | "all" | "custom";
 
 export interface MarketingMetricsConfig {
   id: AnalyticsDateRange;
@@ -17,32 +17,43 @@ export interface MarketingMetricsConfig {
   updated_at?: string;
 }
 
+function makeDefaultMetrics(id: AnalyticsDateRange): MarketingMetricsConfig {
+  return {
+    id,
+    ad_spend_mad: 0,
+    brand_searches: 0,
+    rewards_engagements: 0,
+    account_activations: 0,
+  };
+}
+
 export const DEFAULT_MARKETING_METRICS: Record<
   AnalyticsDateRange,
   MarketingMetricsConfig
 > = {
-  "7d": {
-    id: "7d",
-    ad_spend_mad: 0,
-    brand_searches: 0,
-    rewards_engagements: 0,
-    account_activations: 0,
-  },
-  "30d": {
-    id: "30d",
-    ad_spend_mad: 0,
-    brand_searches: 0,
-    rewards_engagements: 0,
-    account_activations: 0,
-  },
-  all: {
-    id: "all",
-    ad_spend_mad: 0,
-    brand_searches: 0,
-    rewards_engagements: 0,
-    account_activations: 0,
-  },
+  "24h": makeDefaultMetrics("24h"),
+  "3d": makeDefaultMetrics("3d"),
+  "7d": makeDefaultMetrics("7d"),
+  "30d": makeDefaultMetrics("30d"),
+  all: makeDefaultMetrics("all"),
+  custom: makeDefaultMetrics("custom"),
 };
+
+export function parseAnalyticsDateRange(
+  raw: string | null | undefined
+): AnalyticsDateRange {
+  if (
+    raw === "24h" ||
+    raw === "3d" ||
+    raw === "7d" ||
+    raw === "30d" ||
+    raw === "all" ||
+    raw === "custom"
+  ) {
+    return raw;
+  }
+  return "30d";
+}
 
 export interface FunnelStageSummary {
   key: "awareness" | "consideration" | "conversion" | "loyalty";

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/review-server";
 import {
   DEFAULT_MARKETING_METRICS,
+  parseAnalyticsDateRange,
   type AnalyticsDateRange,
   type MarketingMetricsConfig,
 } from "@/lib/analytics";
@@ -16,8 +17,7 @@ const NO_STORE_HEADERS = {
 };
 
 function parseRange(raw: string | null): AnalyticsDateRange {
-  if (raw === "7d" || raw === "30d" || raw === "all") return raw;
-  return "30d";
+  return parseAnalyticsDateRange(raw);
 }
 
 function normalizeMetrics(

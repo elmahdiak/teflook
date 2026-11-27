@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdmin } from "@/lib/review-server";
 import {
   DEFAULT_MARKETING_METRICS,
+  parseAnalyticsDateRange,
   type AnalyticsDateRange,
   type FunnelAnalyticsData,
   type MarketingMetricsConfig,
@@ -17,16 +18,85 @@ const NO_STORE_HEADERS = {
   Expires: "0",
 };
 
-function parseRange(raw: string | null): AnalyticsDateRange {
-  if (raw === "7d" || raw === "30d" || raw === "all") return raw;
-  return "30d";
+interface DateBounds {
+  startIso: string | null;
+  endIso: string | null;
+  startMs: number | null;
+  endMs: number | null;
 }
 
-function getCutoffMs(range: AnalyticsDateRange): number | null {
+function parseBoundDate(raw: string | null, boundary: "start" | "end"): number | null {
+  if (!raw || !raw.trim()) return null;
+  const trimmed = raw.trim();
+  // Support both YYYY-MM-DD and full ISO strings
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    const suffix = boundary === "start" ? "T00:00:00.000Z" : "T23:59:59.999Z";
+    const ms = Date.parse(`${trimmed}${suffix}`);
+    return Number.isFinite(ms) ? ms : null;
+  }
+  const ms = Date.parse(trimmed);
+  return Number.isFinite(ms) ? ms : null;
+}
+
+function getDateBounds(
+  range: AnalyticsDateRange,
+  startParam: string | null,
+  endParam: string | null
+): DateBounds {
   const now = Date.now();
-  if (range === "7d") return now - 7 * 24 * 60 * 60 * 1000;
-  if (range === "30d") return now - 30 * 24 * 60 * 60 * 1000;
-  return null;
+  if (range === "24h") {
+    const startMs = now - 24 * 60 * 60 * 1000;
+    return {
+      startIso: new Date(startMs).toISOString(),
+      endIso: null,
+      startMs,
+      endMs: null,
+    };
+  }
+  if (range === "3d") {
+    const startMs = now - 3 * 24 * 60 * 60 * 1000;
+    return {
+      startIso: new Date(startMs).toISOString(),
+      endIso: null,
+      startMs,
+      endMs: null,
+    };
+  }
+  if (range === "7d") {
+    const startMs = now - 7 * 24 * 60 * 60 * 1000;
+    return {
+      startIso: new Date(startMs).toISOString(),
+      endIso: null,
+      startMs,
+      endMs: null,
+    };
+  }
+  if (range === "30d") {
+    const startMs = now - 30 * 24 * 60 * 60 * 1000;
+    return {
+      startIso: new Date(startMs).toISOString(),
+      endIso: null,
+      startMs,
+      endMs: null,
+    };
+  }
+  if (range === "custom") {
+    let startMs = parseBoundDate(startParam, "start");
+    let endMs = parseBoundDate(endParam, "end");
+    if (startMs !== null && endMs !== null && startMs > endMs) {
+      const swap = startMs;
+      startMs = endMs;
+      endMs = swap;
+    }
+    return {
+      startIso: startMs !== null ? new Date(startMs).toISOString() : null,
+      endIso: endMs !== null ? new Date(endMs).toISOString() : null,
+      startMs,
+      endMs,
+    };
+  }
+
+  return { startIso: null, endIso: null, startMs: null, endMs: null };
 }
 
 function isMissingTableError(err: { code?: string; message?: string } | null): boolean {
@@ -99,44 +169,95 @@ interface AnalyticsEventRow {
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const range = parseRange(searchParams.get("range"));
-  const cutoffMs = getCutoffMs(range);
+  const range = parseAnalyticsDateRange(searchParams.get("range"));
+  const bounds = getDateBounds(
+    range,
+    searchParams.get("start"),
+    searchParams.get("end")
+  );
+  const cutoffMs = bounds.startMs;
 
   try {
     const supabase = getSupabaseAdmin();
     const missingTables: string[] = [];
 
-    const [ordersRes, eventsRes, metricsRes] = await Promise.all([
-      supabase
-        .from("orders")
-        .select(
-          "id, created_at, customer_phone, total_mad, status, custom_fields, notes"
-        )
-        .order("created_at", { ascending: true }),
-      supabase
-        .from("analytics_events")
-        .select(
-          "id, created_at, visitor_id, session_id, event_type, page_path, duration_seconds, metadata"
-        )
-        .order("created_at", { ascending: true })
-        .limit(15000),
+    let periodOrdersQuery = supabase
+      .from("orders")
+      .select(
+        "id, created_at, customer_phone, total_mad, status, custom_fields, notes"
+      )
+      .order("created_at", { ascending: true });
+
+    let periodEventsQuery = supabase
+      .from("analytics_events")
+      .select(
+        "id, created_at, visitor_id, session_id, event_type, page_path, duration_seconds, metadata"
+      )
+      .order("created_at", { ascending: true })
+      .limit(15000);
+
+    if (bounds.startIso) {
+      periodOrdersQuery = periodOrdersQuery.gte("created_at", bounds.startIso);
+      periodEventsQuery = periodEventsQuery.gte("created_at", bounds.startIso);
+    }
+    if (bounds.endIso) {
+      periodOrdersQuery = periodOrdersQuery.lte("created_at", bounds.endIso);
+      periodEventsQuery = periodEventsQuery.lte("created_at", bounds.endIso);
+    }
+
+    const hasWindowBound = Boolean(bounds.startIso || bounds.endIso);
+
+    const [
+      periodOrdersRes,
+      periodEventsRes,
+      metricsRes,
+      lifetimeOrdersRes,
+      lifetimeEventsRes,
+    ] = await Promise.all([
+      periodOrdersQuery,
+      periodEventsQuery,
       supabase
         .from("marketing_metrics")
         .select("*")
         .in("id", [range, "default"]),
+      hasWindowBound
+        ? supabase
+            .from("orders")
+            .select("id, created_at, customer_phone, status")
+            .order("created_at", { ascending: true })
+        : Promise.resolve({ data: null, error: null }),
+      hasWindowBound
+        ? supabase
+            .from("analytics_events")
+            .select("id, created_at, visitor_id, session_id, event_type")
+            .order("created_at", { ascending: true })
+            .limit(15000)
+        : Promise.resolve({ data: null, error: null }),
     ]);
 
-    if (isMissingTableError(ordersRes.error)) missingTables.push("orders");
-    if (isMissingTableError(eventsRes.error)) missingTables.push("analytics_events");
+    if (isMissingTableError(periodOrdersRes.error)) missingTables.push("orders");
+    if (isMissingTableError(periodEventsRes.error)) missingTables.push("analytics_events");
     if (isMissingTableError(metricsRes.error)) missingTables.push("marketing_metrics");
 
-    const allValidOrders = Array.isArray(ordersRes.data)
-      ? ordersRes.data.filter((o) => o.status !== "cancelled")
+    const ordersInPeriod = Array.isArray(periodOrdersRes.data)
+      ? periodOrdersRes.data.filter((o) => o.status !== "cancelled")
       : [];
 
-    const allEvents: AnalyticsEventRow[] = Array.isArray(eventsRes.data)
-      ? (eventsRes.data as AnalyticsEventRow[])
+    const eventsInPeriod: AnalyticsEventRow[] = Array.isArray(periodEventsRes.data)
+      ? (periodEventsRes.data as AnalyticsEventRow[])
       : [];
+
+    const allValidOrders = hasWindowBound
+      ? Array.isArray(lifetimeOrdersRes.data)
+        ? lifetimeOrdersRes.data.filter((o) => o.status !== "cancelled")
+        : ordersInPeriod
+      : ordersInPeriod;
+
+    const allEvents: AnalyticsEventRow[] = hasWindowBound
+      ? Array.isArray(lifetimeEventsRes.data)
+        ? (lifetimeEventsRes.data as AnalyticsEventRow[])
+        : eventsInPeriod
+      : eventsInPeriod;
 
     const metricsRow = Array.isArray(metricsRes.data)
       ? metricsRes.data.find((r) => r.id === range) ||
@@ -186,22 +307,6 @@ export async function GET(req: NextRequest) {
         pageViewsByVisitor.set(ev.visitor_id, list);
       }
     }
-
-    const ordersInPeriod =
-      cutoffMs === null
-        ? allValidOrders
-        : allValidOrders.filter((o) => {
-            const ts = Date.parse(o.created_at);
-            return Number.isFinite(ts) && ts >= cutoffMs;
-          });
-
-    const eventsInPeriod =
-      cutoffMs === null
-        ? allEvents
-        : allEvents.filter((ev) => {
-            const ts = Date.parse(ev.created_at);
-            return Number.isFinite(ts) && ts >= cutoffMs;
-          });
 
     // Stage 1: Awareness (directly calculated from storefront analytics_events)
     const sessionsInPeriod = new Set(
@@ -273,7 +378,10 @@ export async function GET(req: NextRequest) {
     let firstTimeVisitors = 0;
     for (const vid of visitorsInPeriodSet) {
       const firstTs = earliestSeenByVisitor.get(vid);
-      if (cutoffMs === null || (firstTs !== undefined && firstTs >= cutoffMs)) {
+      const afterStart = cutoffMs === null || (firstTs !== undefined && firstTs >= cutoffMs);
+      const beforeEnd =
+        bounds.endMs === null || (firstTs !== undefined && firstTs <= bounds.endMs);
+      if (afterStart && beforeEnd) {
         firstTimeVisitors += 1;
       }
     }

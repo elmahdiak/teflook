@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   ArrowRight,
   BarChart3,
+  Calendar,
   CheckCircle2,
   Copy,
   Database,
@@ -30,11 +31,25 @@ import {
 } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
-const RANGE_OPTIONS: { value: AnalyticsDateRange; label: string }[] = [
+const RANGE_OPTIONS: {
+  value: AnalyticsDateRange;
+  label: string;
+  withCalendarIcon?: boolean;
+}[] = [
+  { value: "24h", label: "Dernières 24h" },
+  { value: "3d", label: "3 derniers jours" },
   { value: "7d", label: "7 derniers jours" },
   { value: "30d", label: "30 derniers jours" },
   { value: "all", label: "Tout le temps" },
+  { value: "custom", label: "Personnalisé", withCalendarIcon: true },
 ];
+
+function toDateInputValue(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
 interface KpiCardDescriptor {
   number: number;
@@ -48,6 +63,12 @@ interface KpiCardDescriptor {
 
 export default function AdminFunnelAnalyticsPage() {
   const [range, setRange] = useState<AnalyticsDateRange>("30d");
+  const [startDate, setStartDate] = useState<string>(() =>
+    toDateInputValue(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
+  );
+  const [endDate, setEndDate] = useState<string>(() =>
+    toDateInputValue(new Date())
+  );
   const [data, setData] = useState<FunnelAnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [copiedSql, setCopiedSql] = useState(false);
@@ -71,27 +92,51 @@ export default function AdminFunnelAnalyticsPage() {
     []
   );
 
-  const loadFunnel = useCallback(async (selectedRange: AnalyticsDateRange) => {
-    setIsLoading(true);
-    try {
-      const res = await fetch(`/api/analytics/funnel?range=${selectedRange}`, {
-        cache: "no-store",
-      });
-      if (res.ok) {
-        const json = (await res.json()) as FunnelAnalyticsData;
-        setData(json);
-        setMetricsForm(json.marketingMetrics);
+  const loadFunnel = useCallback(
+    async (
+      selectedRange: AnalyticsDateRange,
+      customStart?: string,
+      customEnd?: string
+    ) => {
+      setIsLoading(true);
+      try {
+        const query = new URLSearchParams({ range: selectedRange });
+        if (selectedRange === "custom") {
+          const s = customStart ?? startDate;
+          const e = customEnd ?? endDate;
+          if (s) {
+            const parsedStart = new Date(`${s}T00:00:00`);
+            if (!Number.isNaN(parsedStart.getTime())) {
+              query.set("start", parsedStart.toISOString());
+            }
+          }
+          if (e) {
+            const parsedEnd = new Date(`${e}T23:59:59.999`);
+            if (!Number.isNaN(parsedEnd.getTime())) {
+              query.set("end", parsedEnd.toISOString());
+            }
+          }
+        }
+        const res = await fetch(`/api/analytics/funnel?${query.toString()}`, {
+          cache: "no-store",
+        });
+        if (res.ok) {
+          const json = (await res.json()) as FunnelAnalyticsData;
+          setData(json);
+          setMetricsForm(json.marketingMetrics);
+        }
+      } catch (e) {
+        console.error("Failed to fetch funnel analytics:", e);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (e) {
-      console.error("Failed to fetch funnel analytics:", e);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    },
+    [startDate, endDate]
+  );
 
   useEffect(() => {
-    void loadFunnel(range);
-  }, [range, loadFunnel]);
+    void loadFunnel(range, startDate, endDate);
+  }, [range, startDate, endDate, loadFunnel]);
 
   async function handleSaveMetrics(e: React.FormEvent) {
     e.preventDefault();
@@ -498,63 +543,95 @@ export default function AdminFunnelAnalyticsPage() {
       )}
 
       {/* Header & Top Controls */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-[#4B9393]/15">
-        <div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-[#4B9393]/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#4B9393] mb-2">
-            <BarChart3 size={13} />
-            <span>Analytics TefLook</span>
+      <div className="space-y-4 pb-5 border-b border-[#4B9393]/15">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#4B9393]/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#4B9393] mb-2">
+              <BarChart3 size={13} />
+              <span>Analytics TefLook</span>
+            </div>
+            <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#1A3C34]">
+              Funnel Analytics (4 Étapes · 19 KPIs)
+            </h1>
+            <p className="mt-1 text-xs sm:text-sm text-[#1A3C34]/70">
+              Visualisez l&apos;acquisition Meta/Google Ads, le comportement boutique, les conversions COD et la fidélisation client.
+            </p>
           </div>
-          <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#1A3C34]">
-            Funnel Analytics (4 Étapes · 19 KPIs)
-          </h1>
-          <p className="mt-1 text-xs sm:text-sm text-[#1A3C34]/70">
-            Visualisez l&apos;acquisition Meta/Google Ads, le comportement boutique, les conversions COD et la fidélisation client.
-          </p>
+
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isLoading}
+              onClick={() => void loadFunnel(range, startDate, endDate)}
+              className="rounded-2xl border-[#4B9393]/25 bg-white text-[#1A3C34] hover:bg-[#F3EFE6] text-xs font-semibold cursor-pointer"
+            >
+              {isLoading ? (
+                <LoaderCircle size={14} className="animate-spin me-1.5" />
+              ) : (
+                <RefreshCw size={14} className="me-1.5" />
+              )}
+              Actualiser
+            </Button>
+
+            <Button
+              type="button"
+              onClick={() => setIsEditModalOpen(true)}
+              className="rounded-2xl bg-[#F67D56] hover:bg-[#e56c45] text-white text-xs sm:text-sm font-bold shadow-sm cursor-pointer"
+            >
+              <Sparkles size={14} className="me-1.5" />
+              Éditer données Ads / Campagnes
+            </Button>
+          </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-          {/* Date Range Filter */}
-          <div className="inline-flex rounded-2xl border border-[#4B9393]/20 bg-[#F3EFE6]/70 p-1 text-xs font-bold">
+        {/* Expanded Date Range Filter Bar + Custom Date Inputs */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="inline-flex flex-wrap items-center gap-1 rounded-2xl border border-[#4B9393]/20 bg-[#F3EFE6]/80 p-1.5 text-xs font-bold">
             {RANGE_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
                 type="button"
                 onClick={() => setRange(opt.value)}
                 className={cn(
-                  "px-3 py-1.5 rounded-xl transition-all cursor-pointer",
+                  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all cursor-pointer",
                   range === opt.value
                     ? "bg-[#4B9393] text-white shadow-xs"
-                    : "text-[#1A3C34]/75 hover:text-[#1A3C34]"
+                    : "text-[#1A3C34]/80 hover:bg-white/70 hover:text-[#1A3C34]"
                 )}
               >
-                {opt.label}
+                <span>{opt.label}</span>
+                {opt.withCalendarIcon && <Calendar size={13} />}
               </button>
             ))}
           </div>
 
-          <Button
-            type="button"
-            variant="outline"
-            disabled={isLoading}
-            onClick={() => void loadFunnel(range)}
-            className="rounded-2xl border-[#4B9393]/25 bg-white text-[#1A3C34] hover:bg-[#F3EFE6] text-xs font-semibold cursor-pointer"
-          >
-            {isLoading ? (
-              <LoaderCircle size={14} className="animate-spin me-1.5" />
-            ) : (
-              <RefreshCw size={14} className="me-1.5" />
-            )}
-            Actualiser
-          </Button>
+          {range === "custom" && (
+            <div className="inline-flex flex-wrap items-center gap-2.5 rounded-2xl border border-[#4B9393]/25 bg-[#F3EFE6]/70 px-3.5 py-2 text-xs font-semibold text-[#1A3C34] animate-in fade-in duration-150">
+              <label className="inline-flex items-center gap-1.5">
+                <span className="text-[#1A3C34]/75 font-bold">De</span>
+                <input
+                  type="date"
+                  value={startDate}
+                  max={endDate || undefined}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="h-8 px-2.5 rounded-xl border border-[#4B9393]/25 bg-white text-xs font-semibold text-[#1A3C34] outline-none focus:border-[#4B9393] cursor-pointer"
+                />
+              </label>
 
-          <Button
-            type="button"
-            onClick={() => setIsEditModalOpen(true)}
-            className="rounded-2xl bg-[#F67D56] hover:bg-[#e56c45] text-white text-xs sm:text-sm font-bold shadow-sm cursor-pointer"
-          >
-            <Sparkles size={14} className="me-1.5" />
-            Éditer données Ads / Campagnes
-          </Button>
+              <label className="inline-flex items-center gap-1.5">
+                <span className="text-[#1A3C34]/75 font-bold">À</span>
+                <input
+                  type="date"
+                  value={endDate}
+                  min={startDate || undefined}
+                  max={toDateInputValue(new Date())}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="h-8 px-2.5 rounded-xl border border-[#4B9393]/25 bg-white text-xs font-semibold text-[#1A3C34] outline-none focus:border-[#4B9393] cursor-pointer"
+                />
+              </label>
+            </div>
+          )}
         </div>
       </div>
 
