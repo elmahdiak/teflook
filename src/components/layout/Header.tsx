@@ -82,6 +82,7 @@ export function Header({
 
   const [isSearchOpen, setIsSearchOpen] = useState(defaultSearchOpen);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [internalQuery, setInternalQuery] = useState(searchTerm ?? "");
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -91,6 +92,15 @@ export function Header({
 
   useEffect(() => {
     void useCartStore.persist.rehydrate();
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setIsScrolled(window.scrollY > 8);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
@@ -183,11 +193,17 @@ export function Header({
   }
 
   return (
-    <header className="sticky top-0 z-40 w-full" dir={direction}>
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full transition-shadow duration-200",
+        isScrolled && "shadow-[0_6px_24px_-8px_rgba(26,60,52,0.12)]"
+      )}
+      dir={direction}
+    >
       {/* 1. Main 3-Zone TefLook Navigation Bar */}
       <nav
         aria-label={t("a11y.navigation")}
-        className="w-full bg-[#F7FAFA]/95 backdrop-blur-md border-b border-[#4B9393]/15"
+        className="w-full bg-white/95 backdrop-blur-md border-b border-[#4B9393]/15 transition-shadow duration-200"
       >
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-20 sm:h-22 md:h-24 grid grid-cols-[1fr_auto_1fr] items-center gap-2">
           {/* Start Zone: Menu Trigger + Minimalist Language Dropdown */}
@@ -265,7 +281,7 @@ export function Header({
             >
               <HeaderBagIcon />
               {count > 0 && (
-                <span className="absolute top-1 end-1 min-w-[16px] h-4 px-1 rounded-full bg-[#F67D56] text-white font-brand-logo text-[10px] font-bold flex items-center justify-center ring-2 ring-[#F7FAFA]">
+                <span className="absolute top-1 end-1 min-w-[16px] h-4 px-1 rounded-full bg-[#F67D56] text-white font-brand-logo text-[10px] font-bold flex items-center justify-center ring-2 ring-white">
                   {count > 9 ? "9+" : count}
                 </span>
               )}
@@ -277,7 +293,7 @@ export function Header({
         {menuOpen && (
           <div
             id="teflook-navigation-menu"
-            className="border-t border-[#4B9393]/15 bg-[#F7FAFA] px-4 sm:px-6 lg:px-8 py-3 shadow-sm"
+            className="border-t border-[#4B9393]/15 bg-white px-4 sm:px-6 lg:px-8 py-3 shadow-sm"
           >
             <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-1 sm:gap-2">
               {navLinks.map((item) => (
@@ -286,7 +302,7 @@ export function Header({
                   href={item.href}
                   onClick={() => setMenuOpen(false)}
                   className={cn(
-                    "flex items-center justify-between w-full px-3 py-2.5 rounded-xl text-start text-sm font-bold text-[#1A3C34] hover:bg-white hover:text-[#4B9393] transition-colors",
+                    "flex items-center justify-between w-full px-3 py-2.5 rounded-xl text-start text-sm font-bold text-[#1A3C34] hover:bg-[#F7FAFA] hover:text-[#4B9393] transition-colors",
                     isAr && "font-sans"
                   )}
                 >
@@ -304,7 +320,7 @@ export function Header({
         role="search"
         aria-label={t("a11y.search")}
         className={cn(
-          "grid transition-all duration-200 ease-out bg-[#F7FAFA]/95 backdrop-blur-md border-[#4B9393]/15",
+          "grid transition-all duration-200 ease-out bg-white/95 backdrop-blur-md border-[#4B9393]/15",
           isSearchOpen
             ? "grid-rows-[1fr] opacity-100 border-b shadow-xs"
             : "grid-rows-[0fr] opacity-0 border-b-0 pointer-events-none"

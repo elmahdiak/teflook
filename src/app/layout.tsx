@@ -84,7 +84,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`h-full scroll-smooth ${bricolageGrotesque.variable} ${dmSans.variable} ${cairo.variable} ${ibmPlexSansArabic.variable}`}
+      className={`min-h-full scroll-smooth ${bricolageGrotesque.variable} ${dmSans.variable} ${cairo.variable} ${ibmPlexSansArabic.variable}`}
       suppressHydrationWarning
     >
       <head>
