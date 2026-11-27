@@ -183,9 +183,9 @@ export function ProductInfoTabs({ product }: ProductInfoTabsProps) {
   };
 
   return (
-    <div className="w-full mt-4 border-t border-border/80 pt-2" dir={direction}>
+    <div className="w-full" dir={direction}>
       {/* 1. Sleek Tab Header Bar */}
-      <div className="flex items-center gap-6 sm:gap-8 border-b border-border/80 text-xs sm:text-sm font-semibold">
+      <div className="flex items-center gap-6 sm:gap-8 border-b border-[#4B9393]/15 font-sans text-xs sm:text-sm font-semibold">
         {/* Tab 1: Description */}
         <button
           type="button"
@@ -256,7 +256,7 @@ export function ProductInfoTabs({ product }: ProductInfoTabsProps) {
               {/* Soft Gradient Fade-out overlay when collapsed */}
               {!isExpanded && needsCollapse && (
                 <div
-                  className="absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-background via-background/85 to-transparent pointer-events-none"
+                  className="absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-white via-white/85 to-transparent pointer-events-none"
                   aria-hidden="true"
                 />
               )}
@@ -268,7 +268,7 @@ export function ProductInfoTabs({ product }: ProductInfoTabsProps) {
                 <button
                   type="button"
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-background hover:bg-secondary/70 px-4 py-1.5 text-xs font-bold text-foreground transition-all shadow-xs hover:border-brand-teal/50 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[#4B9393]/20 bg-[#F3EFE6]/60 hover:bg-[#4B9393]/10 px-4 py-1.5 font-sans text-xs font-semibold text-[#1A3C34] transition-all hover:border-[#4B9393]/50 cursor-pointer"
                 >
                   <span>
                     {isExpanded
@@ -299,7 +299,7 @@ export function ProductInfoTabs({ product }: ProductInfoTabsProps) {
                 {resolvedAgeRanges.map((age, i) => (
                   <span
                     key={i}
-                    className="inline-flex items-center rounded-lg bg-brand-mist/60 border border-brand-teal/30 px-2.5 py-1 text-xs font-bold text-brand-teal"
+                    className="inline-flex items-center rounded-full bg-[#4B9393]/10 text-[#4B9393] px-3 py-1.5 font-sans text-xs font-semibold"
                   >
                     {age}
                   </span>
@@ -316,7 +316,7 @@ export function ProductInfoTabs({ product }: ProductInfoTabsProps) {
                 {resolvedSkills.map((skill, i) => (
                   <span
                     key={i}
-                    className="inline-flex items-center rounded-lg bg-card border border-border px-2.5 py-1 text-xs font-semibold text-foreground"
+                    className="inline-flex items-center rounded-full bg-[#F3EFE6] border border-[#4B9393]/15 px-3 py-1 font-sans text-xs font-semibold text-[#1A3C34]"
                   >
                     {skill}
                   </span>

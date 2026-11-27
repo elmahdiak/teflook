@@ -4,15 +4,13 @@ import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Check,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Heart,
   LoaderCircle,
   Minus,
-  Package,
   Plus,
   RotateCcw,
+  Share2,
   ShieldCheck,
   ShoppingBag,
   Sparkles,
@@ -34,8 +32,8 @@ import {
 } from "@/components/ui/sheet";
 import { useCartStore } from "@/lib/shopify-cart";
 import type { ShopifyProduct } from "@/lib/shopify-storefront";
-import { CHILD_STORE_CATEGORIES, getChildStoreCategory } from "@/lib/teflook-categories";
-import { CHILD_STORE_CATEGORY_MESSAGE_KEYS, useTefLookLanguage } from "@/lib/teflook-language";
+import { getChildStoreCategory, getCollectionSlug } from "@/lib/teflook-categories";
+import { useTefLookLanguage } from "@/lib/teflook-language";
 import { getLocalizedProduct } from "@/lib/product-localization";
 import { ProductReviewsSection } from "@/components/product/ProductReviewsSection";
 import type { ProductRatingSummary } from "@/lib/reviews-service";
@@ -81,6 +79,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
   const [isCODModalOpen, setIsCODModalOpen] = useState(false);
   const [notice, setNotice] = useState("");
   const [adding, setAdding] = useState(false);
+  const [copiedShare, setCopiedShare] = useState(false);
   const [liveRatingSummary, setLiveRatingSummary] = useState<{
     rating: number;
     reviewsCount: number;
@@ -122,10 +121,35 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
       ? Math.round(((comparePrice - currentPrice) / comparePrice) * 100)
       : null;
 
-  const categoryConfig = CHILD_STORE_CATEGORIES.find((c) => c.value === product.category);
+  const canonicalCategory = getChildStoreCategory(product);
+  const categorySlug = getCollectionSlug(canonicalCategory);
   const localized = getLocalizedProduct(product, locale);
-  const categoryLabel = localized.categoryName;
   const ageBrackets = normalizeProductAgeRanges(product);
+  const isAvailable = Boolean(currentVariant?.availableForSale);
+
+  async function handleShareProduct() {
+    if (typeof window === "undefined") return;
+    const shareUrl = window.location.href;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: localized.title,
+          text: localized.description.slice(0, 120),
+          url: shareUrl,
+        });
+        return;
+      } catch {
+        // Fallback to clipboard copy if share sheet dismissed/unavailable
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopiedShare(true);
+      setTimeout(() => setCopiedShare(false), 2200);
+    } catch {}
+  }
 
   async function handleAddToCart() {
     if (!currentVariant || adding) return;
@@ -155,90 +179,92 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
   )}`;
 
   return (
-    <div lang={locale} dir={direction} className="min-h-screen bg-background text-foreground flex flex-col">
+    <div lang={locale} dir={direction} className="min-h-screen bg-[#F3EFE6]/45 text-[#1A3C34] flex flex-col">
       {/* 1. Sticky Header & Expandable Search Bar */}
       <Header onOpenCart={() => setIsCartOpen(true)} defaultSearchOpen={false} />
 
       {/* 2. Breadcrumb */}
       <nav
         aria-label={locale === "ar" ? "مسار التنقل" : "Fil d'Ariane"}
-        className="border-b border-border/60 bg-card/40 py-2.5"
+        className="border-b border-[#4B9393]/15 bg-[#F3EFE6]/70 py-3"
       >
-        <div className="store-shell flex items-center gap-2 text-xs text-muted-foreground truncate">
-          <Link href="/" className="hover:text-brand-teal transition-colors">
+        <div className="store-shell flex items-center gap-2 text-xs font-sans text-[#1A3C34]/70 truncate">
+          <Link href="/" className="hover:text-[#4B9393] transition-colors">
             {locale === "ar" ? "الرئيسية" : "Accueil"}
           </Link>
-          <ChevronRight size={12} className={cn("shrink-0 text-muted-foreground/60", locale === "ar" && "rotate-180")} />
-          <Link href="/#boutique" className="hover:text-brand-teal transition-colors">
+          <ChevronRight size={12} className={cn("shrink-0 text-[#1A3C34]/40", locale === "ar" && "rotate-180")} />
+          <Link href={`/collections/${categorySlug}`} className="hover:text-[#4B9393] transition-colors">
             {localized.categoryName}
           </Link>
-          <ChevronRight size={12} className={cn("shrink-0 text-muted-foreground/60", locale === "ar" && "rotate-180")} />
-          <span className="truncate font-medium text-foreground">{localized.title}</span>
+          <ChevronRight size={12} className={cn("shrink-0 text-[#1A3C34]/40", locale === "ar" && "rotate-180")} />
+          <span className="truncate font-semibold text-[#1A3C34]">{localized.title}</span>
         </div>
       </nav>
 
-      {/* 3. Main Product Details (Two-Column Layout) */}
-      <main className="flex-1 store-shell py-8 sm:py-12">
-        <div className="grid gap-8 lg:grid-cols-12 lg:gap-12">
-          {/* Left Column: Product Media Gallery */}
-          <div className="lg:col-span-7 flex flex-col gap-4">
-            {/* Main Preview Image */}
-            <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-border/80 bg-white shadow-xs group">
-              <img
-                key={activeImage?.url || "fallback-product-img"}
-                src={activeImage?.url || "/images/Untitled Design.png"}
-                alt={activeImage?.altText || localized.title}
-                className="size-full object-cover animate-in fade-in duration-300 transition-transform group-hover:scale-105"
-              />
-              {discountPercent && (
-                <span className="absolute top-4 start-4 rounded-full bg-brand-orange px-3 py-1 text-xs font-black uppercase tracking-wider text-white shadow-sm">
-                  -{discountPercent}% Promo
-                </span>
-              )}
-
-              {images.length > 1 && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setSelectedImageIndex(
-                        (safeImageIndex - 1 + images.length) % images.length
-                      )
-                    }
-                    aria-label={locale === "ar" ? "الصورة السابقة" : "Photo précédente"}
-                    className="absolute start-3 top-1/2 -translate-y-1/2 grid size-9 sm:size-10 place-items-center rounded-full bg-white/90 text-[#1A3C34] border border-slate-200/80 shadow-md opacity-90 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[#4B9393] hover:text-white transition-all cursor-pointer"
-                  >
-                    <ChevronLeft
-                      size={18}
-                      className={cn(locale === "ar" && "rotate-180")}
-                    />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setSelectedImageIndex((safeImageIndex + 1) % images.length)
-                    }
-                    aria-label={locale === "ar" ? "الصورة التالية" : "Photo suivante"}
-                    className="absolute end-3 top-1/2 -translate-y-1/2 grid size-9 sm:size-10 place-items-center rounded-full bg-white/90 text-[#1A3C34] border border-slate-200/80 shadow-md opacity-90 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[#4B9393] hover:text-white transition-all cursor-pointer"
-                  >
-                    <ChevronRight
-                      size={18}
-                      className={cn(locale === "ar" && "rotate-180")}
-                    />
-                  </button>
-                  <span
-                    dir="ltr"
-                    className="absolute bottom-3 end-3 rounded-full bg-black/55 backdrop-blur-xs px-2.5 py-0.5 text-[11px] font-bold text-white tabular-nums"
-                  >
-                    {safeImageIndex + 1} / {images.length}
+      {/* 3. Main Product Details (Balanced High-Whitespace Two-Column Layout) */}
+      <main className="flex-1 store-shell py-12 lg:py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
+          {/* Left Column: Architectural Limestone Gallery Frame */}
+          <div className="lg:col-span-7 flex flex-col gap-4 lg:sticky lg:top-28">
+            <div className="rounded-3xl border border-[#4B9393]/15 bg-[#F3EFE6] p-3 sm:p-4 shadow-sm">
+              {/* Main Preview Image */}
+              <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-white group">
+                <img
+                  key={activeImage?.url || "fallback-product-img"}
+                  src={activeImage?.url || "/images/Untitled Design.png"}
+                  alt={activeImage?.altText || localized.title}
+                  className="size-full object-cover animate-in fade-in duration-300 transition-transform duration-500 group-hover:scale-105"
+                />
+                {discountPercent && (
+                  <span className="absolute top-4 start-4 rounded-full bg-[#F67D56] px-3.5 py-1.5 font-sans text-xs font-bold uppercase tracking-wider text-white shadow-sm">
+                    -{discountPercent}% Promo
                   </span>
-                </>
-              )}
+                )}
+
+                {images.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSelectedImageIndex(
+                          (safeImageIndex - 1 + images.length) % images.length
+                        )
+                      }
+                      aria-label={locale === "ar" ? "الصورة السابقة" : "Photo précédente"}
+                      className="absolute start-3 top-1/2 -translate-y-1/2 grid size-9 sm:size-10 place-items-center rounded-full bg-white/95 text-[#1A3C34] border border-[#4B9393]/15 shadow-sm opacity-90 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[#4B9393] hover:text-white transition-all cursor-pointer"
+                    >
+                      <ChevronLeft
+                        size={18}
+                        className={cn(locale === "ar" && "rotate-180")}
+                      />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSelectedImageIndex((safeImageIndex + 1) % images.length)
+                      }
+                      aria-label={locale === "ar" ? "الصورة التالية" : "Photo suivante"}
+                      className="absolute end-3 top-1/2 -translate-y-1/2 grid size-9 sm:size-10 place-items-center rounded-full bg-white/95 text-[#1A3C34] border border-[#4B9393]/15 shadow-sm opacity-90 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[#4B9393] hover:text-white transition-all cursor-pointer"
+                    >
+                      <ChevronRight
+                        size={18}
+                        className={cn(locale === "ar" && "rotate-180")}
+                      />
+                    </button>
+                    <span
+                      dir="ltr"
+                      className="absolute bottom-3 end-3 rounded-full bg-[#1A3C34]/75 backdrop-blur-xs px-3 py-1 font-sans text-[11px] font-semibold text-white tabular-nums"
+                    >
+                      {safeImageIndex + 1} / {images.length}
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Thumbnail Strip */}
             {images.length > 1 && (
-              <div className="flex items-center gap-3 overflow-x-auto pb-2 pt-0.5">
+              <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-1 pt-0.5">
                 {images.map((img, index) => {
                   const isActive = safeImageIndex === index;
                   return (
@@ -253,10 +279,10 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                       }
                       aria-pressed={isActive}
                       className={cn(
-                        "relative w-16 h-16 sm:w-20 sm:h-20 shrink-0 overflow-hidden rounded-xl border-2 transition-all cursor-pointer bg-white",
+                        "relative w-16 h-16 sm:w-20 sm:h-20 shrink-0 overflow-hidden rounded-2xl border-2 transition-all cursor-pointer bg-white",
                         isActive
-                          ? "border-[#4B9393] ring-2 ring-[#4B9393]/25 opacity-100 shadow-xs"
-                          : "border-slate-200 opacity-70 hover:opacity-100 hover:border-[#4B9393]/50"
+                          ? "border-[#4B9393] ring-2 ring-[#4B9393]/20 opacity-100 shadow-xs"
+                          : "border-[#4B9393]/15 opacity-75 hover:opacity-100 hover:border-[#4B9393]/50"
                       )}
                     >
                       <img
@@ -271,27 +297,39 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
             )}
           </div>
 
-          {/* Right Column: Product Information & Purchase Box */}
-          <div className="lg:col-span-5 flex flex-col gap-6">
-            {/* Vendor & Rating */}
+          {/* Right Column: Product Information & Calm Purchase Card */}
+          <div className="lg:col-span-5 flex flex-col gap-7">
+            {/* Editorial Title, Pillar Badge & Rating */}
             <div>
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <span className="text-xs font-bold uppercase tracking-widest text-brand-teal">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <span className="font-sans text-xs font-semibold uppercase tracking-[0.14em] text-[#4B9393]">
                   {localized.vendor}
                 </span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-brand-mist px-2.5 py-0.5 text-xs font-bold text-brand-teal">
+                <Link
+                  href={`/collections/${categorySlug}`}
+                  className="inline-flex items-center rounded-full bg-[#4B9393]/10 text-[#4B9393] hover:bg-[#4B9393]/15 px-3 py-1.5 font-sans text-xs font-semibold transition-colors"
+                >
                   {localized.categoryBadge}
-                </span>
+                </Link>
               </div>
-              <h1 className={cn("font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold text-foreground leading-[1.15]", locale === "ar" && "font-sans leading-snug")}>
+
+              <h1
+                className={cn(
+                  "font-display font-bold text-2xl sm:text-3xl lg:text-4xl text-[#1A3C34] tracking-tight mb-4 leading-[1.15]",
+                  locale === "ar" && "font-sans tracking-normal leading-snug"
+                )}
+              >
                 {localized.title}
               </h1>
 
-              {/* Star rating */}
-              <div className="mt-3 flex items-center gap-2 text-xs font-medium text-muted-foreground min-h-[1.5rem]">
+              {/* Star Rating Row */}
+              <a
+                href="#avis-clients"
+                className="inline-flex items-center gap-2 font-sans text-xs font-medium text-[#1A3C34]/75 hover:text-[#4B9393] transition-colors min-h-[1.5rem]"
+              >
                 {isMounted && liveRatingSummary.reviewsCount > 0 ? (
                   <>
-                    <div className="flex items-center text-[#FCC846]">
+                    <div className="flex items-center gap-0.5 text-[#FCC846]">
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
@@ -299,12 +337,12 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                           className={cn(
                             i < Math.round(liveRatingSummary.rating)
                               ? "fill-[#FCC846] text-[#FCC846]"
-                              : "text-muted-foreground/30 fill-none"
+                              : "text-[#1A3C34]/20 fill-none"
                           )}
                         />
                       ))}
                     </div>
-                    <span className="font-bold text-foreground">
+                    <span className="font-bold text-[#1A3C34] tabular-nums">
                       {liveRatingSummary.rating.toFixed(1)}
                     </span>
                     <span>
@@ -318,8 +356,8 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                     </span>
                   </>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 px-2.5 py-0.5 text-xs text-muted-foreground">
-                    <Star size={13} className="text-muted-foreground/50 fill-none" />
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[#F3EFE6] border border-[#4B9393]/15 px-3 py-1 font-sans text-xs font-medium text-[#1A3C34]/75">
+                    <Star size={13} className="text-[#FCC846] fill-[#FCC846]" />
                     <span>
                       {isMounted && locale === "ar"
                         ? "منتج جديد • كن أول من يقيّم"
@@ -327,32 +365,60 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                     </span>
                   </span>
                 )}
-              </div>
+              </a>
             </div>
 
-            {/* Price Box */}
-            <div className="rounded-xl border border-border/80 bg-card p-4 sm:p-5 shadow-xs">
-              <div className="flex items-baseline gap-3">
-                <span className="font-display text-3xl sm:text-4xl font-extrabold text-brand-orange-deep">
-                  {currentPrice} MAD
-                </span>
-                {comparePrice && (
-                  <span className="text-base sm:text-lg text-muted-foreground line-through">
-                    {comparePrice} MAD
+            {/* Warm Limestone Wrapper + Elevated White Purchase Box */}
+            <div className="rounded-3xl border border-[#4B9393]/15 bg-white p-6 lg:p-10 shadow-sm">
+              {/* Crisp Sans-Serif Price & Stock Status */}
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-baseline gap-3" dir="ltr">
+                  <span className="font-sans text-3xl sm:text-4xl font-extrabold text-[#1A3C34] tabular-nums">
+                    {currentPrice} MAD
                   </span>
-                )}
+                  {comparePrice && (
+                    <span className="font-sans text-base sm:text-lg font-medium text-[#1A3C34]/45 line-through tabular-nums">
+                      {comparePrice} MAD
+                    </span>
+                  )}
+                </div>
+
+                <span
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-sans text-xs font-semibold",
+                    isAvailable
+                      ? "bg-[#4B9393]/10 text-[#4B9393]"
+                      : "bg-slate-100 text-slate-600"
+                  )}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "size-1.5 rounded-full",
+                      isAvailable ? "bg-[#4B9393]" : "bg-slate-400"
+                    )}
+                  />
+                  {isAvailable
+                    ? locale === "ar"
+                      ? "متوفر في المخزون"
+                      : "En stock"
+                    : locale === "ar"
+                    ? "نفدت الكمية"
+                    : "Épuisé"}
+                </span>
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">
+
+              <p className="mt-2 font-sans text-xs text-[#1A3C34]/65">
                 {locale === "ar"
                   ? "شامل للضريبة · الدفع نقداً عند الاستلام في جميع أنحاء المغرب"
                   : "TVA incluse · Paiement en espèces à la livraison partout au Maroc"}
               </p>
 
-              {/* Age Brackets / Variant Badges */}
+              {/* Soft Pastel Age-Bracket & Pillar Badges */}
               {(ageBrackets.length > 0 ||
                 (product.variants.edges.length > 0 && currentVariant?.selectedOptions)) && (
-                <div className="mt-5 border-t border-border/60 pt-4">
-                  <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2.5">
+                <div className="mt-6 border-t border-[#4B9393]/15 pt-5">
+                  <p className="font-sans text-xs font-semibold uppercase tracking-wider text-[#1A3C34]/60 mb-3">
                     {locale === "ar" ? "الفئات العمرية :" : "Tranches d'âge :"}
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -360,7 +426,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                       ? ageBrackets.map((age) => (
                           <span
                             key={age}
-                            className="rounded-lg border border-brand-teal/40 bg-brand-mist/50 px-3.5 py-1.5 text-xs font-bold text-brand-teal"
+                            className="bg-[#4B9393]/10 text-[#4B9393] px-3 py-1.5 rounded-full font-sans text-xs font-semibold"
                           >
                             {formatAgeBracketLabel(age, locale)}
                           </span>
@@ -368,7 +434,7 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                       : product.variants.edges.map(({ node: v }) => (
                           <span
                             key={v.id}
-                            className="rounded-lg border border-brand-teal/40 bg-brand-mist/50 px-3.5 py-1.5 text-xs font-bold text-brand-teal"
+                            className="bg-[#4B9393]/10 text-[#4B9393] px-3 py-1.5 rounded-full font-sans text-xs font-semibold"
                           >
                             {v.title}
                           </span>
@@ -377,116 +443,147 @@ export function ProductDetailView({ product, relatedProducts }: ProductDetailVie
                 </div>
               )}
 
-              {/* Quantity Selector & Add to Cart */}
-              <div className="mt-6 flex flex-col gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 items-center rounded-xl border border-border bg-background px-1">
+              {/* Minimal Secondary Controls (Quantity & Share) + High-Conversion Coral CTAs */}
+              <div className="mt-7 flex flex-col gap-3.5">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="inline-flex h-12 items-center rounded-2xl border border-[#4B9393]/20 bg-[#F3EFE6]/60 px-1.5">
                     <button
                       type="button"
                       disabled={quantity <= 1}
                       onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                       aria-label={locale === "ar" ? "تقليل الكمية" : "Diminuer la quantité"}
-                      className="grid size-10 place-items-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground disabled:opacity-40"
+                      className="grid size-9 place-items-center rounded-xl text-[#1A3C34]/75 hover:bg-white hover:text-[#4B9393] transition-colors disabled:opacity-35 cursor-pointer"
                     >
                       <Minus size={15} />
                     </button>
-                    <span className="w-10 text-center font-bold text-sm">{quantity}</span>
+                    <span className="w-10 text-center font-sans font-bold text-sm text-[#1A3C34] tabular-nums">
+                      {quantity}
+                    </span>
                     <button
                       type="button"
                       onClick={() => setQuantity((q) => q + 1)}
                       aria-label={locale === "ar" ? "زيادة الكمية" : "Augmenter la quantité"}
-                      className="grid size-10 place-items-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground"
+                      className="grid size-9 place-items-center rounded-xl text-[#1A3C34]/75 hover:bg-white hover:text-[#4B9393] transition-colors cursor-pointer"
                     >
                       <Plus size={15} />
                     </button>
                   </div>
 
-                  {/* Add to Cart CTA */}
-                  <Button
-                    onClick={handleAddToCart}
-                    disabled={adding || !currentVariant?.availableForSale}
-                    className="h-12 flex-1 rounded-xl bg-brand-orange text-white font-extrabold text-sm sm:text-base hover:bg-brand-orange/90 shadow-md shadow-brand-orange/20 transition-all cursor-pointer"
+                  <button
+                    type="button"
+                    onClick={() => void handleShareProduct()}
+                    aria-label={locale === "ar" ? "مشاركة المنتج" : "Partager ce produit"}
+                    className="inline-flex h-12 items-center gap-2 rounded-2xl border border-[#4B9393]/20 bg-[#F3EFE6]/60 px-4 font-sans text-xs font-semibold text-[#1A3C34] hover:bg-white hover:border-[#4B9393]/40 hover:text-[#4B9393] transition-all cursor-pointer"
                   >
-                    {adding ? (
-                      <LoaderCircle className="animate-spin size-5" />
+                    {copiedShare ? (
+                      <>
+                        <Check size={15} className="text-[#4B9393]" />
+                        <span>{locale === "ar" ? "تم النسخ" : "Lien copié"}</span>
+                      </>
                     ) : (
                       <>
-                        <ShoppingBag size={18} className={cn(locale === "ar" ? "ml-2" : "mr-2")} />
+                        <Share2 size={15} />
+                        <span>{locale === "ar" ? "مشاركة" : "Partager"}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Primary High-Conversion Add to Cart CTA */}
+                <Button
+                  onClick={handleAddToCart}
+                  disabled={adding || !isAvailable}
+                  className="h-auto bg-[#F67D56] hover:bg-[#e06d48] text-white font-sans font-semibold text-sm sm:text-base py-4 px-8 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 w-full text-center flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
+                >
+                  {adding ? (
+                    <LoaderCircle className="animate-spin size-5" />
+                  ) : (
+                    <>
+                      <ShoppingBag size={18} className="shrink-0" />
+                      <span>
                         {locale === "ar"
                           ? `إضافة إلى السلة • ${currentPrice * quantity} درهم`
                           : `Ajouter au panier • ${currentPrice * quantity} MAD`}
-                      </>
-                    )}
-                  </Button>
-                </div>
+                      </span>
+                    </>
+                  )}
+                </Button>
 
-                {/* Instant WhatsApp Order CTA */}
+                {/* Instant WhatsApp Order Secondary CTA */}
                 <a
                   href={whatsappOrderUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-50 text-emerald-800 text-xs sm:text-sm font-bold hover:bg-emerald-100 transition-colors"
+                  className="flex items-center justify-center gap-2.5 w-full rounded-2xl border border-[#4B9393]/25 bg-[#F3EFE6]/70 hover:bg-[#4B9393]/10 hover:border-[#4B9393]/45 text-[#1A3C34] font-sans text-xs sm:text-sm font-semibold py-3.5 px-6 transition-all duration-300 text-center"
                 >
                   <img
                     src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
                     alt=""
-                    className="size-4"
+                    className="size-4 shrink-0"
                   />
-                  {locale === "ar" ? "طلب مباشر عبر واتساب" : "Commander directement via WhatsApp"}
+                  <span>
+                    {locale === "ar"
+                      ? "طلب مباشر عبر واتساب"
+                      : "Commander directement via WhatsApp"}
+                  </span>
                 </a>
               </div>
             </div>
 
-            {/* Moroccan Service & Trust Guarantees */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex items-start gap-2.5 rounded-xl border border-border/60 bg-card/60 p-3">
-                <Truck size={18} className="text-brand-teal shrink-0 mt-0.5" />
-                <div className="text-xs leading-snug">
-                  <span className="font-bold block text-foreground">
-                    {locale === "ar" ? "توصيل سريع" : "Livraison Express"}
-                  </span>
-                  <span className="text-muted-foreground">
-                    {locale === "ar" ? "24 إلى 48 ساعة في كافة مدن المغرب" : "24 à 48h partout au Maroc"}
-                  </span>
+            {/* Moroccan Service & Trust Guarantees inside Warm Limestone Wrapper */}
+            <div className="rounded-3xl border border-[#4B9393]/15 bg-[#F3EFE6]/80 p-4 sm:p-5">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex items-start gap-2.5 rounded-2xl border border-[#4B9393]/10 bg-white p-3.5 shadow-2xs">
+                  <Truck size={18} className="text-[#4B9393] shrink-0 mt-0.5" />
+                  <div className="font-sans text-xs leading-snug">
+                    <span className="font-bold block text-[#1A3C34]">
+                      {locale === "ar" ? "توصيل سريع" : "Livraison Express"}
+                    </span>
+                    <span className="text-[#1A3C34]/65">
+                      {locale === "ar" ? "24 إلى 48 ساعة في كافة مدن المغرب" : "24 à 48h partout au Maroc"}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start gap-2.5 rounded-xl border border-border/60 bg-card/60 p-3">
-                <ShieldCheck size={18} className="text-brand-teal shrink-0 mt-0.5" />
-                <div className="text-xs leading-snug">
-                  <span className="font-bold block text-foreground">
-                    {locale === "ar" ? "دفع آمن" : "Paiement Sécurisé"}
-                  </span>
-                  <span className="text-muted-foreground">
-                    {locale === "ar" ? "عند استلام ومعاينة طلبيتك" : "À la réception de votre colis"}
-                  </span>
+                <div className="flex items-start gap-2.5 rounded-2xl border border-[#4B9393]/10 bg-white p-3.5 shadow-2xs">
+                  <ShieldCheck size={18} className="text-[#4B9393] shrink-0 mt-0.5" />
+                  <div className="font-sans text-xs leading-snug">
+                    <span className="font-bold block text-[#1A3C34]">
+                      {locale === "ar" ? "دفع آمن" : "Paiement Sécurisé"}
+                    </span>
+                    <span className="text-[#1A3C34]/65">
+                      {locale === "ar" ? "عند استلام ومعاينة طلبيتك" : "À la réception de votre colis"}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start gap-2.5 rounded-xl border border-border/60 bg-card/60 p-3">
-                <Sparkles size={18} className="text-brand-orange shrink-0 mt-0.5" />
-                <div className="text-xs leading-snug">
-                  <span className="font-bold block text-foreground">
-                    {locale === "ar" ? "100% غير سام" : "100% Non Toxique"}
-                  </span>
-                  <span className="text-muted-foreground">
-                    {locale === "ar" ? "مواد آمنة ومعتمدة للأطفال" : "Matériaux certifiés sûrs"}
-                  </span>
+                <div className="flex items-start gap-2.5 rounded-2xl border border-[#4B9393]/10 bg-white p-3.5 shadow-2xs">
+                  <Sparkles size={18} className="text-[#FCC846] shrink-0 mt-0.5" />
+                  <div className="font-sans text-xs leading-snug">
+                    <span className="font-bold block text-[#1A3C34]">
+                      {locale === "ar" ? "100% غير سام" : "100% Non Toxique"}
+                    </span>
+                    <span className="text-[#1A3C34]/65">
+                      {locale === "ar" ? "مواد آمنة ومعتمدة للأطفال" : "Matériaux certifiés sûrs"}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start gap-2.5 rounded-xl border border-border/60 bg-card/60 p-3">
-                <RotateCcw size={18} className="text-brand-teal shrink-0 mt-0.5" />
-                <div className="text-xs leading-snug">
-                  <span className="font-bold block text-foreground">
-                    {locale === "ar" ? "ضمان تيفلوك" : "Garantie TefLook"}
-                  </span>
-                  <span className="text-muted-foreground">
-                    {locale === "ar" ? "إرجاع واستبدال بكل سهولة" : "Échange & retour faciles"}
-                  </span>
+                <div className="flex items-start gap-2.5 rounded-2xl border border-[#4B9393]/10 bg-white p-3.5 shadow-2xs">
+                  <RotateCcw size={18} className="text-[#4B9393] shrink-0 mt-0.5" />
+                  <div className="font-sans text-xs leading-snug">
+                    <span className="font-bold block text-[#1A3C34]">
+                      {locale === "ar" ? "ضمان تيفلوك" : "Garantie TefLook"}
+                    </span>
+                    <span className="text-[#1A3C34]/65">
+                      {locale === "ar" ? "إرجاع واستبدال بكل سهولة" : "Échange & retour faciles"}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Two-Tab Information Section: Description & Détails du produit */}
-            <ProductInfoTabs product={product} />
+            {/* Two-Tab Information Section inside Clean Elevated Container */}
+            <div className="rounded-3xl border border-[#4B9393]/15 bg-white p-6 lg:p-8 shadow-sm">
+              <ProductInfoTabs product={product} />
+            </div>
           </div>
         </div>
 

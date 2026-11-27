@@ -114,10 +114,10 @@ export function FAQAccordion({ product, className }: FAQAccordionProps) {
       lang={currentLocale}
       aria-labelledby="faq-title"
       className={cn(
-        "relative overflow-hidden bg-gradient-to-b from-[#F4F9F9] to-[#FCFDFD]",
+        "relative overflow-hidden bg-gradient-to-b from-[#F4F9F9] to-white",
         product
-          ? "mt-14 sm:mt-20 rounded-3xl border border-[#4b9797]/15 py-12 sm:py-16 px-4 sm:px-8"
-          : "border-t border-[#4b9797]/10",
+          ? "mt-14 sm:mt-20 rounded-3xl border border-[#4B9393]/15 py-12 sm:py-16 px-4 sm:px-8"
+          : "border-t border-[#4B9393]/10",
         className
       )}
     >
