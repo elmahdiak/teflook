@@ -15,6 +15,7 @@ import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tan
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { CollectionCardsGrid } from "@/components/collections/CollectionCardsGrid";
 import { ProductCard } from "@/components/product/ProductCard";
 import {
   DEFAULT_PRODUCT_FILTER_STATE,
@@ -231,15 +232,15 @@ function TefLookStorefront() {
 
           {/* Bottom-Center EXPLORER Scroll Cue */}
           <a
-            href="#boutique"
+            href="#collections"
             onClick={(e) => {
               e.preventDefault();
-              document.getElementById("boutique")?.scrollIntoView({ behavior: "smooth" });
+              document.getElementById("collections")?.scrollIntoView({ behavior: "smooth" });
             }}
             aria-label={
               locale === "ar"
-                ? "اكتشف المتجر"
-                : "Explorer la boutique ci-dessous"
+                ? "اكتشف المجموعات"
+                : "Explorer les collections ci-dessous"
             }
             className="absolute bottom-5 sm:bottom-8 lg:bottom-11 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5 sm:gap-2 group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 rounded-md px-2 py-0.5"
           >
@@ -261,7 +262,25 @@ function TefLookStorefront() {
         </div>
       </section>
 
-      {/* 4. Shop Catalogue Section */}
+      {/* 4. Developmental Collections Section */}
+      <section
+        id="collections"
+        className="store-shell scroll-mt-24 py-12 sm:py-20"
+        aria-label={t("category.heading")}
+      >
+        <div className="mb-10 sm:mb-12">
+          <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#F67D56] mb-3 sm:mb-4">
+            {t("category.eyebrow")}
+          </p>
+          <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#1A3C34] tracking-tight">
+            {t("category.heading")}
+          </h2>
+        </div>
+
+        <CollectionCardsGrid locale={locale} />
+      </section>
+
+      {/* 5. Shop Catalogue Section */}
       <section
         id="boutique"
         className="scroll-mt-24 border-y border-border bg-card"
