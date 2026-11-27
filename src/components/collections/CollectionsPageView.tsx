@@ -36,10 +36,10 @@ export function CollectionsPageView() {
       <main className="flex-1 bg-[#F7FAFA]">
         <section
           aria-labelledby="collections-page-heading"
-          className="pt-12 sm:pt-16 pb-16 sm:pb-20"
+          className="py-16 sm:py-24"
         >
           {/* Editorial Centered Header */}
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center mb-6 sm:mb-8">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center mb-10 sm:mb-12">
             <h1
               id="collections-page-heading"
               className={cn(

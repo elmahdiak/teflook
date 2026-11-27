@@ -269,15 +269,15 @@ function TefLookStorefront() {
       {/* 4. Developmental Categories (The 6 Pillars) */}
       <section
         id="collections"
-        className="store-shell scroll-mt-24 pb-12 pt-10 sm:pt-14"
+        className="store-shell scroll-mt-24 py-16 sm:py-24"
         aria-label={t("category.heading")}
       >
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div className="mb-10 sm:mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#F67D56]">
+            <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#F67D56] mb-3 sm:mb-4">
               {t("category.eyebrow")}
             </p>
-            <h2 className="mt-2 font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#1A3C34] tracking-tight">
+            <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#1A3C34] tracking-tight">
               {t("category.heading")}
             </h2>
           </div>
