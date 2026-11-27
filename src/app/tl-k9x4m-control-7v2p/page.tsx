@@ -7,6 +7,7 @@ import {
   ArrowRight,
   ArrowUpRight,
   CheckCircle2,
+  ClipboardList,
   Clock,
   Coins,
   Eye,
@@ -42,6 +43,7 @@ import {
 } from "@/lib/site-settings";
 import {
   ADMIN_CATEGORIES_PATH,
+  ADMIN_CHECKOUT_FIELDS_PATH,
   ADMIN_ORDERS_PATH,
   ADMIN_PRODUCTS_PATH,
   ADMIN_REVIEWS_PATH,
@@ -618,6 +620,17 @@ export default function AdminDashboardPage() {
                 <div className="flex items-center gap-2.5">
                   <Truck size={16} className="text-brand-orange" />
                   <span>Traiter les commandes COD</span>
+                </div>
+                <ArrowRight size={14} className="text-muted-foreground" />
+              </Link>
+
+              <Link
+                href={ADMIN_CHECKOUT_FIELDS_PATH}
+                className="flex items-center justify-between rounded-xl border border-border p-3 hover:border-brand-teal hover:bg-brand-mist/30 transition-all text-xs font-bold text-foreground"
+              >
+                <div className="flex items-center gap-2.5">
+                  <ClipboardList size={16} className="text-brand-teal" />
+                  <span>Personnaliser le formulaire COD</span>
                 </div>
                 <ArrowRight size={14} className="text-muted-foreground" />
               </Link>

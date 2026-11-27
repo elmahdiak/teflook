@@ -21,6 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   deleteCODOrder,
+  fetchSyncedCODOrders,
   getCODOrders,
   updateCODOrderStatus,
   type CODOrder,
@@ -43,22 +44,27 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     setOrders(getCODOrders());
+    fetchSyncedCODOrders().then((synced) => {
+      setOrders(synced);
+    });
   }, []);
 
   function handleStatusChange(orderId: string, newStatus: OrderStatus) {
-    const updated = updateCODOrderStatus(orderId, newStatus);
-    if (updated) {
-      setOrders(getCODOrders());
-      if (selectedOrder?.id === orderId) {
-        setSelectedOrder(updated);
-      }
+    updateCODOrderStatus(orderId, newStatus);
+    setOrders((prev) =>
+      prev.map((order) =>
+        order.id === orderId ? { ...order, status: newStatus } : order
+      )
+    );
+    if (selectedOrder?.id === orderId) {
+      setSelectedOrder({ ...selectedOrder, status: newStatus });
     }
   }
 
   function handleDelete(orderId: string) {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cette commande ?")) {
       deleteCODOrder(orderId);
-      setOrders(getCODOrders());
+      setOrders((prev) => prev.filter((order) => order.id !== orderId));
       if (selectedOrder?.id === orderId) {
         setSelectedOrder(null);
       }
@@ -75,7 +81,16 @@ export default function AdminOrdersPage() {
       order.customerName.toLowerCase().includes(query) ||
       order.customerPhone.includes(query) ||
       order.customerCity.toLowerCase().includes(query) ||
-      order.customerAddress.toLowerCase().includes(query);
+      order.customerAddress.toLowerCase().includes(query) ||
+      (order.notes && order.notes.toLowerCase().includes(query)) ||
+      Boolean(
+        order.customFieldsSummary?.some(
+          (entry) =>
+            entry.labelFr.toLowerCase().includes(query) ||
+            entry.labelAr.toLowerCase().includes(query) ||
+            entry.value.toLowerCase().includes(query)
+        )
+      );
 
     return matchesFilter && matchesSearch;
   });
@@ -351,6 +366,29 @@ export default function AdminOrdersPage() {
                     <p className="text-amber-800 font-medium italic mt-0.5">{selectedOrder.notes}</p>
                   </div>
                 )}
+                {selectedOrder.customFieldsSummary &&
+                  selectedOrder.customFieldsSummary.length > 0 && (
+                    <div className="border-t border-border/60 pt-2 space-y-1.5">
+                      <span className="text-muted-foreground block text-[11px] font-semibold">
+                        Détails du formulaire checkout :
+                      </span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                        {selectedOrder.customFieldsSummary.map((entry, idx) => (
+                          <div
+                            key={`${entry.key}-${idx}`}
+                            className="rounded-lg bg-white/80 border border-border/60 px-2.5 py-1.5 text-[11px]"
+                          >
+                            <span className="text-muted-foreground block">
+                              {entry.labelFr || entry.labelAr || entry.key}
+                            </span>
+                            <span className="font-semibold text-foreground break-words">
+                              {entry.value || "-"}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
               </div>
 
               {/* Items List */}

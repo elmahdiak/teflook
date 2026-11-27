@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  ClipboardList,
   ExternalLink,
   FolderTree,
   LayoutDashboard,
@@ -20,6 +21,7 @@ import { isAuthenticated, logoutAdmin } from "@/lib/admin-auth";
 import {
   ADMIN_BASE_PATH,
   ADMIN_CATEGORIES_PATH,
+  ADMIN_CHECKOUT_FIELDS_PATH,
   ADMIN_LOGIN_PATH,
   ADMIN_ORDERS_PATH,
   ADMIN_PRODUCTS_PATH,
@@ -70,6 +72,12 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       href: ADMIN_ORDERS_PATH,
       icon: Truck,
       badge: "COD",
+    },
+    {
+      label: "Formulaire Checkout",
+      href: ADMIN_CHECKOUT_FIELDS_PATH,
+      icon: ClipboardList,
+      badge: "Builder",
     },
     {
       label: "Catalogue Produits",

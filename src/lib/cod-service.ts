@@ -11,6 +11,13 @@ export interface CODOrderItem {
 
 export type OrderStatus = "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
 
+export interface CODOrderCustomFieldEntry {
+  key: string;
+  labelFr: string;
+  labelAr: string;
+  value: string;
+}
+
 export interface CODOrder {
   id: string;
   createdAt: string;
@@ -19,6 +26,8 @@ export interface CODOrder {
   customerCity: string;
   customerAddress: string;
   notes?: string;
+  customFields?: Record<string, string | boolean>;
+  customFieldsSummary?: CODOrderCustomFieldEntry[];
   items: CODOrderItem[];
   totalMad: number;
   status: OrderStatus;
@@ -398,32 +407,92 @@ export function saveCODOrder(orderData: Omit<CODOrder, "id" | "createdAt" | "sta
   if (typeof window !== "undefined") {
     localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(updated));
   }
+
+  // Persist order + dynamic checkout metadata to Supabase asynchronously
+  if (typeof window !== "undefined") {
+    void fetch("/api/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newOrder),
+    }).catch(() => {});
+  }
+
   return newOrder;
+}
+
+export async function fetchSyncedCODOrders(): Promise<CODOrder[]> {
+  const localOrders = getCODOrders();
+  if (typeof window === "undefined") return localOrders;
+
+  try {
+    const res = await fetch("/api/orders", { cache: "no-store" });
+    if (res.ok) {
+      const serverOrders = await res.json();
+      if (Array.isArray(serverOrders) && serverOrders.length > 0) {
+        const mergedMap = new Map<string, CODOrder>();
+        for (const o of serverOrders) {
+          if (o?.id) mergedMap.set(o.id, o);
+        }
+        for (const o of localOrders) {
+          if (o?.id && !mergedMap.has(o.id)) {
+            mergedMap.set(o.id, o);
+          }
+        }
+        const merged = Array.from(mergedMap.values()).sort(
+          (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)
+        );
+        try {
+          localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(merged));
+        } catch {}
+        return merged;
+      }
+    }
+  } catch {}
+
+  return localOrders;
 }
 
 export function updateCODOrderStatus(orderId: string, newStatus: OrderStatus): CODOrder | null {
   const current = getCODOrders();
   const index = current.findIndex((o) => o.id === orderId);
-  if (index === -1) return null;
+  let updatedOrder: CODOrder | null = null;
 
-  const updatedOrder = { ...current[index], status: newStatus };
-  current[index] = updatedOrder;
+  if (index !== -1) {
+    updatedOrder = { ...current[index], status: newStatus };
+    current[index] = updatedOrder;
+
+    if (typeof window !== "undefined") {
+      localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(current));
+    }
+  }
 
   if (typeof window !== "undefined") {
-    localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(current));
+    fetch("/api/orders", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: orderId, status: newStatus }),
+    }).catch(() => {});
   }
+
   return updatedOrder;
 }
 
 export function deleteCODOrder(orderId: string): boolean {
   const current = getCODOrders();
   const filtered = current.filter((o) => o.id !== orderId);
-  if (filtered.length === current.length) return false;
+  const removedLocally = filtered.length !== current.length;
 
-  if (typeof window !== "undefined") {
+  if (removedLocally && typeof window !== "undefined") {
     localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(filtered));
   }
-  return true;
+
+  if (typeof window !== "undefined") {
+    fetch(`/api/orders?id=${encodeURIComponent(orderId)}`, {
+      method: "DELETE",
+    }).catch(() => {});
+  }
+
+  return removedLocally;
 }
 
 /* ========================================================================= */
