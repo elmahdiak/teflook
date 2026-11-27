@@ -60,15 +60,6 @@ function buildInitialFieldValues(
 
     if (field.field_type === "checkbox") {
       next[field.field_key] = false;
-    } else if (field.field_type === "select" || field.field_type === "radio") {
-      const opts =
-        field.options && field.options.length > 0
-          ? field.options
-          : field.field_key === "city"
-            ? MOROCCAN_CITIES_OPTIONS
-            : [];
-      next[field.field_key] =
-        field.field_key === "city" && opts.length > 0 ? opts[0] : "";
     } else {
       next[field.field_key] = "";
     }
@@ -831,6 +822,16 @@ export function CODCheckoutModal({
                         : field.field_key === "city"
                           ? MOROCCAN_CITIES_OPTIONS
                           : [];
+                    const selectValue = String(rawValue ?? "");
+                    const placeholderOptionLabel =
+                      placeholder ||
+                      (field.field_key === "city"
+                        ? isAr
+                          ? "اختر مدينتك..."
+                          : "Choisir votre ville..."
+                        : isAr
+                          ? "اختر خياراً..."
+                          : "Sélectionner...");
 
                     return (
                       <div key={field.id}>
@@ -846,20 +847,26 @@ export function CODCheckoutModal({
                           </div>
                           <select
                             required={field.is_required}
-                            value={String(rawValue ?? "")}
+                            value={selectValue}
                             onChange={(e) =>
                               setValue(field.field_key, e.target.value)
                             }
-                            className="flex-1 min-w-0 h-11 px-3.5 text-sm text-[#1A3C34] bg-transparent outline-none cursor-pointer"
-                          >
-                            {field.field_key !== "city" && (
-                              <option value="">
-                                {placeholder ||
-                                  (isAr ? "اختر خياراً..." : "Sélectionner...")}
-                              </option>
+                            className={cn(
+                              "flex-1 min-w-0 h-11 px-3.5 text-sm bg-transparent outline-none cursor-pointer",
+                              selectValue === ""
+                                ? "text-[#1A3C34]/45"
+                                : "text-[#1A3C34]"
                             )}
+                          >
+                            <option value="" disabled className="text-[#1A3C34]/50">
+                              {placeholderOptionLabel}
+                            </option>
                             {options.map((opt) => (
-                              <option key={opt} value={opt}>
+                              <option
+                                key={opt}
+                                value={opt}
+                                className="text-[#1A3C34]"
+                              >
                                 {opt}
                               </option>
                             ))}
@@ -931,7 +938,14 @@ export function CODCheckoutModal({
                           type={inputType}
                           inputMode={inputMode}
                           required={field.is_required}
-                          placeholder={placeholder}
+                          placeholder={
+                            placeholder ||
+                            (field.field_key === "city"
+                              ? isAr
+                                ? "مدينتك"
+                                : "Votre ville"
+                              : "")
+                          }
                           value={String(rawValue ?? "")}
                           onChange={(e) =>
                             setValue(field.field_key, e.target.value)

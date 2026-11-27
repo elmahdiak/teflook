@@ -1410,12 +1410,18 @@ export default function AdminCheckoutFieldsPage() {
                             ) : field.field_type === "select" ? (
                               <select
                                 disabled
-                                className="flex-1 min-w-0 h-9 px-3 text-xs text-[#1A3C34] bg-transparent"
+                                defaultValue=""
+                                className="flex-1 min-w-0 h-9 px-3 text-xs text-[#1A3C34]/50 bg-transparent"
                               >
-                                <option>
-                                  {(field.options && field.options[0]) ||
-                                    placeholder ||
-                                    label}
+                                <option value="" disabled>
+                                  {placeholder ||
+                                    (field.field_key === "city"
+                                      ? isPreviewAr
+                                        ? "اختر مدينتك..."
+                                        : "Choisir votre ville..."
+                                      : isPreviewAr
+                                        ? "اختر خياراً..."
+                                        : "Sélectionner...")}
                                 </option>
                               </select>
                             ) : (
