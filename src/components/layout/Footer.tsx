@@ -102,7 +102,7 @@ export function Footer() {
     >
       {/* Signature Diagonal Slanted Top Edge */}
       <div
-        className="w-full overflow-hidden leading-none bg-white -mb-px"
+        className="w-full overflow-hidden leading-none bg-transparent -mb-px"
         aria-hidden="true"
       >
         <svg
