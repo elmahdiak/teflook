@@ -19,7 +19,6 @@ import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tan
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { CollectionCardsGrid } from "@/components/collections/CollectionCardsGrid";
 import { ProductCard } from "@/components/product/ProductCard";
 import {
   DEFAULT_PRODUCT_FILTER_STATE,
@@ -236,15 +235,15 @@ function TefLookStorefront() {
 
           {/* Bottom-Center EXPLORER Scroll Cue */}
           <a
-            href="#collections"
+            href="#boutique"
             onClick={(e) => {
               e.preventDefault();
-              document.getElementById("collections")?.scrollIntoView({ behavior: "smooth" });
+              document.getElementById("boutique")?.scrollIntoView({ behavior: "smooth" });
             }}
             aria-label={
               locale === "ar"
-                ? "اكتشف المجموعات"
-                : "Explorer les collections ci-dessous"
+                ? "اكتشف المتجر"
+                : "Explorer la boutique ci-dessous"
             }
             className="absolute bottom-5 sm:bottom-8 lg:bottom-11 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5 sm:gap-2 group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/80 rounded-md px-2 py-0.5"
           >
@@ -266,43 +265,7 @@ function TefLookStorefront() {
         </div>
       </section>
 
-      {/* 4. Developmental Categories (The 6 Pillars) */}
-      <section
-        id="collections"
-        className="store-shell scroll-mt-24 py-16 sm:py-24"
-        aria-label={t("category.heading")}
-      >
-        <div className="mb-10 sm:mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <div>
-            <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#F67D56] mb-3 sm:mb-4">
-              {t("category.eyebrow")}
-            </p>
-            <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#1A3C34] tracking-tight">
-              {t("category.heading")}
-            </h2>
-          </div>
-          {activeCategory !== "all" && (
-            <button
-              type="button"
-              onClick={() => setActiveCategory("all")}
-              className="self-start sm:self-auto text-xs font-bold text-[#4B9393] hover:text-[#F67D56] transition-colors underline cursor-pointer"
-            >
-              Afficher tous les univers
-            </button>
-          )}
-        </div>
-
-        <CollectionCardsGrid
-          locale={locale}
-          activeCategory={activeCategory}
-          onSelectCategory={(category) => {
-            setActiveCategory((current) => (current === category ? "all" : category));
-            document.getElementById("boutique")?.scrollIntoView({ behavior: "smooth" });
-          }}
-        />
-      </section>
-
-      {/* 5. Shop Catalogue Section */}
+      {/* 4. Shop Catalogue Section */}
       <section
         id="boutique"
         className="scroll-mt-24 border-y border-border bg-card"
