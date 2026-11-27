@@ -5,6 +5,7 @@ import {
   type AnalyticsDateRange,
   type FunnelAnalyticsData,
   type MarketingMetricsConfig,
+  type TrafficSourceBreakdownItem,
 } from "@/lib/analytics";
 
 export const dynamic = "force-dynamic";
@@ -215,7 +216,60 @@ export async function GET(req: NextRequest) {
     const reach = totalUniqueVisitors;
     const frequency = reach > 0 ? impressions / reach : 0;
 
-    // Stage 2: Consideration
+    // Stage 2: Consideration (including automatic Traffic Sources attribution)
+    const sessionSourceMap = new Map<string, string>();
+    const sessionVisitorMap = new Map<string, string>();
+    for (const ev of eventsInPeriod) {
+      if (!ev.session_id) continue;
+      if (ev.visitor_id && !sessionVisitorMap.has(ev.session_id)) {
+        sessionVisitorMap.set(ev.session_id, ev.visitor_id);
+      }
+      const rawSource =
+        typeof ev.metadata?.traffic_source === "string" &&
+        ev.metadata.traffic_source.trim()
+          ? ev.metadata.traffic_source.trim()
+          : typeof ev.metadata?.utm_source === "string" &&
+              ev.metadata.utm_source.trim()
+            ? ev.metadata.utm_source.trim()
+            : "Direct";
+      const existing = sessionSourceMap.get(ev.session_id);
+      if (!existing || (existing === "Direct" && rawSource !== "Direct")) {
+        sessionSourceMap.set(ev.session_id, rawSource);
+      }
+    }
+
+    const sourceGroups = new Map<
+      string,
+      { sessions: Set<string>; visitors: Set<string> }
+    >();
+    for (const [sessionId, sourceName] of sessionSourceMap.entries()) {
+      const bucket = sourceGroups.get(sourceName) || {
+        sessions: new Set<string>(),
+        visitors: new Set<string>(),
+      };
+      bucket.sessions.add(sessionId);
+      const vid = sessionVisitorMap.get(sessionId);
+      if (vid) bucket.visitors.add(vid);
+      sourceGroups.set(sourceName, bucket);
+    }
+
+    const totalAttributedSessions = sessionSourceMap.size;
+    const trafficSourcesBreakdown: TrafficSourceBreakdownItem[] = Array.from(
+      sourceGroups.entries()
+    )
+      .map(([source, bucket]) => ({
+        source,
+        sessionsCount: bucket.sessions.size,
+        visitorsCount: bucket.visitors.size,
+        percentage:
+          totalAttributedSessions > 0
+            ? Math.round((bucket.sessions.size / totalAttributedSessions) * 100)
+            : 0,
+      }))
+      .sort((a, b) => b.sessionsCount - a.sessionsCount);
+
+    const uniqueTrafficSourcesCount = trafficSourcesBreakdown.length;
+
     let firstTimeVisitors = 0;
     for (const vid of visitorsInPeriodSet) {
       const firstTs = earliestSeenByVisitor.get(vid);
@@ -507,7 +561,8 @@ export async function GET(req: NextRequest) {
         impressions,
         reach,
         frequency,
-        brandSearches: marketingMetrics.brand_searches,
+        uniqueTrafficSourcesCount,
+        trafficSourcesBreakdown,
         firstTimeVisitors,
         totalUniqueVisitors,
         totalPageViews,

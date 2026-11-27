@@ -43,6 +43,7 @@ interface KpiCardDescriptor {
   subtext: string;
   tooltip: string;
   accent?: "teal" | "coral" | "forest";
+  breakdownPills?: { label: string; pct: number; count: number }[];
 }
 
 export default function AdminFunnelAnalyticsPage() {
@@ -166,11 +167,17 @@ export default function AdminFunnelAnalyticsPage() {
     ? [
         {
           number: 4,
-          label: "Recherches marque TefLook",
-          value: k.brandSearches.toLocaleString("fr-FR"),
-          subtext: "Volume de recherche organique / Ads",
-          tooltip: "Issu de marketing_metrics.brand_searches",
+          label: "Sources de trafic",
+          value: k.uniqueTrafficSourcesCount.toLocaleString("fr-FR"),
+          subtext: "Répartition des canaux d'acquisition",
+          tooltip:
+            "Origine des visiteurs (Direct, Instagram, Facebook/Ads, TikTok, WhatsApp, Google, etc.) sur la période sélectionnée.",
           accent: "teal",
+          breakdownPills: k.trafficSourcesBreakdown.slice(0, 6).map((item) => ({
+            label: item.source,
+            pct: item.percentage,
+            count: item.sessionsCount,
+          })),
         },
         {
           number: 5,
@@ -420,24 +427,6 @@ export default function AdminFunnelAnalyticsPage() {
                     setMetricsForm((prev) => ({
                       ...prev,
                       ad_spend_mad: Number(e.target.value) || 0,
-                    }))
-                  }
-                  className="w-full h-10 px-3 rounded-xl border border-[#4B9393]/25 bg-[#F3EFE6]/35 focus:bg-white text-sm text-[#1A3C34] outline-none focus:border-[#4B9393]"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-[#1A3C34] mb-1">
-                  Recherches marque TefLook
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  value={metricsForm.brand_searches}
-                  onChange={(e) =>
-                    setMetricsForm((prev) => ({
-                      ...prev,
-                      brand_searches: Number(e.target.value) || 0,
                     }))
                   }
                   className="w-full h-10 px-3 rounded-xl border border-[#4B9393]/25 bg-[#F3EFE6]/35 focus:bg-white text-sm text-[#1A3C34] outline-none focus:border-[#4B9393]"
@@ -741,6 +730,23 @@ export default function AdminFunnelAnalyticsPage() {
                         >
                           {kpi.value}
                         </div>
+
+                        {kpi.breakdownPills && kpi.breakdownPills.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5">
+                            {kpi.breakdownPills.map((pill) => (
+                              <span
+                                key={pill.label}
+                                title={`${pill.count} visite(s)`}
+                                className="inline-flex items-center gap-1 rounded-full border border-[#4B9393]/20 bg-white px-2.5 py-0.5 text-[11px] font-bold text-[#1A3C34]"
+                              >
+                                <span>{pill.label}:</span>
+                                <span className="text-[#4B9393] tabular-nums">
+                                  {pill.pct}%
+                                </span>
+                              </span>
+                            ))}
+                          </div>
+                        )}
 
                         <p className="text-[11px] text-[#1A3C34]/65 leading-snug">
                           {kpi.subtext}

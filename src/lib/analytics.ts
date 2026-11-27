@@ -54,6 +54,13 @@ export interface FunnelStageSummary {
   conversionToNextPct: number | null;
 }
 
+export interface TrafficSourceBreakdownItem {
+  source: string;
+  visitorsCount: number;
+  sessionsCount: number;
+  percentage: number;
+}
+
 export interface FunnelAnalyticsData {
   range: AnalyticsDateRange;
   needsMigration: boolean;
@@ -66,7 +73,8 @@ export interface FunnelAnalyticsData {
     reach: number;
     frequency: number;
     // Stage 2: Consideration
-    brandSearches: number;
+    uniqueTrafficSourcesCount: number;
+    trafficSourcesBreakdown: TrafficSourceBreakdownItem[];
     firstTimeVisitors: number;
     totalUniqueVisitors: number;
     totalPageViews: number;
@@ -138,6 +146,148 @@ CREATE TABLE IF NOT EXISTS public.marketing_metrics (
 
 const VISITOR_ID_KEY = "teflook_visitor_id_v1";
 const SESSION_ID_KEY = "teflook_session_id_v1";
+const SESSION_TRAFFIC_KEY = "teflook_session_traffic_v1";
+
+export interface SessionTrafficAttribution {
+  traffic_source: string;
+  utm_source?: string;
+  utm_medium?: string;
+  referrer_host?: string;
+}
+
+function classifyTrafficSource(params: {
+  utmSource: string;
+  utmMedium: string;
+  fbclid: string;
+  gclid: string;
+  ttclid: string;
+  referrerHost: string;
+}): string {
+  const { utmSource, utmMedium, fbclid, gclid, ttclid, referrerHost } = params;
+  const isPaid =
+    Boolean(fbclid || gclid || ttclid) ||
+    ["cpc", "paid", "ads", "paid_social", "ppc", "meta"].includes(utmMedium);
+
+  if (utmSource) {
+    if (utmSource.includes("instagram") || utmSource === "ig") return "Instagram";
+    if (
+      utmSource.includes("facebook") ||
+      utmSource === "fb" ||
+      utmSource.includes("meta")
+    ) {
+      return isPaid ? "Meta Ads" : "Facebook";
+    }
+    if (utmSource.includes("tiktok") || utmSource === "tt") return "TikTok";
+    if (utmSource.includes("whatsapp") || utmSource === "wa") return "WhatsApp";
+    if (utmSource.includes("google")) return "Google";
+    if (utmSource.includes("youtube") || utmSource === "yt") return "YouTube";
+    return utmSource.charAt(0).toUpperCase() + utmSource.slice(1);
+  }
+
+  if (referrerHost) {
+    if (referrerHost.includes("instagram.com")) return "Instagram";
+    if (
+      referrerHost.includes("facebook.com") ||
+      referrerHost === "fb.com" ||
+      referrerHost.endsWith(".fb.com")
+    ) {
+      return isPaid ? "Meta Ads" : "Facebook";
+    }
+    if (referrerHost.includes("tiktok.com")) return "TikTok";
+    if (referrerHost.includes("whatsapp.com") || referrerHost === "wa.me") {
+      return "WhatsApp";
+    }
+    if (referrerHost.includes("google.")) return "Google";
+    if (
+      referrerHost === "t.co" ||
+      referrerHost.includes("twitter.com") ||
+      referrerHost.includes("x.com")
+    ) {
+      return "X / Twitter";
+    }
+    if (referrerHost.includes("youtube.com") || referrerHost === "youtu.be") {
+      return "YouTube";
+    }
+    return referrerHost.replace(/^www\./, "");
+  }
+
+  if (fbclid) return "Meta Ads";
+  if (gclid) return "Google";
+  if (ttclid) return "TikTok";
+
+  return "Direct";
+}
+
+export function detectAndPersistTrafficSource(): SessionTrafficAttribution {
+  if (typeof window === "undefined") {
+    return { traffic_source: "Direct" };
+  }
+
+  let existing: SessionTrafficAttribution | null = null;
+  try {
+    const raw = window.sessionStorage.getItem(SESSION_TRAFFIC_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed.traffic_source === "string") {
+        existing = parsed as SessionTrafficAttribution;
+      }
+    }
+  } catch {}
+
+  const searchParams = new URLSearchParams(window.location.search);
+  const utmSource = searchParams.get("utm_source")?.trim().toLowerCase() || "";
+  const utmMedium = searchParams.get("utm_medium")?.trim().toLowerCase() || "";
+  const fbclid = searchParams.get("fbclid")?.trim() || "";
+  const gclid = searchParams.get("gclid")?.trim() || "";
+  const ttclid = searchParams.get("ttclid")?.trim() || "";
+
+  let referrerHost = "";
+  if (document.referrer) {
+    try {
+      const refUrl = new URL(document.referrer);
+      if (refUrl.hostname && refUrl.hostname !== window.location.hostname) {
+        referrerHost = refUrl.hostname.toLowerCase();
+      }
+    } catch {}
+  }
+
+  const hasExplicitAttribution = Boolean(
+    utmSource || referrerHost || fbclid || gclid || ttclid
+  );
+
+  if (existing && !hasExplicitAttribution) {
+    return existing;
+  }
+
+  if (existing && existing.traffic_source !== "Direct" && !utmSource) {
+    return existing;
+  }
+
+  const trafficSource = classifyTrafficSource({
+    utmSource,
+    utmMedium,
+    fbclid,
+    gclid,
+    ttclid,
+    referrerHost,
+  });
+
+  const nextAttribution: SessionTrafficAttribution = {
+    traffic_source: trafficSource,
+    ...(utmSource ? { utm_source: utmSource } : {}),
+    ...(utmMedium ? { utm_medium: utmMedium } : {}),
+    ...(referrerHost ? { referrer_host: referrerHost } : {}),
+  };
+
+  try {
+    window.sessionStorage.setItem(
+      SESSION_TRAFFIC_KEY,
+      JSON.stringify(nextAttribution)
+    );
+  } catch {}
+
+  return nextAttribution;
+}
 
 function generateAnonId(prefix: string): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
@@ -186,6 +336,8 @@ export function trackAnalyticsEvent(params: {
   const currentPath = params.pagePath || window.location.pathname || "/";
   if (currentPath.startsWith("/tl-k9x4m-control-7v2p")) return;
 
+  const attribution = detectAndPersistTrafficSource();
+
   const payload = {
     visitor_id: getOrCreateVisitorId(),
     session_id: getOrCreateSessionId(),
@@ -196,7 +348,15 @@ export function trackAnalyticsEvent(params: {
       Number.isFinite(params.durationSeconds)
         ? Math.max(0, Math.round(params.durationSeconds))
         : null,
-    metadata: params.metadata || {},
+    metadata: {
+      traffic_source: attribution.traffic_source,
+      ...(attribution.utm_source ? { utm_source: attribution.utm_source } : {}),
+      ...(attribution.utm_medium ? { utm_medium: attribution.utm_medium } : {}),
+      ...(attribution.referrer_host
+        ? { referrer_host: attribution.referrer_host }
+        : {}),
+      ...(params.metadata || {}),
+    },
   };
 
   try {

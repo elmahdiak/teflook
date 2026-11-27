@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { ADMIN_BASE_PATH } from "@/lib/admin-config";
 import {
+  detectAndPersistTrafficSource,
   getOrCreateSessionId,
   getOrCreateVisitorId,
   trackAnalyticsEvent,
@@ -39,6 +40,7 @@ export function StorefrontTracker() {
 
     getOrCreateVisitorId();
     getOrCreateSessionId();
+    const attribution = detectAndPersistTrafficSource();
 
     // Flush exit duration for previous storefront route on client-side navigation
     if (activePageRef.current && activePageRef.current.path !== currentPath) {
@@ -70,6 +72,11 @@ export function StorefrontTracker() {
     trackAnalyticsEvent({
       eventType: "page_view",
       pagePath: currentPath,
+      metadata: {
+        traffic_source: attribution.traffic_source,
+        ...(attribution.utm_source ? { utm_source: attribution.utm_source } : {}),
+        ...(attribution.utm_medium ? { utm_medium: attribution.utm_medium } : {}),
+      },
     });
   }, [pathname]);
 
