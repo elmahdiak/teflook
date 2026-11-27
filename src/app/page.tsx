@@ -3,7 +3,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
-  ArrowDown,
   Check,
   Minus,
   Plus,
@@ -266,60 +265,36 @@ function TefLookStorefront() {
       <section
         id="boutique"
         className="scroll-mt-24 border-y border-border bg-card"
-        aria-labelledby="shop-title"
+        aria-label={locale === "ar" ? "متجر المنتجات" : "Catalogue des produits"}
       >
-        <div className="store-shell py-12 sm:py-16">
-          <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-brand-orange">
-                {t("shop.eyebrow")}
-              </p>
-              <h2 id="shop-title" className="mt-2 font-display text-3xl font-semibold">
-                {searchTerm ? `${t("shop.searchResults")} « ${searchTerm} »` : t("shop.heading")}
-              </h2>
-              {products.length > 0 && (
-                <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                  <span>
-                    {filteredProducts.length}{" "}
-                    {filteredProducts.length > 1 ? t("shop.products") : t("shop.product")}
+        <div className="store-shell py-8 sm:py-12">
+          {(searchTerm || activeCategory !== "all") && (
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                {searchTerm && (
+                  <span className="font-display text-lg sm:text-xl font-semibold text-foreground">
+                    {`${t("shop.searchResults")} « ${searchTerm} »`}
                   </span>
-                  {activeCategory !== "all" && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-teal/10 px-3 py-0.5 text-xs font-semibold text-brand-teal">
-                      <span>{t(CHILD_STORE_CATEGORY_MESSAGE_KEYS[activeCategory])}</span>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveCategory("all");
-                        }}
-                        className="ml-1 text-sm font-bold leading-none hover:text-brand-orange cursor-pointer"
-                        aria-label="Effacer le filtre"
-                        title="Effacer le filtre"
-                      >
-                        ×
-                      </button>
-                    </span>
-                  )}
-                  {activeAge !== "all" && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#4B9393]/10 px-3 py-0.5 text-xs font-semibold text-[#4B9393]">
-                      <span>{formatAgeBracketLabel(activeAge, locale)}</span>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveAge("all");
-                        }}
-                        className="ml-1 text-sm font-bold leading-none hover:text-brand-orange cursor-pointer"
-                        aria-label={locale === "ar" ? "إزالة فلتر العمر" : "Effacer le filtre d'âge"}
-                      >
-                        ×
-                      </button>
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-            <div className="flex items-center gap-3">
+                )}
+                {activeCategory !== "all" && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-teal/10 px-3 py-1 text-xs font-semibold text-brand-teal">
+                    <span>{t(CHILD_STORE_CATEGORY_MESSAGE_KEYS[activeCategory])}</span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveCategory("all");
+                      }}
+                      className="ml-1 text-sm font-bold leading-none hover:text-brand-orange cursor-pointer"
+                      aria-label="Effacer le filtre"
+                      title="Effacer le filtre"
+                    >
+                      ×
+                    </button>
+                  </span>
+                )}
+              </div>
+
               {activeCategory !== "all" && (
                 <Link
                   href={`/collections/${getCollectionSlug(activeCategory)}`}
@@ -328,29 +303,8 @@ function TefLookStorefront() {
                   {locale === "ar" ? "عرض صفحة المجموعة ←" : "Ouvrir la collection →"}
                 </Link>
               )}
-              {(activeCategory !== "all" || activeAge !== "all") && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveCategory("all");
-                    setActiveAge("all");
-                  }}
-                  className="text-xs font-medium text-brand-teal underline hover:text-brand-orange transition-colors cursor-pointer"
-                >
-                  {t("shop.reset")}
-                </button>
-              )}
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 text-[13px] font-semibold text-primary hover:text-brand-orange cursor-pointer"
-                onClick={() =>
-                  document.getElementById("product-grid")?.scrollIntoView({ behavior: "smooth" })
-                }
-              >
-                {t("shop.discover")} <ArrowDown size={15} />
-              </button>
             </div>
-          </div>
+          )}
 
           {/* Age Bracket Filter Pills */}
           <div
