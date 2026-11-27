@@ -266,15 +266,27 @@ function TefLookStorefront() {
       <section
         id="collections"
         className="store-shell scroll-mt-24 py-12 sm:py-20"
-        aria-label={t("category.heading")}
+        aria-label={locale === "ar" ? "مجموعاتنا" : "Nos Collections"}
       >
-        <div className="mb-10 sm:mb-12">
-          <p className="text-[12px] font-bold uppercase tracking-[0.18em] text-[#F67D56] mb-3 sm:mb-4">
-            {t("category.eyebrow")}
-          </p>
-          <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#1A3C34] tracking-tight">
-            {t("category.heading")}
+        <div className="text-center mx-auto max-w-2xl mb-10 sm:mb-14">
+          <h2
+            className={cn(
+              "font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1A3C34] tracking-tight mb-3",
+              locale === "ar" && "font-sans tracking-normal"
+            )}
+          >
+            {locale === "ar" ? "مجموعاتنا" : "Nos Collections"}
           </h2>
+          <p
+            className={cn(
+              "text-sm sm:text-base lg:text-lg text-[#1A3C34]/75 leading-relaxed mx-auto",
+              locale === "ar" && "font-sans leading-loose"
+            )}
+          >
+            {locale === "ar"
+              ? "أدوات تعلم بدون شاشات مصممة لكل مرحلة من مراحل نمو الطفل."
+              : "Des outils d'apprentissage sans écran pensés pour chaque étape de l'enfant."}
+          </p>
         </div>
 
         <CollectionCardsGrid locale={locale} />
