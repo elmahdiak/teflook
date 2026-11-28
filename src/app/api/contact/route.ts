@@ -1,5 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { revalidatePath } from "next/cache";
+import { getSupabaseAdmin } from "@/lib/review-server";
+import { ADMIN_CONTACT_MESSAGES_PATH } from "@/lib/admin-config";
+import {
+  isSupabaseMissingColumnError,
+  isSupabaseMissingTableError,
+  type ContactMessageItem,
+  type ContactMessageStatus,
+} from "@/lib/community-submissions";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -12,17 +20,54 @@ const NO_STORE_HEADERS = {
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function getSupabaseAdmin() {
-  const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL || "https://zvqcsxwwkgypvqfewbtn.supabase.co";
-  const supabaseKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    "sb_publishable_IkjoHS4mwYG9qEXkBWy8Xg_jw3TI_AF";
+function normalizeContactMessage(row: Record<string, any>): ContactMessageItem {
+  return {
+    id: String(row.id),
+    name: String(row.name || ""),
+    email: String(row.email || ""),
+    phone: row.phone ? String(row.phone) : null,
+    message: String(row.message || ""),
+    status: row.status === "read" ? "read" : "unread",
+    created_at: row.created_at || new Date().toISOString(),
+  };
+}
 
-  return createClient(supabaseUrl, supabaseKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
+export async function GET() {
+  try {
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("contact_messages")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      if (isSupabaseMissingTableError(error)) {
+        return NextResponse.json(
+          { messages: [], needsMigration: true },
+          { headers: NO_STORE_HEADERS }
+        );
+      }
+      console.error("GET /api/contact Supabase error:", error.message);
+      return NextResponse.json(
+        { error: error.message, messages: [] },
+        { status: 500, headers: NO_STORE_HEADERS }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        messages: (data || []).map(normalizeContactMessage),
+        needsMigration: false,
+      },
+      { headers: NO_STORE_HEADERS }
+    );
+  } catch (err) {
+    console.error("GET /api/contact exception:", err);
+    return NextResponse.json(
+      { error: "Erreur lors de la récupération des messages.", messages: [] },
+      { status: 500, headers: NO_STORE_HEADERS }
+    );
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -63,31 +108,48 @@ export async function POST(req: NextRequest) {
     }
 
     const supabase = getSupabaseAdmin();
-    const { data, error } = await supabase
+    const baseRow = {
+      name,
+      email,
+      phone: phone || null,
+      message,
+    };
+
+    let { data, error } = await supabase
       .from("contact_messages")
-      .insert([
-        {
-          name,
-          email,
-          phone: phone || null,
-          message,
-        },
-      ])
-      .select("id, created_at")
+      .insert([{ ...baseRow, status: "unread" }])
+      .select("*")
       .single();
+
+    if (error && isSupabaseMissingColumnError(error, "status")) {
+      const retry = await supabase
+        .from("contact_messages")
+        .insert([baseRow])
+        .select("*")
+        .single();
+      data = retry.data;
+      error = retry.error;
+    }
 
     if (error) {
       console.error("POST /api/contact Supabase error:", error.message);
       return NextResponse.json(
-        { error: "Impossible d'enregistrer votre message pour le moment." },
+        {
+          error: "Impossible d'enregistrer votre message pour le moment.",
+          needsMigration: isSupabaseMissingTableError(error),
+        },
         { status: 500, headers: NO_STORE_HEADERS }
       );
     }
 
+    try {
+      revalidatePath(ADMIN_CONTACT_MESSAGES_PATH);
+    } catch {}
+
     return NextResponse.json(
       {
         success: true,
-        contactMessage: data,
+        contactMessage: normalizeContactMessage(data),
       },
       { status: 201, headers: NO_STORE_HEADERS }
     );
@@ -95,6 +157,97 @@ export async function POST(req: NextRequest) {
     console.error("POST /api/contact unexpected error:", error);
     return NextResponse.json(
       { error: "Erreur serveur lors de l'envoi du message." },
+      { status: 500, headers: NO_STORE_HEADERS }
+    );
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const id = typeof body?.id === "string" ? body.id.trim() : "";
+    const status = body?.status as ContactMessageStatus;
+
+    if (!id || (status !== "read" && status !== "unread")) {
+      return NextResponse.json(
+        { error: "id et status ('read' ou 'unread') requis." },
+        { status: 400, headers: NO_STORE_HEADERS }
+      );
+    }
+
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("contact_messages")
+      .update({ status })
+      .eq("id", id)
+      .select("*")
+      .single();
+
+    if (error) {
+      if (isSupabaseMissingColumnError(error, "status")) {
+        return NextResponse.json(
+          {
+            error:
+              "La colonne status manque sur contact_messages — exécutez le SQL de mise à jour.",
+            needsMigration: true,
+          },
+          { status: 500, headers: NO_STORE_HEADERS }
+        );
+      }
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500, headers: NO_STORE_HEADERS }
+      );
+    }
+
+    try {
+      revalidatePath(ADMIN_CONTACT_MESSAGES_PATH);
+    } catch {}
+
+    return NextResponse.json(
+      { success: true, message: normalizeContactMessage(data) },
+      { headers: NO_STORE_HEADERS }
+    );
+  } catch {
+    return NextResponse.json(
+      { error: "Erreur lors de la mise à jour du message." },
+      { status: 500, headers: NO_STORE_HEADERS }
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id")?.trim();
+    if (!id) {
+      return NextResponse.json(
+        { error: "Identifiant requis." },
+        { status: 400, headers: NO_STORE_HEADERS }
+      );
+    }
+
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase
+      .from("contact_messages")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500, headers: NO_STORE_HEADERS }
+      );
+    }
+
+    try {
+      revalidatePath(ADMIN_CONTACT_MESSAGES_PATH);
+    } catch {}
+
+    return NextResponse.json({ success: true, id }, { headers: NO_STORE_HEADERS });
+  } catch {
+    return NextResponse.json(
+      { error: "Erreur lors de la suppression." },
       { status: 500, headers: NO_STORE_HEADERS }
     );
   }

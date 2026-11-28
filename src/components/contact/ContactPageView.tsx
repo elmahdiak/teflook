@@ -137,6 +137,15 @@ export function ContactPageView() {
         return;
       }
 
+      try {
+        window.dispatchEvent(new CustomEvent("teflook:contact-message-created"));
+        if (typeof BroadcastChannel !== "undefined") {
+          const bc = new BroadcastChannel("teflook_sync");
+          bc.postMessage({ type: "contact-message-created" });
+          bc.close();
+        }
+      } catch {}
+
       setName("");
       setEmail("");
       setPhone("");

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { AlertCircle, CheckCircle2, LoaderCircle, X } from "lucide-react";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { FooterSocialLinks } from "@/components/footer/FooterSocialLinks";
 import { useCookieConsent } from "@/lib/cookies";
@@ -17,11 +18,23 @@ export function Footer() {
   const { openSettingsModal } = useCookieConsent();
   const [isMounted, setIsMounted] = useState(false);
   const [email, setEmail] = useState("");
+  const [isSubmittingNewsletter, setIsSubmittingNewsletter] = useState(false);
   const [feedback, setFeedback] = useState<{
     type: "error" | "success";
     message: string;
   } | null>(null);
+  const [toast, setToast] = useState<{
+    type: "error" | "success" | "info";
+    message: string;
+  } | null>(null);
   const [whatsappPhone, setWhatsappPhone] = useState("212600000000");
+
+  function showToast(type: "error" | "success" | "info", msg: string) {
+    setToast({ type, message: msg });
+    setTimeout(() => {
+      setToast((curr) => (curr?.message === msg ? null : curr));
+    }, 4500);
+  }
 
   useEffect(() => {
     setIsMounted(true);
@@ -61,42 +74,90 @@ export function Footer() {
       )}`
     : "/#faq";
 
-  function handleNewsletterSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleNewsletterSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (isSubmittingNewsletter) return;
     const trimmed = email.trim();
 
     if (!trimmed) {
-      setFeedback({
-        type: "error",
-        message: isAr
-          ? "يرجى إدخال عنوان بريد إلكتروني."
-          : "Veuillez entrer une adresse e-mail.",
-      });
+      const msg = isAr
+        ? "يرجى إدخال عنوان بريد إلكتروني."
+        : "Veuillez entrer une adresse e-mail.";
+      setFeedback({ type: "error", message: msg });
+      showToast("error", msg);
       return;
     }
 
     if (!EMAIL_REGEX.test(trimmed)) {
-      setFeedback({
-        type: "error",
-        message: isAr
-          ? "عنوان البريد الإلكتروني غير صالح. يرجى التحقق."
-          : "Adresse e-mail invalide. Veuillez vérifier.",
-      });
+      const msg = isAr
+        ? "عنوان البريد الإلكتروني غير صالح. يرجى التحقق."
+        : "Adresse e-mail invalide. Veuillez vérifier.";
+      setFeedback({ type: "error", message: msg });
+      showToast("error", msg);
       return;
     }
 
-    trackAnalyticsEvent({
-      eventType: "newsletter_signup",
-      metadata: { email: trimmed.toLowerCase() },
-    });
+    setIsSubmittingNewsletter(true);
+    setFeedback(null);
 
-    setFeedback({
-      type: "success",
-      message: isAr
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmed }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (res.status === 409 || data?.alreadySubscribed) {
+        const dupMsg = isAr
+          ? "هذا البريد الإلكتروني مسجل مسبقاً في نشرتنا البريدية."
+          : "Cette adresse e-mail est déjà inscrite à notre newsletter.";
+        setFeedback({ type: "error", message: dupMsg });
+        showToast("info", dupMsg);
+        return;
+      }
+
+      if (!res.ok || !data?.success) {
+        const errMsg =
+          data?.error ||
+          (isAr
+            ? "تعذر تسجيل اشتراكك حالياً. يرجى المحاولة لاحقاً."
+            : "Impossible d'enregistrer votre inscription pour le moment.");
+        setFeedback({ type: "error", message: errMsg });
+        showToast("error", errMsg);
+        return;
+      }
+
+      trackAnalyticsEvent({
+        eventType: "newsletter_signup",
+        metadata: { email: trimmed.toLowerCase() },
+      });
+
+      try {
+        window.dispatchEvent(new CustomEvent("teflook:newsletter-subscribed"));
+        if (typeof BroadcastChannel !== "undefined") {
+          const bc = new BroadcastChannel("teflook_sync");
+          bc.postMessage({ type: "newsletter-subscribed" });
+          bc.close();
+        }
+      } catch {}
+
+      const successMsg = isAr
         ? "شكراً لك! تم تسجيل اشتراكك بنجاح."
-        : "Merci ! Votre inscription a bien été enregistrée.",
-    });
-    setEmail("");
+        : "Merci ! Votre inscription a bien été enregistrée.";
+      setFeedback({ type: "success", message: successMsg });
+      showToast("success", successMsg);
+      setEmail("");
+    } catch {
+      const netErr = isAr
+        ? "حدث خطأ في الاتصال. يرجى المحاولة لاحقاً."
+        : "Erreur réseau lors de l'inscription. Veuillez réessayer.";
+      setFeedback({ type: "error", message: netErr });
+      showToast("error", netErr);
+    } finally {
+      setIsSubmittingNewsletter(false);
+    }
   }
 
   return (
@@ -106,6 +167,35 @@ export function Footer() {
       aria-label={isAr ? "تذييل صفحة تيفلوك" : "Pied de page TefLook"}
       className="relative w-full text-white mt-auto select-none scroll-mt-24"
     >
+      {/* Newsletter Toast Notification */}
+      {toast && (
+        <div
+          role="status"
+          className={cn(
+            "fixed top-5 end-5 z-50 flex items-center gap-2.5 rounded-2xl px-4 py-3 text-xs sm:text-sm font-bold text-white shadow-2xl animate-in fade-in slide-in-from-top-4",
+            toast.type === "error"
+              ? "bg-[#F67D56]"
+              : toast.type === "info"
+                ? "bg-[#1A3C34]"
+                : "bg-[#4B9393]"
+          )}
+        >
+          {toast.type === "success" ? (
+            <CheckCircle2 size={17} className="shrink-0" />
+          ) : (
+            <AlertCircle size={17} className="shrink-0" />
+          )}
+          <span>{toast.message}</span>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            aria-label="Fermer"
+            className="ms-1 opacity-80 hover:opacity-100 cursor-pointer"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
       {/* Signature Diagonal Slanted Top Edge */}
       <div
         className="w-full overflow-hidden leading-none bg-transparent -mb-px"
@@ -162,6 +252,7 @@ export function Footer() {
                   name="email"
                   type="email"
                   autoComplete="email"
+                  disabled={isSubmittingNewsletter}
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);
@@ -169,19 +260,26 @@ export function Footer() {
                   }}
                   placeholder={isAr ? "البريد الإلكتروني" : "E-mail"}
                   className={cn(
-                    "w-full rounded-xl bg-white/5 border border-white/60 focus:border-white focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/25 px-4 py-3.5 text-[15px] text-white placeholder:text-white/75 transition-all duration-200",
+                    "w-full rounded-xl bg-white/5 border border-white/60 focus:border-white focus:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/25 px-4 py-3.5 text-[15px] text-white placeholder:text-white/75 transition-all duration-200 disabled:opacity-60",
                     isAr && "font-sans"
                   )}
                 />
 
                 <button
                   type="submit"
+                  disabled={isSubmittingNewsletter}
                   className={cn(
-                    "mt-3 w-full rounded-2xl bg-[#F67D56] hover:bg-[#E06740] active:scale-[0.99] py-3.5 px-6 font-display font-semibold text-white text-[15px] shadow-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#4B9393] focus-visible:ring-white cursor-pointer",
+                    "mt-3 w-full rounded-2xl bg-[#F67D56] hover:bg-[#E06740] active:scale-[0.99] py-3.5 px-6 font-display font-semibold text-white text-[15px] shadow-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#4B9393] focus-visible:ring-white cursor-pointer flex items-center justify-center gap-2 disabled:opacity-70",
                     isAr && "font-sans"
                   )}
                 >
-                  {isAr ? "اشترك الآن" : "S’inscrire maintenant"}
+                  {isSubmittingNewsletter ? (
+                    <LoaderCircle size={18} className="animate-spin" />
+                  ) : isAr ? (
+                    "اشترك الآن"
+                  ) : (
+                    "S’inscrire maintenant"
+                  )}
                 </button>
 
                 <p

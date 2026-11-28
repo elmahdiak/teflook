@@ -7,4 +7,6 @@ export const ADMIN_REVIEWS_PATH = `${ADMIN_BASE_PATH}/reviews`;
 export const ADMIN_CHECKOUT_FIELDS_PATH = `${ADMIN_BASE_PATH}/checkout-fields`;
 export const ADMIN_ANALYTICS_PATH = `${ADMIN_BASE_PATH}/analytics`;
 export const ADMIN_FUNNEL_ANALYTICS_PATH = `${ADMIN_BASE_PATH}/analytics/funnel`;
+export const ADMIN_NEWSLETTER_PATH = `${ADMIN_BASE_PATH}/newsletter`;
+export const ADMIN_CONTACT_MESSAGES_PATH = `${ADMIN_BASE_PATH}/contact-messages`;
 export const ADMIN_SETTINGS_PATH = `${ADMIN_BASE_PATH}/settings`;
