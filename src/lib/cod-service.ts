@@ -311,7 +311,7 @@ export function mapRowToCODOrder(row: Record<string, any>): CODOrder {
       ? row.custom_fields_summary
       : undefined,
     items: Array.isArray(row.items) ? row.items : [],
-    totalMad: Number(row.total_mad ?? row.totalMad ?? 0),
+    totalMad: Number(row.total_mad ?? row.total_price ?? row.totalMad ?? 0) || 0,
     status: (row.status || "pending") as OrderStatus,
     paymentMethod: "COD",
   };
@@ -669,6 +669,33 @@ export function deleteReview(reviewId: string): boolean {
 /* ANALYTICS & STATS                                                         */
 /* ========================================================================= */
 
+const DELIVERED_PAID_STATUSES = new Set([
+  "delivered",
+  "livree",
+  "livrée",
+  "payee",
+  "payée",
+]);
+
+const EXCLUDED_REVENUE_STATUSES = new Set([
+  "pending",
+  "confirmed",
+  "shipped",
+  "en_cours",
+  "cancelled",
+  "annulee",
+  "annulée",
+  "returned",
+  "retournee",
+  "retournée",
+]);
+
+/** Returns true strictly for delivered and paid COD order statuses. */
+export function isDeliveredPaidOrder(status: unknown): boolean {
+  const normalized = String(status ?? "").trim().toLowerCase();
+  return !EXCLUDED_REVENUE_STATUSES.has(normalized) && DELIVERED_PAID_STATUSES.has(normalized);
+}
+
 export function getDashboardStats(
   orders: CODOrder[] = [],
   productsCountOverride?: number,
@@ -678,13 +705,13 @@ export function getDashboardStats(
   const reviews = getAdminReviews();
 
   const totalRevenue = orders
-    .filter((o) => o.status !== "cancelled")
+    .filter((o) => isDeliveredPaidOrder(o.status))
     .reduce((sum, o) => sum + o.totalMad, 0);
 
   const pendingOrders = orders.filter((o) => o.status === "pending").length;
   const confirmedOrders = orders.filter((o) => o.status === "confirmed").length;
   const shippedOrders = orders.filter((o) => o.status === "shipped").length;
-  const deliveredOrders = orders.filter((o) => o.status === "delivered").length;
+  const deliveredOrders = orders.filter((o) => isDeliveredPaidOrder(o.status)).length;
 
   const confirmationRate =
     orders.length > 0

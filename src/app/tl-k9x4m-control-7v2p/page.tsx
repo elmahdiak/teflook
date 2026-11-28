@@ -12,6 +12,7 @@ import {
   Coins,
   Eye,
   FolderTree,
+  HelpCircle,
   MapPin,
   Package,
   Plus,
@@ -214,12 +215,27 @@ export default function AdminDashboardPage() {
       {/* 2. Key Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {/* Metric 1: Revenue */}
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-xs flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Chiffre d'Affaires COD
-            </span>
-            <div className="grid size-9 place-items-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200">
+        <div
+          className="rounded-2xl border border-border bg-card p-5 shadow-xs flex flex-col justify-between"
+          title="Chiffre d'affaires calculé uniquement sur les commandes livrées et payées (exclut les retours et les encours)."
+        >
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                Chiffre d'Affaires COD
+              </span>
+              <span
+                className="group relative inline-flex items-center text-muted-foreground/80 hover:text-foreground cursor-help"
+                title="Chiffre d'affaires calculé uniquement sur les commandes livrées et payées (exclut les retours et les encours)."
+                aria-label="Chiffre d'affaires calculé uniquement sur les commandes livrées et payées (exclut les retours et les encours)."
+              >
+                <HelpCircle size={13} />
+                <span className="pointer-events-none invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity absolute left-0 top-5 z-20 w-60 rounded-lg border border-border bg-foreground px-2.5 py-1.5 text-[11px] font-normal normal-case tracking-normal text-background shadow-md">
+                  Chiffre d&apos;affaires calculé uniquement sur les commandes livrées et payées (exclut les retours et les encours).
+                </span>
+              </span>
+            </div>
+            <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200">
               <Coins size={18} />
             </div>
           </div>
@@ -228,8 +244,8 @@ export default function AdminDashboardPage() {
               {stats.totalRevenue.toLocaleString("fr-FR")} MAD
             </div>
             <p className="mt-1 text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
-              <TrendingUp size={12} />
-              Total des commandes confirmées & livrées
+              <TrendingUp size={12} className="shrink-0" />
+              Total des produits livrés &amp; encaissés (100%)
             </p>
           </div>
         </div>

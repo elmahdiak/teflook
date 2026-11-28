@@ -91,3 +91,4 @@ export function isSupabaseMissingColumnError(
       (msg.includes("column") || msg.includes("schema cache")))
   );
 }
+
